@@ -216,24 +216,32 @@ class PortfolioApp {
 
   async fetchMarkdownFiles(directory) {
     const files = [];
-    
+    let usedGitHubApi = false;
+
+    // Attempt GitHub API auto-discovery first (no manifest needed)
     try {
-      // Use GitHub API to auto-discover markdown files (no manifest needed!)
       if (!this.repoOwner || !this.repoName) {
-        console.log('GitHub repo not configured in settings.json');
-        return files;
+        throw new Error('GitHub repo not configured in settings.json');
       }
-      
+
       const apiUrl = `https://api.github.com/repos/${this.repoOwner}/${this.repoName}/contents/${directory}`;
-      
       const response = await fetch(apiUrl);
+
+      if (!response.ok) {
+        throw new Error(`GitHub API error: ${response.status}`);
+      }
+
       const items = await response.json();
-      
+
+      if (!Array.isArray(items)) {
+        throw new Error('GitHub API response not an array (rate limit or error)');
+      }
+
       // Filter for .md files only
-      const markdownFiles = items.filter(item => 
+      const markdownFiles = items.filter(item =>
         item.type === 'file' && item.name.endsWith('.md')
       );
-      
+
       // Fetch content of each markdown file
       for (const file of markdownFiles) {
         try {
@@ -245,10 +253,29 @@ class PortfolioApp {
           console.log(`Could not load ${file.name}:`, error);
         }
       }
+
+      usedGitHubApi = true;
     } catch (error) {
-      console.log(`Could not load ${directory} from GitHub API:`, error);
+      console.log(`GitHub API unavailable for ${directory}:`, error);
     }
-    
+
+    // Fallback to local manifest if GitHub API fails
+    if (!usedGitHubApi || files.length === 0) {
+      try {
+        const response = await fetch(`${directory}/manifest.json`);
+        const manifest = await response.json();
+
+        for (const file of manifest.files) {
+          const fileResponse = await fetch(`${directory}/${file}`);
+          const content = await fileResponse.text();
+          const metadata = this.parseMarkdownMetadata(content);
+          files.push(metadata);
+        }
+      } catch (error) {
+        console.log(`Could not load ${directory} from manifest fallback:`, error);
+      }
+    }
+
     return files;
   }
 
