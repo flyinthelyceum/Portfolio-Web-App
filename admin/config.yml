@@ -2,8 +2,10 @@ backend:
   name: github
   repo: flyinthelyceum/Portfolio-Web-App
   branch: main
-  auth_type: pkce
+  auth_type: implicit
   app_id: Ov23li020gRLyf588iGF
+  base_url: https://flyinthelyceum.github.io
+  auth_endpoint: /Portfolio-Web-App/admin
 
 site_url: https://flyinthelyceum.github.io/Portfolio-Web-App/
 display_url: https://flyinthelyceum.github.io/Portfolio-Web-App/
