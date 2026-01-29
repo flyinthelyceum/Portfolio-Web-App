@@ -124,7 +124,7 @@ build/
 
 ### 7. Create GitHub OAuth App (Required for CMS)
 **Priority:** HIGH  
-**Status:** ❌ Pending
+**Status:** ✅ COMPLETED
 
 **Charter Alignment:** Section 6.2 - Students must not edit code; Section 10 - Change name/bio without opening VS Code
 
@@ -139,19 +139,19 @@ build/
 
 ### 8. Update CMS Config for GitHub
 **Priority:** HIGH  
-**Status:** ❌ Pending
+**Status:** ✅ COMPLETED
 
 **Charter Alignment:** Section 6.2 - Students manage content without editing code (one-time setup required)
 
 **Update `admin/config.yml`:**
-- `repo: YOUR-USERNAME/YOUR-REPO`
-- `app_id: YOUR_CLIENT_ID`
+- `repo: flyinthelyceum/Portfolio-Web-App` ✅
+- `app_id: Ov23li020gRLyf588iGF` ✅
 
 ---
 
 ### 9. Test CMS as Student User (GitHub Pages)
 **Priority:** HIGH  
-**Status:** ❌ Pending
+**Status:** ⏳ Ready for testing
 
 **Charter Alignment:** Section 10 - Definition of Done; Section 6.2 - No code editing required after setup
 
