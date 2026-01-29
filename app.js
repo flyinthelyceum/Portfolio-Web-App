@@ -57,6 +57,10 @@ class PortfolioApp {
     this.projects = [];
     this.currentFilter = 'all';
     this.settings = {};
+    
+    // GitHub repo info - auto-detected or from settings
+    this.repoOwner = null;
+    this.repoName = null;
 
     this.init();
   }
@@ -188,6 +192,13 @@ class PortfolioApp {
     document.getElementById('hero-bio').textContent = this.settings.bio;
     document.getElementById('footer-name').textContent = this.settings.studentName;
     document.getElementById('page-title').textContent = this.settings.siteTitle;
+    
+    // Parse GitHub repo from settings for auto-discovery
+    if (this.settings.githubRepo) {
+      const [owner, name] = this.settings.githubRepo.split('/');
+      this.repoOwner = owner;
+      this.repoName = name;
+    }
   }
 
   async loadContent() {
@@ -205,21 +216,39 @@ class PortfolioApp {
 
   async fetchMarkdownFiles(directory) {
     const files = [];
-    // This would be replaced with actual file loading in production
-    // For now, we'll load from the manifest or use fetch
+    
     try {
-      const response = await fetch(`${directory}/manifest.json`);
-      const manifest = await response.json();
-
-      for (const file of manifest.files) {
-        const fileResponse = await fetch(`${directory}/${file}`);
-        const content = await fileResponse.text();
-        const metadata = this.parseMarkdownMetadata(content);
-        files.push(metadata);
+      // Use GitHub API to auto-discover markdown files (no manifest needed!)
+      if (!this.repoOwner || !this.repoName) {
+        console.log('GitHub repo not configured in settings.json');
+        return files;
+      }
+      
+      const apiUrl = `https://api.github.com/repos/${this.repoOwner}/${this.repoName}/contents/${directory}`;
+      
+      const response = await fetch(apiUrl);
+      const items = await response.json();
+      
+      // Filter for .md files only
+      const markdownFiles = items.filter(item => 
+        item.type === 'file' && item.name.endsWith('.md')
+      );
+      
+      // Fetch content of each markdown file
+      for (const file of markdownFiles) {
+        try {
+          const fileResponse = await fetch(file.download_url);
+          const content = await fileResponse.text();
+          const metadata = this.parseMarkdownMetadata(content);
+          files.push(metadata);
+        } catch (error) {
+          console.log(`Could not load ${file.name}:`, error);
+        }
       }
     } catch (error) {
-      console.log(`Could not load ${directory}, using empty array`);
+      console.log(`Could not load ${directory} from GitHub API:`, error);
     }
+    
     return files;
   }
 
