@@ -1,6 +1,12 @@
 backend:
-  name: git-gateway
+  name: github
+  repo: flyinthelyceum/Portfolio-Web-App
   branch: main
+  auth_type: pkce
+  app_id: YOUR_GITHUB_OAUTH_APP_ID
+
+site_url: https://flyinthelyceum.github.io/Portfolio-Web-App/
+display_url: https://flyinthelyceum.github.io/Portfolio-Web-App/
 
 media_folder: "assets/uploads"
 public_folder: "/assets/uploads"

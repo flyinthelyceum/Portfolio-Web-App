@@ -40,8 +40,6 @@ node_modules/
 dist/
 build/
 
-# Netlify
-.netlify/
 ```
 
 **Why:** Prevents committing system files and IDE settings to your repository.
@@ -73,7 +71,7 @@ build/
 
 ✅ Remote configured and initial commit pushed successfully!
 
-**Why:** Netlify needs a Git repository to deploy from and enable the CMS.
+**Why:** GitHub Pages and Decap CMS require a Git repository.
 
 ---
 
@@ -93,87 +91,75 @@ build/
 
 ---
 
-## 🚀 TEMPLATE DEPLOYMENT (Demo Site)
+## 🚀 TEMPLATE DEPLOYMENT (GitHub Pages)
 
-### 5. Deploy Template to Netlify
+### 5. Deploy Template to GitHub Pages
 **Priority:** HIGH  
-**Status:** ✅ COMPLETED
+**Status:** ❌ Pending migration
 
 **Charter Alignment:** Section 4 - Static web application on static hosting; Section 10 - Student publishes shareable URL
 
-**Deployment Details:**
-- Live URL: https://artandtechportfolio.netlify.app
-- Repository: flyinthelyceum/Portfolio-Web-App
-- Auto-deploys on Git push: ✅
-
-**Next:** Enable Identity and Git Gateway on this site
+**Steps:**
+1. Go to GitHub repo → **Settings → Pages**
+2. Source: **Deploy from a branch**
+3. Branch: `main` and **/ (root)**
+4. Save. Your demo URL becomes:
+	`https://flyinthelyceum.github.io/Portfolio-Web-App/`
 
 ---
 
-### 6. Configure Custom Site Name
+### 6. Configure Custom Domain (Optional)
 **Priority:** MEDIUM  
-**Status:** ✅ COMPLETED
+**Status:** ❌ Optional
 
 **Charter Alignment:** Section 10 - Professional, shareable URL
 
-**Details:**
-- Custom name: `artandtechportfolio`
-- Full URL: https://artandtechportfolio.netlify.app
-
-**Note:** Students will configure their own Netlify site names when they deploy their forks
+**Steps:**
+1. In GitHub Pages settings, add your custom domain
+2. Create a `CNAME` file with the domain name
+3. Update DNS records at your registrar to point to GitHub Pages
+4. GitHub will provision HTTPS automatically
 
 ---
 
-### 7. Enable Netlify Identity (Required for CMS)
+### 7. Create GitHub OAuth App (Required for CMS)
 **Priority:** HIGH  
-**Status:** ✅ COMPLETED
+**Status:** ❌ Pending
 
 **Charter Alignment:** Section 6.2 - Students must not edit code; Section 10 - Change name/bio without opening VS Code
 
-**Purpose:** Allows students to log into `/admin` and manage content through web interface
-
-**Steps (in Netlify dashboard for artandtechportfolio):**
-1. Go to https://app.netlify.com/sites/artandtechportfolio/settings/identity
-2. Click "Enable Identity"
-3. Under Registration preferences → Set to "Invite only"
-4. Under External providers → Consider enabling GitHub (easier for students)
-
----
-
-### 8. Enable Git Gateway (Required for CMS)
-**Priority:** HIGH  
-**Status:** ✅ COMPLETED
-
-**Charter Alignment:** Section 6.2 - Students manage content without editing code; Section 6.4 - Fast, low-friction posting
-
-**Purpose:** Allows CMS to save changes directly to Git repository (students never touch Git)
-
-**Steps (in Netlify dashboard for artandtechportfolio):**
-1. In Identity settings → Services → Git Gateway
-2. Click "Enable Git Gateway"
-3. This allows the CMS to commit directly to your repository
-
-**Why:** The CMS needs to write changes back to your Git repository.
+**Steps:**
+1. GitHub → Settings → Developer settings → OAuth Apps
+2. New OAuth App
+3. Homepage URL: your GitHub Pages site
+4. Authorization callback URL: `https://YOUR-USERNAME.github.io/YOUR-REPO/admin/`
+5. Copy **Client ID**
 
 ---
 
-### 9. Test CMS as Student User
+### 8. Update CMS Config for GitHub
 **Priority:** HIGH  
-**Status:** ✅ COMPLETED (auth + content)
+**Status:** ❌ Pending
 
-**Charter Alignment:** Section 10 - Definition of Done; Section 6.2 - No code editing required
+**Charter Alignment:** Section 6.2 - Students manage content without editing code (one-time setup required)
 
-**Test Workflow (Completed):**
-1. Created test user via Netlify Identity
-2. Logged into `/admin`
-3. Created Working Portfolio log entries with images
-4. Verified changes appear on live site after deploy
+**Update `admin/config.yml`:**
+- `repo: YOUR-USERNAME/YOUR-REPO`
+- `app_id: YOUR_CLIENT_ID`
 
-**Notes:**
-- Settings editing via CMS is not yet implemented (see #16)
-- Auth flow fixed by enabling Identity and handling invite token in the site
+---
 
-**Success Criteria (partial):** Content creation works without touching code; settings via CMS remains a blocker.
+### 9. Test CMS as Student User (GitHub Pages)
+**Priority:** HIGH  
+**Status:** ❌ Pending
+
+**Charter Alignment:** Section 10 - Definition of Done; Section 6.2 - No code editing required after setup
+
+**Test Workflow:**
+1. Log into `/admin` with GitHub
+2. Create Working Portfolio log entries with images
+3. Create a Project entry with statement
+4. Verify changes appear on live site after Pages publishes
 
 ---
 
@@ -186,7 +172,7 @@ If you own a domain:
 2. Click "Add custom domain"
 3. Enter your domain (e.g., `yourname.com`)
 4. Follow instructions to update DNS records at your registrar
-5. Netlify will handle SSL/HTTPS automatically
+5. GitHub Pages will handle SSL/HTTPS automatically
 
 **Cost:** Domain registration costs money (~$10-15/year)
 
@@ -202,7 +188,7 @@ If you own a domain:
 
 **Create:** `STUDENT_GUIDE.md` with:
 1. How to fork this repository to their own GitHub account
-2. How to deploy their fork to Netlify (with screenshots)
+2. How to deploy their fork to GitHub Pages (with screenshots)
 3. How to log into `/admin` 
 4. How to customize their name, bio, and links
 5. How to add Working Portfolio logs (3 images, 2 sentences, 1 next step)
@@ -325,23 +311,23 @@ After deployment, test on actual devices:
 
 **Charter Alignment:** Section 4 - Students fork template; Section 10 - Shareable URL
 
-**Current:** Repository public (required for free Netlify CMS)
+**Current:** Repository public (required for GitHub Pages and CMS access)
 **Student repos:** Should also be public (so portfolios are shareable)
 
-**Action:** Document in student guide that their repos must stay public for CMS to work with free Netlify tier.
+**Action:** Document in student guide that their repos must stay public for GitHub Pages + CMS access.
 
 ---
 
-### 18. Review Netlify Identity Settings
+### 18. Review GitHub OAuth Settings
 **Priority:** MEDIUM  
-**Status:** ❌ Pending deployment
+**Status:** ❌ Pending
 
 **Charter Alignment:** Section 6.2 - Students manage content; Section 2 - Appropriate for high school
 
 **Configure:**
-- Registration: "Invite only" (prevents random signups)
-- External providers: Consider enabling GitHub login (easier for students)
-- Email templates: Customize invitation email for student context
+- OAuth App Homepage URL matches Pages site
+- OAuth callback URL matches `/admin/` on Pages
+- App Client ID is saved in `admin/config.yml`
 
 ---
 
@@ -355,10 +341,10 @@ After deployment, test on actual devices:
 
 **Full simulation:**
 1. Fork/use template as if you're a student
-2. Deploy to Netlify following student guide
-3. Enable Identity + Git Gateway
-4. Create account
-5. Customize name/bio via CMS (after implementing #16)
+2. Deploy to GitHub Pages following student guide
+3. Configure GitHub OAuth App
+4. Log into `/admin`
+5. Customize name/bio via CMS
 6. Add 2-3 Working Portfolio logs with images
 7. Add 1 Project with statement
 8. Share portfolio URL
@@ -389,17 +375,16 @@ After deployment, test on actual devices:
 - [x] Git repository initialized with first commit
 - [x] Code pushed to GitHub
 - [x] `assets/uploads/` directory created
-- [x] Template deployed to Netlify (demo site)
-- [x] Netlify Identity enabled
-- [x] Git Gateway enabled
-- [x] CMS tested with demo user
+- [ ] Template deployed to GitHub Pages (demo site)
+- [ ] GitHub OAuth App configured
+- [ ] CMS tested with demo user
 - [ ] GitHub repository marked as template
 
 **Phase 2: Documentation** (Before students use)
 - [x] STUDENT_GUIDE.md created
 - [ ] INSTRUCTOR_NOTES.md created  
 - [ ] Sample content reviewed for quality
-- [ ] README updated with student-facing language
+- [x] README updated with student-facing language
 
 **Phase 3: Validation** (Final checks)
 - [ ] No build system required (verify)
@@ -421,7 +406,7 @@ After deployment, test on actual devices:
 
 1. **Google Drive Sync:** Project currently in Google Drive. For production, consider if this affects Git operations.
 
-2. **CMS Settings:** Currently students must edit `settings.json` manually. Consider adding to CMS for true no-code experience (see #16).
+2. **CMS Settings:** Settings are editable in `/admin` → Settings. Verify this on GitHub Pages after OAuth is configured.
 
 3. **First Image Upload:** First image upload via CMS might be slow as it creates the `assets/uploads` branch structure.
 
@@ -436,7 +421,7 @@ After deployment, test on actual devices:
 | Phase | Time Estimate |
 |-------|---------------|
 | Assets directory & push | 5 minutes |
-| Netlify deployment | 10 minutes |
+| GitHub Pages deployment | 10 minutes |
 | Enable Identity & Gateway | 5 minutes |
 | Test CMS workflow | 15 minutes |
 | Create student guide | 60 minutes |
@@ -448,15 +433,15 @@ After deployment, test on actual devices:
 ## 🆘 TROUBLESHOOTING
 
 ### CMS not loading
-- Check Netlify Identity is enabled
-- Verify Git Gateway is enabled  
+- Check GitHub OAuth App settings
+- Verify `app_id` and `repo` in `admin/config.yml`
 - Check browser console for errors
 - Try incognito/private window
 
 ### Images not uploading
 - Verify `assets/uploads/` directory exists in repo
-- Check Git Gateway is enabled
-- Check Netlify deploy logs for errors
+- Check GitHub Pages publish status
+- Check browser console for errors
 
 ### Student can't log in
 - Verify invitation email sent
@@ -464,15 +449,15 @@ After deployment, test on actual devices:
 - Verify Identity is enabled for their site (not just template)
 
 ### Changes not appearing  
-- Wait 1-2 minutes for Netlify rebuild
-- Check deploy status in Netlify dashboard
+- Wait 1-2 minutes for GitHub Pages publish
+- Check Pages status in repository settings
 - Hard refresh browser (Cmd+Shift+R / Ctrl+Shift+R)
 
 ---
 
 ## 📚 RESOURCES FOR STUDENTS
 
-- [Netlify Docs](https://docs.netlify.com/)
+- [GitHub Pages Docs](https://docs.github.com/pages)
 - [Decap CMS Docs](https://decapcms.org/docs/)
 - [Markdown Guide](https://www.markdownguide.org/)
 
@@ -480,8 +465,8 @@ After deployment, test on actual devices:
 
 ## 📚 RESOURCES FOR INSTRUCTOR
 
-- [Canvas Integration Ideas](https://docs.netlify.com/)
-- [Netlify Identity Management](https://docs.netlify.com/visitor-access/identity/)
+- [Canvas Integration Ideas](https://docs.github.com/pages)
+- [GitHub OAuth Apps](https://docs.github.com/en/apps/oauth-apps)
 - [Assessment Rubric Ideas] (To be created)
 
 ---

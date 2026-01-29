@@ -40,9 +40,11 @@ A minimal, beautiful portfolio template for showcasing student work in art and t
 
 ## Customization
 
-### Quick Personalization (settings.json)
+### Quick Personalization (via CMS)
 
-Edit `settings.json` to customize:
+Students should edit settings in `/admin` → **Settings** → **Site Settings**.
+
+Advanced users can still edit `settings.json` directly if needed:
 
 ```json
 {
@@ -88,24 +90,23 @@ In `styles.css`, modify `:root` variables:
 
 All typography, spacing, and color scales are controlled here. No need to touch component styles.
 
-## Content Management with Decap CMS
+## Content Management with Decap CMS (GitHub Pages)
 
 ### Setup
 
-1. **Deploy to Netlify** (see below)
-2. **Enable Netlify Identity**:
-   - Go to Netlify dashboard → Site settings → Identity
-   - Click "Enable Identity"
-3. **Enable Git Gateway**:
-   - Go to Identity → Settings and usage → Git Gateway
-   - Click "Enable Git Gateway"
-4. **Create User**:
-   - Go to Identity → Users → Invite users
-   - Invite your email address
-   - Accept invite email and set password
-5. **Access CMS**:
-   - Visit `yoursite.netlify.app/admin`
-   - Log in with your email and password
+1. **Deploy to GitHub Pages** (see below)
+2. **Create a GitHub OAuth App** (required for Decap CMS on GitHub Pages):
+   - Go to GitHub → Settings → Developer settings → OAuth Apps
+   - Click **New OAuth App**
+   - **Homepage URL:** your GitHub Pages site
+   - **Authorization callback URL:** `https://YOUR-USERNAME.github.io/YOUR-REPO/admin/`
+   - Copy the **Client ID**
+3. **Add the Client ID** to `admin/config.yml`:
+   - Set `app_id: YOUR_GITHUB_OAUTH_APP_ID`
+   - Set `repo: YOUR-USERNAME/YOUR-REPO`
+4. **Access CMS**:
+   - Visit `https://YOUR-USERNAME.github.io/YOUR-REPO/admin/`
+   - Log in with GitHub
 
 ### Adding Content
 
@@ -166,45 +167,21 @@ The portfolio supports standard markdown:
 ```code block```
 ```
 
-## Deployment on Netlify
+## Deployment on GitHub Pages
 
-### From GitHub/GitLab/Bitbucket
+1. **Push to GitHub** (if you haven't already).
+2. Go to your repository → **Settings** → **Pages**.
+3. **Source:** Deploy from a branch.
+4. **Branch:** `main` and **/ (root)**.
+5. Click **Save**. GitHub will publish your site at:
+   - `https://YOUR-USERNAME.github.io/YOUR-REPO/`
 
-1. **Push to Git Repository**:
-   ```bash
-   git init
-   git add .
-   git commit -m "Initial portfolio"
-   git remote add origin https://github.com/yourname/portfolio
-   git branch -M main
-   git push -u origin main
-   ```
+### Custom Domain (Optional)
 
-2. **Connect to Netlify**:
-   - Go to [netlify.com](https://netlify.com) and sign up
-   - Click "New site from Git"
-   - Select your repository
-   - Configure build settings:
-     - Build command: (leave blank)
-     - Publish directory: `.` (or leave blank)
-   - Click "Deploy site"
-
-3. **Enable Netlify Identity** (see Content Management section above)
-
-### Manual Deploy
-
-1. Zip entire project folder
-2. Go to [netlify.com/drop](https://netlify.com/drop)
-3. Drag and drop the zip file
-4. Copy the deployed URL
-5. Note: Manual deploys won't support Decap CMS without additional setup
-
-### Custom Domain
-
-1. Go to Netlify site settings → Domain management
-2. Click "Add custom domain"
-3. Enter your domain (e.g., `yourname.com`)
-4. Update DNS records at your domain registrar to point to Netlify
+1. In GitHub Pages settings, add your custom domain.
+2. Create a `CNAME` file with your domain name.
+3. Update DNS records at your registrar to point to GitHub Pages.
+4. GitHub will provision HTTPS automatically.
 
 ## How to Edit Locally
 
@@ -229,7 +206,7 @@ If you want to preview changes before publishing:
    git push origin main
    ```
 
-   Netlify will auto-deploy your changes!
+   GitHub Pages will auto-publish your changes after you push.
 
 ## Markdown File Format
 
@@ -317,9 +294,9 @@ No external dependencies—everything runs in the browser.
 
 ### CMS Not Loading
 
-- Check that Identity is enabled in Netlify settings
-- Check that Git Gateway is enabled
-- Verify you're logged in (try logging out and back in)
+- Check that your GitHub OAuth App is configured correctly
+- Verify `app_id` and `repo` in `admin/config.yml`
+- Confirm your Pages URL matches the OAuth callback URL
 - Check browser console for errors
 
 ### Images Not Showing
@@ -356,8 +333,8 @@ No external dependencies—everything runs in the browser.
 ## Credits
 
 - Typography: [Google Fonts](https://fonts.google.com)
-- CMS: [Decap CMS](https://decapcms.org) (formerly Netlify CMS)
-- Hosting: [Netlify](https://netlify.com)
+- CMS: [Decap CMS](https://decapcms.org)
+- Hosting: [GitHub Pages](https://pages.github.com)
 - Design philosophy: Inspired by [xxix.co](https://xxix.co)
 
 ## License
@@ -368,7 +345,7 @@ This template is provided as-is for educational use. Customize and deploy freely
 
 Refer to the official documentation:
 - [Decap CMS Docs](https://decapcms.org/docs/intro/)
-- [Netlify Guides](https://docs.netlify.com/)
+- [GitHub Pages Docs](https://docs.github.com/pages)
 - [Markdown Guide](https://www.markdownguide.org/)
 
 ---

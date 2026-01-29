@@ -2,7 +2,7 @@
 
 **Purpose:** This is your working portfolio. It should show process, experiments, and iteration — not just finished work.
 
-**You do not need to edit code.** Everything happens through the web interface.
+**Goal:** You should be able to publish and update your portfolio from the web.
 
 ---
 
@@ -10,44 +10,40 @@
 1. Go to the main template repository on GitHub.
 2. Click **Use this template**.
 3. Name your new repository (for example: `yourname-portfolio`).
-4. Keep it **Public** so your site and CMS work on the free Netlify plan.
+4. Keep it **Public** so GitHub Pages and the CMS can work for free.
 
 ---
 
-## 2) Deploy Your Site to Netlify
-1. Go to Netlify and log in or create an account.
-2. Click **Add new site** → **Import an existing project**.
-3. Connect your GitHub account and choose your new repository.
-4. Build settings:
-   - Build command: leave blank
-   - Publish directory: leave blank or `.`
-5. Click **Deploy site**.
+## 2) Deploy Your Site to GitHub Pages
+1. In your repository, go to **Settings → Pages**.
+2. Under **Source**, choose **Deploy from a branch**.
+3. Select **main** and **/(root)**.
+4. Click **Save**.
 
-Netlify will give you a URL like: `random-name.netlify.app`.
+Your site will appear at:
+`https://YOUR-USERNAME.github.io/YOUR-REPO/`
 
 ---
 
-## 3) Enable the CMS (Identity + Git Gateway)
-In Netlify for your site:
+## 3) Enable the CMS (GitHub OAuth)
+Decap CMS on GitHub Pages requires a GitHub OAuth App.
 
-1. Go to **Site settings → Identity** and click **Enable Identity**.
-2. Set **Registration** to **Invite only**.
-3. Enable **Git Gateway** under **Identity → Services**.
-
----
-
-## 4) Create Your Account
-1. In Netlify → **Identity → Users**, click **Invite users**.
-2. Enter your email and send the invite.
-3. Open the email and click the invite link.
-4. Set your password when prompted.
+1. Go to GitHub → **Settings → Developer settings → OAuth Apps**.
+2. Click **New OAuth App**.
+3. **Homepage URL:** your GitHub Pages URL
+4. **Authorization callback URL:**
+   `https://YOUR-USERNAME.github.io/YOUR-REPO/admin/`
+5. Copy your **Client ID**.
+6. In your repo, open `admin/config.yml` and set:
+   - `repo: YOUR-USERNAME/YOUR-REPO`
+   - `app_id: YOUR_CLIENT_ID`
 
 Now you can log in at:
-- `your-site.netlify.app/admin`
+- `https://YOUR-USERNAME.github.io/YOUR-REPO/admin/`
 
 ---
 
-## 5) Set Your Name, Bio, and Links
+## 4) Set Your Name, Bio, and Links
 1. Go to `/admin`.
 2. Open **Settings** → **Site Settings**.
 3. Update:
@@ -62,7 +58,7 @@ After the site rebuilds, your new name and bio will appear.
 
 ---
 
-## 6) Add Working Portfolio Logs (Most Frequent)
+## 5) Add Working Portfolio Logs (Most Frequent)
 1. Go to `/admin` → **Posts** → **New Post**.
 2. Choose **Type: log**.
 3. Add:
@@ -77,7 +73,7 @@ After the site rebuilds, your new name and bio will appear.
 
 ---
 
-## 7) Add Projects (Fewer, Deeper)
+## 6) Add Projects (Fewer, Deeper)
 1. Go to `/admin` → **Projects** → **New Project**.
 2. Add:
    - Title
@@ -89,15 +85,15 @@ After the site rebuilds, your new name and bio will appear.
 
 ---
 
-## 8) If Something Doesn’t Show Up
-- Wait 1–2 minutes for Netlify to rebuild.
+## 7) If Something Doesn’t Show Up
+- Wait 1–2 minutes for GitHub Pages to publish.
 - Refresh the site (hard refresh).
 - Make sure your post is **Published**, not **Draft**.
-- Check that your site is still connected to your GitHub repo in Netlify.
+- Check that your OAuth app settings match your Pages URL.
 
 ---
 
-## 9) Your Portfolio Is a Studio Practice
+## 8) Your Portfolio Is a Studio Practice
 - Post often.
 - Include failed experiments and unfinished work.
 - Show what changed, not just what worked.
