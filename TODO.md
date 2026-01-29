@@ -79,24 +79,17 @@ build/
 
 ### 4. Create Assets Directory
 **Priority:** HIGH  
-**Status:** ❌ Missing
+**Status:** ✅ COMPLETED
 
 **Charter Alignment:** Section 6.2 - Students must not edit code; Section 7 - Content model requires image uploads
 
-Create the uploads directory for Decap CMS:
-```bash
-mkdir -p assets/uploads
-touch assets/uploads/.gitkeep
-```
+**Completion Details:**
+- Directory created: `assets/uploads/`
+- `.gitkeep` file added to track empty directory
+- Commit hash: `3bde2bd`
+- Pushed to GitHub: ✅
 
 **Why:** Decap CMS needs this directory to store student-uploaded images. Without it, image uploads will fail.
-
-After creating:
-```bash
-git add assets/uploads/.gitkeep
-git commit -m "Add assets/uploads directory for CMS"
-git push
-```
 
 ---
 
@@ -104,68 +97,58 @@ git push
 
 ### 5. Deploy Template to Netlify
 **Priority:** HIGH  
-**Status:** ❌ Not deployed
+**Status:** ✅ COMPLETED
 
 **Charter Alignment:** Section 4 - Static web application on static hosting; Section 10 - Student publishes shareable URL
 
-**Purpose:** Create a live demo site that shows students what their portfolio will look like
+**Deployment Details:**
+- Live URL: https://artandtechportfolio.netlify.app
+- Repository: flyinthelyceum/Portfolio-Web-App
+- Auto-deploys on Git push: ✅
 
-**Steps:**
-1. Go to [netlify.com](https://netlify.com) and sign up/login
-2. Click "Add new site" → "Import an existing project"
-3. Choose your Git provider (GitHub/GitLab/Bitbucket)
-4. Authorize Netlify to access your repositories
-5. Select your portfolio repository
-6. Configure build settings:
-   - **Build command:** Leave blank
-   - **Publish directory:** `.` or leave blank
-   - **Branch to deploy:** `main`
-7. Click "Deploy site"
-8. Wait for initial deployment (1-2 minutes)
-
-**Result:** You'll get a URL like `random-name-12345.netlify.app`
+**Next:** Enable Identity and Git Gateway on this site
 
 ---
 
-### 6. Configure Custom Site Name (Optional)
+### 6. Configure Custom Site Name
 **Priority:** MEDIUM  
-**Status:** ❌ Pending deployment
+**Status:** ✅ COMPLETED
 
-After deployment:
-1. Go to Site settings → Site details
-2. Click "Change site name"
-3. Choose something like: `yourname-portfolio.netlify.app`
-4. Update is instant
+**Charter Alignment:** Section 10 - Professional, shareable URL
+
+**Details:**
+- Custom name: `artandtechportfolio`
+- Full URL: https://artandtechportfolio.netlify.app
+
+**Note:** Students will configure their own Netlify site names when they deploy their forks
 
 ---
 
 ### 7. Enable Netlify Identity (Required for CMS)
 **Priority:** HIGH  
-**Status:** ❌ Pending deployment
+**Status:** ✅ COMPLETED
 
 **Charter Alignment:** Section 6.2 - Students must not edit code; Section 10 - Change name/bio without opening VS Code
 
 **Purpose:** Allows students to log into `/admin` and manage content through web interface
 
-**Steps:**
-1. In Netlify dashboard → Site settings → Identity
+**Steps (in Netlify dashboard for artandtechportfolio):**
+1. Go to https://app.netlify.com/sites/artandtechportfolio/settings/identity
 2. Click "Enable Identity"
 3. Under Registration preferences → Set to "Invite only"
-4. Under External providers → Enable any you want (GitHub, Google, etc.)
-
-**Why:** This allows you to log into `/admin` and manage content.
+4. Under External providers → Consider enabling GitHub (easier for students)
 
 ---
 
 ### 8. Enable Git Gateway (Required for CMS)
 **Priority:** HIGH  
-**Status:** ❌ Pending deployment
+**Status:** ✅ COMPLETED
 
 **Charter Alignment:** Section 6.2 - Students manage content without editing code; Section 6.4 - Fast, low-friction posting
 
 **Purpose:** Allows CMS to save changes directly to Git repository (students never touch Git)
 
-**Steps:**
+**Steps (in Netlify dashboard for artandtechportfolio):**
 1. In Identity settings → Services → Git Gateway
 2. Click "Enable Git Gateway"
 3. This allows the CMS to commit directly to your repository
@@ -419,10 +402,10 @@ After deployment, test on actual devices:
 - [x] `.gitignore` created
 - [x] Git repository initialized with first commit
 - [x] Code pushed to GitHub
-- [ ] `assets/uploads/` directory created
-- [ ] Template deployed to Netlify (demo site)
-- [ ] Netlify Identity enabled
-- [ ] Git Gateway enabled
+- [x] `assets/uploads/` directory created
+- [x] Template deployed to Netlify (demo site)
+- [x] Netlify Identity enabled
+- [x] Git Gateway enabled
 - [ ] CMS tested with demo user
 - [ ] GitHub repository marked as template
 
