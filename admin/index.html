@@ -8,12 +8,13 @@
     content="Admin for Art & Technology Portfolio"
   />
   <title>Content Manager - Portfolio</title>
-  <script src="https://unpkg.com/decap-cms@^3.0.0/dist/decap-cms.js"></script>
+  <script src="https://unpkg.com/decap-cms@^3.1.0/dist/decap-cms.js"></script>
+  <script src="https://unpkg.com/@decap-cms-backend-github@^3.1.0/dist/index.js"></script>
 </head>
 <body>
   <script>
-    // Initialize Decap CMS with GitHub backend (PKCE OAuth)
-    if (window.CMS) {
+    // Wait for backends to load before initializing
+    window.addEventListener('load', function() {
       CMS.registerBackend('github', window.DecapCmsBackendGithub);
       
       CMS.init({
@@ -98,9 +99,7 @@
           ]
         }
       });
-    } else {
-      console.error('Decap CMS failed to load');
-    }
+    });
   </script>
 </body>
 </html>
