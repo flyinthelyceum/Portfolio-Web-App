@@ -1,15 +1,18 @@
 # Portfolio Deployment TODO
 
-**Project Status:** Ready for deployment with some setup tasks required
+**Project Purpose:** Student-facing portfolio template for Art & Technology course
+**Canonical Reference:** See [PROJECT_CHARTER.md](PROJECT_CHARTER.md)
 **Last Updated:** January 29, 2026
+
+> **Important:** This is a template repository for students. Placeholders (names, bios, sample content) are intentional examples and should NOT be replaced with instructor information.
 
 ---
 
-## 🚨 CRITICAL - Pre-Deployment
+## 🚨 CRITICAL - Template Setup
 
 ### 1. Create `.gitignore` File
 **Priority:** HIGH  
-**Status:** ❌ Missing
+**Status:** ✅ COMPLETED
 
 Create a `.gitignore` file to exclude unnecessary files from version control:
 
@@ -47,72 +50,65 @@ build/
 
 ### 2. Initialize Git Repository & Make First Commit
 **Priority:** HIGH  
-**Status:** ⚠️ Git initialized but no commits made
+**Status:** ✅ COMPLETED
 
-```bash
-git add .gitignore
-git add README.md
-git add settings.json
-git add index.html
-git add styles.css
-git add app.js
-git add admin/
-git add posts/
-git add projects/
-git commit -m "Initial commit: Art & Technology Portfolio"
-```
+**Commit Details:**
+- Commit hash: `b1b2865`
+- Files committed: 21 files, 3838 insertions
+- Date: January 29, 2026
 
-**Note:** You have untracked files. First commit must be made before pushing to remote.
+✅ Initial commit completed successfully!
 
 ---
 
 ### 3. Create GitHub/GitLab Repository
 **Priority:** HIGH  
-**Status:** ❌ No remote repository configured
+**Status:** ✅ COMPLETED
 
-**Steps:**
-1. Go to [github.com](https://github.com) (or GitLab/Bitbucket)
-2. Create new repository (e.g., `portfolio-webapp`)
-3. Keep it public (required for free Netlify CMS)
-4. DO NOT initialize with README (you already have one)
-5. Copy the repository URL
+**Repository Details:**
+- Owner: `flyinthelyceum`
+- Repo: `Portfolio-Web-App`
+- URL: https://github.com/flyinthelyceum/Portfolio-Web-App
+- Branch: `main`
 
-**Then connect local repo to remote:**
-```bash
-git remote add origin https://github.com/YOUR_USERNAME/portfolio-webapp.git
-git branch -M main
-git push -u origin main
-```
+✅ Remote configured and initial commit pushed successfully!
 
 **Why:** Netlify needs a Git repository to deploy from and enable the CMS.
 
 ---
 
-### 4. Personalize Settings
+### 4. Create Assets Directory
 **Priority:** HIGH  
-**Status:** ⚠️ Using template data
+**Status:** ❌ Missing
 
-Edit `settings.json` with actual information:
+**Charter Alignment:** Section 6.2 - Students must not edit code; Section 7 - Content model requires image uploads
 
-**Current placeholders to replace:**
-- `studentName`: "Alex Rivera" → Your actual name
-- `siteTitle`: Update to match your name
-- `bio`: Update with your actual studio statement
-- `accentColor`: Keep or customize
-- `links.Instagram`: Update or remove if not using
-- `links.GitHub`: Update with actual GitHub URL
-- `links.Email`: Update with actual email (currently `student@brophyprep.org`)
+Create the uploads directory for Decap CMS:
+```bash
+mkdir -p assets/uploads
+touch assets/uploads/.gitkeep
+```
 
-**Also update in files:**
-- Footer contact info in `index.html` (line 107-108)
+**Why:** Decap CMS needs this directory to store student-uploaded images. Without it, image uploads will fail.
+
+After creating:
+```bash
+git add assets/uploads/.gitkeep
+git commit -m "Add assets/uploads directory for CMS"
+git push
+```
 
 ---
 
-## 🚀 DEPLOYMENT
+## 🚀 TEMPLATE DEPLOYMENT (Demo Site)
 
-### 5. Deploy to Netlify
+### 5. Deploy Template to Netlify
 **Priority:** HIGH  
 **Status:** ❌ Not deployed
+
+**Charter Alignment:** Section 4 - Static web application on static hosting; Section 10 - Student publishes shareable URL
+
+**Purpose:** Create a live demo site that shows students what their portfolio will look like
 
 **Steps:**
 1. Go to [netlify.com](https://netlify.com) and sign up/login
@@ -147,6 +143,10 @@ After deployment:
 **Priority:** HIGH  
 **Status:** ❌ Pending deployment
 
+**Charter Alignment:** Section 6.2 - Students must not edit code; Section 10 - Change name/bio without opening VS Code
+
+**Purpose:** Allows students to log into `/admin` and manage content through web interface
+
 **Steps:**
 1. In Netlify dashboard → Site settings → Identity
 2. Click "Enable Identity"
@@ -161,6 +161,10 @@ After deployment:
 **Priority:** HIGH  
 **Status:** ❌ Pending deployment
 
+**Charter Alignment:** Section 6.2 - Students manage content without editing code; Section 6.4 - Fast, low-friction posting
+
+**Purpose:** Allows CMS to save changes directly to Git repository (students never touch Git)
+
 **Steps:**
 1. In Identity settings → Services → Git Gateway
 2. Click "Enable Git Gateway"
@@ -170,21 +174,22 @@ After deployment:
 
 ---
 
-### 9. Create Your Admin User
+### 9. Test CMS as Student User
 **Priority:** HIGH  
 **Status:** ❌ Pending Identity setup
 
-**Steps:**
-1. In Netlify → Identity → Invite users
-2. Enter your email address
-3. Check your email for the invite
-4. Click the confirmation link
-5. Set your password
+**Charter Alignment:** Section 10 - Definition of Done; Section 6.2 - No code editing required
 
-**Test:**
-- Visit `yoursite.netlify.app/admin`
-- Log in with your email and password
-- You should see the Decap CMS interface
+**Test Workflow:**
+1. Create test user via Netlify Identity
+2. Log into `/admin` 
+3. Edit settings (change name, bio) via CMS
+4. Create a new Working Portfolio log entry with images
+5. Create a new Project with statement
+6. Verify changes appear on live site (1-2 min rebuild time)
+7. Delete test entries if desired
+
+**Success Criteria:** A non-technical user can complete all steps without touching code.
 
 ---
 
@@ -203,354 +208,313 @@ If you own a domain:
 
 ---
 
-## 📁 CONTENT
+## � STUDENT DOCUMENTATION
 
-### 11. Review Sample Content
+### 10. Create Student Onboarding Guide
+**Priority:** HIGH  
+**Status:** ❌ Not created
+
+**Charter Alignment:** Section 2 - Little/no web dev experience; Section 6.2 - Students must not edit code
+
+**Create:** `STUDENT_GUIDE.md` with:
+1. How to fork this repository to their own GitHub account
+2. How to deploy their fork to Netlify (with screenshots)
+3. How to log into `/admin` 
+4. How to customize their name, bio, and links
+5. How to add Working Portfolio logs (3 images, 2 sentences, 1 next step)
+6. How to add Project entries
+7. Troubleshooting common issues
+
+**Success Criteria:** A student can follow the guide independently with minimal instructor help.
+
+---
+
+### 11. Document Instructor Workflow
+**Priority:** MEDIUM  
+**Status:** ❌ Not created
+
+**Charter Alignment:** Section 9 - Instructor workflow; Section 7 - Content maps to Canvas assignments
+
+**Create:** `INSTRUCTOR_NOTES.md` with:
+1. How to view all student portfolios (list of URLs)
+2. How to assess Working Portfolio frequency/quality
+3. How to reference entries during critique
+4. Integration with Canvas assignments
+5. Semester timeline (when students should post)
+
+---
+
+## 🎨 TEMPLATE VALIDATION
+
+### 12. Review Sample Content Quality
 **Priority:** MEDIUM  
 **Status:** ⚠️ Template content included
 
+**Charter Alignment:** Section 6.3 - Placeholders are intentional examples; Section 7 - Working Portfolio vs Projects
+
 **Current sample files:**
-- 6 sample logs in `posts/`
-- 4 sample projects in `projects/`
+- 6 sample logs in `posts/` (demonstrate Working Portfolio format)
+- 4 sample projects in `projects/` (demonstrate Project format)
 
-**Decision needed:**
-- Keep samples for testing → Leave as-is temporarily
-- Start fresh → Delete samples, add your own via CMS
+**Action:** Review samples to ensure they:
+- Model the "3 images, 2 sentences, 1 next step" format for logs
+- Show appropriate level of incompleteness/process
+- Demonstrate project statement structure
+- Use language appropriate for high school students
+- Avoid being too polished (remember: process is visible, failure is documented)
 
-**To delete samples via CMS:**
-1. Go to `/admin`
-2. Click on Posts/Projects
-3. Delete individual items
-
----
-
-### 12. Create Missing Directory
-**Priority:** MEDIUM  
-**Status:** ❌ Assets folder not created
-
-Create the uploads directory:
-```bash
-mkdir -p assets/uploads
-```
-
-**Why:** Decap CMS will upload images here. Without it, image uploads may fail.
-
-**Important:** Add a `.gitkeep` file so Git tracks the empty folder:
-```bash
-touch assets/uploads/.gitkeep
-git add assets/uploads/.gitkeep
-git commit -m "Add assets/uploads directory"
-git push
-```
+**Do NOT delete samples** - they teach by example.
 
 ---
 
-### 13. Add Your First Real Content
-**Priority:** MEDIUM  
-**Status:** ❌ Pending CMS setup
-
-**After CMS is working:**
-1. Create your first log entry
-2. Add at least 1-2 project overviews
-3. Test the filtering and modal functionality
-
----
-
-## 🎨 CUSTOMIZATION
-
-### 14. Customize Visual Theme (Optional)
-**Priority:** LOW  
-**Status:** ✅ Default theme applied
-
-**If desired, edit CSS variables in `styles.css`:**
-- Line 6-22: Color palette
-- Line 24-26: Font families
-- Line 28-34: Spacing scale
-- Line 36-40: Border widths
-
-**Or use `settings.json`** for quick theme changes:
-- `accentColor`
-- `cardRadius`
-- `spacing`
-
----
-
-### 15. Test on Mobile Devices
-**Priority:** MEDIUM  
-**Status:** ❌ Pending deployment
-
-After deployment:
-- Test on iPhone/Android
-- Check responsive layout
-- Verify touch interactions work
-- Test modal scrolling on mobile
-
----
-
-## 🧪 TESTING
-
-### 16. Verify Local Development
-**Priority:** MEDIUM  
+### 13. Verify No Build System Required
+**Priority:** HIGH  
 **Status:** ⚠️ Needs verification
 
-**Test locally before deploying changes:**
-```bash
-python -m http.server 8000
-```
-Then visit: `http://localhost:8000`
+**Charter Alignment:** Section 6.1 - No npm, no bundlers, no frameworks
 
-**Check:**
-- ✅ Settings load correctly
-- ✅ Posts display in feed
-- ✅ Projects grid renders
-- ✅ Filtering works
-- ✅ Modal opens/closes
-- ✅ Links work
+**Test:**
+1. Clone repository fresh to new location
+2. Open `index.html` directly in browser (double-click)
+3. Or use: `python -m http.server 8000`
+4. Verify everything works without any `npm install` or build step
+
+**Success Criteria:** Works immediately with just static files.
 
 ---
 
-### 17. Browser Compatibility Check
-**Priority:** LOW  
-**Status:** ❌ Pending deployment
-
-Test in:
-- ✅ Chrome/Edge
-- ✅ Firefox
-- ✅ Safari (desktop & iOS)
-- ✅ Mobile browsers
-
----
-
-### 18. CMS Content Test
+### 14. Create GitHub Template Repository
 **Priority:** HIGH  
-**Status:** ❌ Pending CMS setup
+**Status:** ❌ Not configured
 
-**After setting up CMS:**
-1. Create a new log via `/admin`
-2. Upload an image
-3. Publish the post
-4. Verify it appears on the main site (may take 1-2 min for rebuild)
-5. Edit the post
-6. Delete a test post
+**Charter Alignment:** Section 4 - Template that students fork; Section 10 - Student workflow
 
-**Why:** Confirms the entire CMS → Git → Deploy pipeline works.
+**Steps:**
+1. Go to repository settings on GitHub
+2. Check the box "Template repository"
+3. This allows students to click "Use this template" instead of forking
+
+**Why:** Template repositories create clean copies without fork history, which is cleaner for student portfolios.
 
 ---
 
-## 🛡️ SECURITY & BEST PRACTICES
-
-### 19. Review Security Settings
+### 15. Test Mobile Responsiveness
 **Priority:** MEDIUM  
 **Status:** ❌ Pending deployment
 
-**In Netlify settings:**
-- Enable HTTPS (automatic)
-- Set Identity registration to "Invite only" (prevents spam accounts)
-- Review allowed email domains if needed
+**Charter Alignment:** Section 8 - Aesthetic direction; Section 2 - Visual intuition
+
+After deployment, test on actual devices:
+- iPhone/Android phones
+- Tablets  
+- Different screen sizes
+
+**Check:**
+- Working Portfolio cards are readable
+- Images display properly
+- Modal scrolling works on touch devices
+- Navigation menu accessible
+- Filter chips work on mobile
 
 ---
 
-### 20. Set Up Deployment Notifications (Optional)
+## 🔧 OPTIONAL ENHANCEMENTS
+
+### 16. Add Settings to CMS
 **Priority:** LOW  
-**Status:** ❌ Optional
+**Status:** ❌ Not implemented
 
-**Options:**
-- Email notifications on deploy success/failure
-- Slack integration
-- GitHub status checks
+**Charter Alignment:** Section 6.2 - No code editing; Section 10 - Change name/bio via web
 
-**Configure in:** Netlify → Site settings → Build & deploy → Deploy notifications
+**Current:** Students edit `settings.json` manually (requires code editor)
+**Better:** Add settings to Decap CMS as a "Settings" collection
+
+**Implementation:** Add to `admin/config.yml`:
+```yaml
+- name: "settings"
+  label: "Settings"
+  files:
+    - label: "Site Settings"
+      name: "settings"
+      file: "settings.json"
+      fields:
+        - {label: "Student Name", name: "studentName", widget: "string"}
+        - {label: "Site Title", name: "siteTitle", widget: "string"}
+        - {label: "Bio", name: "bio", widget: "text"}
+        # ... etc
+```
+
+**Benefit:** Fully removes need for students to edit any code files.
+
+---
+
+## 🛡️ SECURITY & ACCESS
+
+### 17. Configure Repository Visibility
+**Priority:** MEDIUM  
+**Status:** ⚠️ Needs review
+
+**Charter Alignment:** Section 4 - Students fork template; Section 10 - Shareable URL
+
+**Current:** Repository public (required for free Netlify CMS)
+**Student repos:** Should also be public (so portfolios are shareable)
+
+**Action:** Document in student guide that their repos must stay public for CMS to work with free Netlify tier.
+
+---
+
+### 18. Review Netlify Identity Settings
+**Priority:** MEDIUM  
+**Status:** ❌ Pending deployment
+
+**Charter Alignment:** Section 6.2 - Students manage content; Section 2 - Appropriate for high school
+
+**Configure:**
+- Registration: "Invite only" (prevents random signups)
+- External providers: Consider enabling GitHub login (easier for students)
+- Email templates: Customize invitation email for student context
 
 ---
 
 ## 📊 POST-DEPLOYMENT
 
-### 21. Monitor First Deployment
+### 19. Test Complete Student Workflow
 **Priority:** HIGH  
 **Status:** ❌ Pending deployment
 
-**Check after going live:**
-- ✅ Site loads without errors
-- ✅ All links work
-- ✅ Images display correctly
-- ✅ CMS login works
-- ✅ Content updates deploy automatically
+**Charter Alignment:** Section 10 - Definition of Done
 
-**Where to check for errors:**
-- Netlify deploy logs
-- Browser console (F12)
-- Network tab for failed requests
+**Full simulation:**
+1. Fork/use template as if you're a student
+2. Deploy to Netlify following student guide
+3. Enable Identity + Git Gateway
+4. Create account
+5. Customize name/bio via CMS
+6. Add 2-3 Working Portfolio logs with images
+7. Add 1 Project with statement
+8. Share portfolio URL
 
----
-
-### 22. Share Portfolio URL
-**Priority:** MEDIUM  
-**Status:** ❌ Pending deployment
-
-**Once everything works:**
-- Update your GitHub profile with portfolio link
-- Add to resume/CV
-- Share on social media
-- Add to email signature
+**Success:** Complete workflow without opening code editor.
 
 ---
 
-### 23. Set Up Analytics (Optional)
+### 20. Create Example Portfolio URLs List
 **Priority:** LOW  
-**Status:** ❌ Optional, not configured
+**Status:** ❌ Not created
 
-**Options:**
-- Netlify Analytics (paid, privacy-friendly)
-- Google Analytics (free, more detailed)
-- Plausible (privacy-focused, paid)
+**Charter Alignment:** Section 9 - Instructor quickly browses student work
 
-**Implementation:** Add tracking script to `index.html` `<head>`
+**Create:** Simple tracking system for student portfolio URLs
+- Could be a spreadsheet
+- Could be a markdown file
+- Could integrate with Canvas
 
----
-
-### 24. Create Backup Strategy
-**Priority:** LOW  
-**Status:** ⚠️ Git provides version control
-
-**Current backup:** All content is in Git repository (automatic backup)
-
-**Optional enhanced backup:**
-- Clone repository to second location
-- Export content periodically
-- Keep local copies of images
+**Why:** Easier to visit all student portfolios for assessment/critique.
 
 ---
 
-## 🔄 MAINTENANCE
+## ✅ DEPLOYMENT CHECKLIST
 
-### 25. Content Update Workflow
-**Priority:** MEDIUM  
-**Status:** ❌ Document after deployment
-
-**Establish routine:**
-1. Log work regularly (aim for weekly logs)
-2. Update project pages when milestones hit
-3. Keep portfolio current
-
-**Two methods:**
-- **Via CMS:** Easy, non-technical, at `/admin`
-- **Via Code:** Edit markdown files, commit, push
-
----
-
-### 26. Keep Dependencies Updated
-**Priority:** LOW  
-**Status:** ⚠️ Currently using CDN links
-
-**Current external dependencies:**
-- Google Fonts (CDN)
-- Netlify Identity Widget (CDN)
-- Netlify CMS (CDN)
-
-**Action:** Check for updates every 6-12 months
-- CMS: Update version in `/admin/index.html` (line 15)
-- Identity: Usually auto-updates
-
----
-
-## 📝 DOCUMENTATION
-
-### 27. Create Personal Documentation (Optional)
-**Priority:** LOW  
-**Status:** ❌ Optional
-
-**Consider adding:**
-- `CHANGELOG.md` - Track major changes over time
-- `CONTRIBUTING.md` - If others will add content
-- `DEPLOYMENT.md` - Your specific deployment notes
-
----
-
-## ✅ FINAL CHECKLIST
-
-**Before announcing your portfolio is live:**
-
-- [ ] `.gitignore` created
-- [ ] Git repository initialized with first commit
-- [ ] Code pushed to GitHub/GitLab/Bitbucket
-- [ ] Settings personalized (name, bio, email, links)
-- [ ] Deployed to Netlify successfully
-- [ ] Custom site name set (optional but recommended)
+**Phase 1: Template Infrastructure** (Do first)
+- [x] `.gitignore` created
+- [x] Git repository initialized with first commit
+- [x] Code pushed to GitHub
+- [ ] `assets/uploads/` directory created
+- [ ] Template deployed to Netlify (demo site)
 - [ ] Netlify Identity enabled
 - [ ] Git Gateway enabled
-- [ ] Admin user created and tested
-- [ ] CMS access confirmed at `/admin`
-- [ ] `assets/uploads/` directory created
-- [ ] Test post created via CMS
-- [ ] Test post appears on live site
-- [ ] Mobile responsive checked
-- [ ] All links work (social, email, etc.)
-- [ ] Browser console shows no errors
-- [ ] Sample content reviewed (keep or delete)
+- [ ] CMS tested with demo user
+- [ ] GitHub repository marked as template
+
+**Phase 2: Documentation** (Before students use)
+- [ ] STUDENT_GUIDE.md created
+- [ ] INSTRUCTOR_NOTES.md created  
+- [ ] Sample content reviewed for quality
+- [ ] README updated with student-facing language
+
+**Phase 3: Validation** (Final checks)
+- [ ] No build system required (verify)
+- [ ] Complete student workflow tested
+- [ ] Mobile responsiveness checked
+- [ ] Browser compatibility verified
+- [ ] All links functional
+
+**Phase 4: Semester Rollout** (When ready)
+- [ ] Demo site URL shared with students
+- [ ] Student guide distributed
+- [ ] First cohort guided through setup
+- [ ] Portfolio URLs collected
+- [ ] Integration with Canvas assignments confirmed
 
 ---
 
 ## 🚧 KNOWN ISSUES / NOTES
 
-1. **Google Drive Sync:** Your project is in Google Drive. Consider moving to a regular folder before pushing to Git to avoid sync conflicts.
+1. **Google Drive Sync:** Project currently in Google Drive. For production, consider if this affects Git operations.
 
-2. **CMS Image Uploads:** First image upload via CMS might be slow as it creates the `assets/uploads` branch structure.
+2. **CMS Settings:** Currently students must edit `settings.json` manually. Consider adding to CMS for true no-code experience (see #16).
 
-3. **Build Version:** Code has build version tracking (v9) in comments. Consider removing or updating these for production.
+3. **First Image Upload:** First image upload via CMS might be slow as it creates the `assets/uploads` branch structure.
 
-4. **Hardcoded Text:** Some placeholder text exists in `index.html` (footer contact) that should be updated.
+4. **Placeholders:** All placeholder content (Alex Rivera, sample logs/projects) is intentional and should remain as examples.
+
+5. **Build Comments:** Code contains build version markers (v9). These are fine to keep for debugging but not critical.
 
 ---
 
-## 🎯 ESTIMATED TIME TO DEPLOY
+## 🎯 ESTIMATED TIME
 
-| Task Group | Time Estimate |
-|------------|---------------|
-| Git & GitHub setup | 15 minutes |
-| Personalize settings | 10 minutes |
+| Phase | Time Estimate |
+|-------|---------------|
+| Assets directory & push | 5 minutes |
 | Netlify deployment | 10 minutes |
 | Enable Identity & Gateway | 5 minutes |
-| Create admin user & test | 10 minutes |
-| Create assets folder | 2 minutes |
-| Test full workflow | 10 minutes |
-| **TOTAL** | **~60 minutes** |
+| Test CMS workflow | 15 minutes |
+| Create student guide | 60 minutes |
+| Review & test complete workflow | 30 minutes |
+| **TOTAL TO DEPLOYMENT** | **~2 hours** |
 
 ---
 
-## 🆘 IF SOMETHING GOES WRONG
+## 🆘 TROUBLESHOOTING
 
 ### CMS not loading
+- Check Netlify Identity is enabled
+- Verify Git Gateway is enabled  
 - Check browser console for errors
-- Verify Identity is enabled
-- Try logging out and back in
-- Clear browser cache
+- Try incognito/private window
 
 ### Images not uploading
-- Check `assets/uploads/` exists
-- Verify Git Gateway is enabled
-- Check Netlify deploy logs
+- Verify `assets/uploads/` directory exists in repo
+- Check Git Gateway is enabled
+- Check Netlify deploy logs for errors
 
-### Changes not appearing
+### Student can't log in
+- Verify invitation email sent
+- Check spam folder
+- Verify Identity is enabled for their site (not just template)
+
+### Changes not appearing  
 - Wait 1-2 minutes for Netlify rebuild
-- Check deploy status in Netlify
+- Check deploy status in Netlify dashboard
 - Hard refresh browser (Cmd+Shift+R / Ctrl+Shift+R)
-
-### Site not building on Netlify
-- Check Netlify deploy logs
-- Verify all files pushed to Git
-- Check for JavaScript console errors
 
 ---
 
-## 📚 HELPFUL RESOURCES
+## 📚 RESOURCES FOR STUDENTS
 
 - [Netlify Docs](https://docs.netlify.com/)
 - [Decap CMS Docs](https://decapcms.org/docs/)
 - [Markdown Guide](https://www.markdownguide.org/)
-- [Git Basics](https://git-scm.com/book/en/v2/Getting-Started-Git-Basics)
 
 ---
 
-**Good luck with your deployment! 🚀**
+## 📚 RESOURCES FOR INSTRUCTOR
 
-*Remember: Start with the Critical section, then Deployment, then everything else can be done over time.*
+- [Canvas Integration Ideas](https://docs.netlify.com/)
+- [Netlify Identity Management](https://docs.netlify.com/visitor-access/identity/)
+- [Assessment Rubric Ideas] (To be created)
+
+---
+
+**Remember:** This is a student template, not a personal portfolio. All decisions should support Section 10 of the charter: students who never open VS Code can maintain their portfolio throughout the semester.
