@@ -10,7 +10,30 @@
   <title>Content Manager - Portfolio</title>
 </head>
 <body>
+  <div id="cms-status" style="font-family: system-ui, -apple-system, sans-serif; padding: 16px;">
+    Loading CMS…
+  </div>
   <!-- Decap CMS will auto-load config.yml in this folder -->
-  <script src="https://unpkg.com/decap-cms@^3.0.0/dist/decap-cms.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/decap-cms@3.0.0/dist/decap-cms.js"></script>
+  <script>
+    const statusEl = document.getElementById('cms-status');
+    const showStatus = (msg) => { if (statusEl) statusEl.textContent = msg; };
+
+    // Check config.yml availability to surface useful errors
+    fetch('./config.yml', { cache: 'no-store' })
+      .then((res) => {
+        if (!res.ok) throw new Error(`config.yml not found (${res.status})`);
+        return res.text();
+      })
+      .then(() => showStatus('CMS loaded. If you still see a blank screen, open DevTools → Console.'))
+      .catch((err) => showStatus(`CMS config error: ${err.message}`));
+
+    // If CMS doesn't load, show a friendly message
+    setTimeout(() => {
+      if (!window.CMS) {
+        showStatus('CMS failed to load. Check network blocker or CDN access, then hard refresh.');
+      }
+    }, 2000);
+  </script>
 </body>
 </html>
