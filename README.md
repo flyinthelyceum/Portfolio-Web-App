@@ -1,41 +1,48 @@
-# Art & Technology Student Portfolio Template
+# Art & Technology Student Portfolio System
 
-A minimal, beautiful portfolio template for showcasing student work in art and technology. Designed with an editorial "art book" aesthetic, typography-driven layout, and a completely code-free content management system via Decap CMS.
+A multi-tenant portfolio platform for art and technology students. Designed with an editorial "art book" aesthetic, this system hosts all student portfolios in a single application with individual authentication and public URLs.
+
+## Architecture
+
+**Multi-Tenant Design:**
+- Single web application hosts all student portfolios
+- Firebase backend for authentication, data storage, and image hosting
+- Students log in with email and see only their content
+- Public URLs: `yourapp.com/student/username`
+- Instructor dashboard: view all students at once
+
+**Why This Approach:**
+- Students never touch code, Git, or deployment infrastructure
+- Instructor sets up once, not 30 times
+- Interface feels like Padlet—just log in and post
+- Aligns with Charter Section 6.2 (no code editing) and Section 10 (never open VS Code)
 
 ## Features
 
-- **Editorial Design**: Clean, confident aesthetic inspired by xx.co restraint
+- **Editorial Design**: Clean, confident aesthetic inspired by art publications
 - **Typography-First**: Uses Fraunces (display) and Inter (body) from Google Fonts
 - **CSS Variables**: Fully customizable theme tokens for colors, spacing, and typography
-- **Decap CMS Integration**: Non-technical students can manage content at `/admin` without touching code
-- **Local Markdown Parser**: No CDN dependencies—everything runs locally
+- **Firebase Integration**: Real-time database, authentication, and file storage
+- **Web Interface**: Add content via + button (no CMS complexity)
 - **Responsive Design**: Beautiful on mobile, tablet, and desktop
 - **Two Content Types**: 
-  - **Logs**: Quick updates with compact cards and image galleries (3-up)
-  - **Projects**: Larger featured-image cards with deep dives and narratives
+  - **Logs**: Quick updates with compact cards and image galleries
+  - **Projects**: Featured-image cards with deep dives and artist statements
 - **Filtering**: Students can filter portfolio by All, Logs, or Projects
 - **Modal Views**: Click any post or project to read the full story
-- **Dark/Light Modes Ready**: CSS variables make theme switching trivial
+- **Instructor Dashboard**: Browse all student work, monitor frequency, export data
 
 ## Project Structure
 
 ```
-├── index.html              # Main portfolio page
+├── index.html              # Main portfolio viewer (public)
+├── dashboard.html          # Instructor dashboard
+├── editor.html             # Student content editor
 ├── styles.css              # All styling with CSS variables
-├── app.js                  # Markdown parser & app logic
-├── settings.json           # Configuration (student name, colors, links)
-├── admin/
-│   ├── index.html          # Decap CMS entry point
-│   └── config.yml          # CMS collection definitions
-├── posts/                  # Markdown files for logs and project posts
-│   ├── log-001.md
-│   ├── log-002.md
-│   └── ... (6 samples included)
-├── projects/               # Markdown files for project overviews
-│   ├── project-001.md
-│   ├── project-002.md
-│   └── ... (4 samples included)
-└── assets/uploads/         # Media storage for Decap CMS
+├── app.js                  # Portfolio display logic
+├── editor.js               # Content creation/editing interface
+├── firebase-config.js      # Firebase initialization
+└── assets/                 # Static assets
 ```
 
 ## Customization
@@ -90,106 +97,106 @@ In `styles.css`, modify `:root` variables:
 
 All typography, spacing, and color scales are controlled here. No need to touch component styles.
 
-## Content Management with Decap CMS (GitHub Pages)
+## Getting Started (Instructor)
 
-### Setup
+### 1. Firebase Setup
 
-1. **Deploy to GitHub Pages** (see below)
-2. **Create a GitHub OAuth App** (required for Decap CMS on GitHub Pages):
-   - Go to GitHub → Settings → Developer settings → OAuth Apps
-   - Click **New OAuth App**
-   - **Homepage URL:** your GitHub Pages site
-   - **Authorization callback URL:** `https://YOUR-USERNAME.github.io/YOUR-REPO/admin/`
-   - Copy the **Client ID**
-3. **Add the Client ID** to `admin/config.yml`:
-   - Set `app_id: YOUR_GITHUB_OAUTH_APP_ID`
-   - Set `repo: YOUR-USERNAME/YOUR-REPO`
-4. **Access CMS**:
-   - Visit `https://YOUR-USERNAME.github.io/YOUR-REPO/admin/`
-   - Log in with GitHub
+1. Go to [Firebase Console](https://console.firebase.google.com)
+2. Create a new project: **"Art Tech Portfolio"**
+3. Add a web app, copy the config object
+4. Enable **Authentication** → Email/Password provider
+5. Enable **Firestore Database** (start in test mode, we'll secure it)
+6. Enable **Storage** for image uploads
+7. Create `firebase-config.js` with your credentials
+
+### 2. Deploy Application
+
+**Option A: GitHub Pages**
+1. Push code to GitHub
+2. Settings → Pages → Deploy from main branch
+3. Site live at: `https://USERNAME.github.io/REPO/`
+
+**Option B: Netlify**
+1. Connect GitHub repo to Netlify
+2. Deploy (no build command needed)
+3. Site live at: `https://SITENAME.netlify.app`
+
+### 3. Add Students
+
+Two approaches:
+
+**A. Bulk Import (Recommended)**
+- Create CSV of student emails
+- Use Firebase Admin SDK to create accounts
+- Send students their login credentials
+
+**B. Self-Registration**
+- Enable email/password signup
+- Students create accounts with school email
+- Instructor approves via dashboard
+
+### 4. Student Access
+
+Students visit the deployed URL:
+1. Log in with school email
+2. Complete profile (name, bio, links)
+3. Click + button to add logs/projects
+4. View public portfolio at: `yourapp.com/student/username`
+
+## For Students
+
+### First-Time Setup
+
+1. Visit the portfolio site URL (provided by instructor)
+2. Log in with your school email and password
+3. Complete your profile:
+   - Display name
+   - Bio/artist statement
+   - Social links (optional)
+4. Customize theme colors (optional)
 
 ### Adding Content
 
-#### Posts (Logs & Projects)
+**Working Portfolio Logs** (frequent, process-focused):
+1. Click the **+ Log** button
+2. Add 1-3 images
+3. Write 2-3 sentences about what you're working on
+4. Add a "next step" note
+5. Click **Save**
 
-1. Go to `/admin` and click "Posts"
-2. Click "New Post"
-3. Fill in:
-   - **Title**: Post headline
-   - **Publish Date**: When it was created
-   - **Type**: "log" (quick update) or "project" (deep dive)
-   - **Tags**: Categories (comma-separated)
-   - **Summary**: Short excerpt (auto-generated from body if blank)
-   - **Featured Image**: Main hero image (optional)
-   - **Gallery Images**: Up to 3 images for logs (optional)
-   - **Project Number**: Links to project overviews (optional)
-   - **Body**: Full markdown content
+**Projects** (finished work with statements):
+1. Click the **+ Project** button
+2. Add a hero image
+3. Write project title
+4. Add artist statement (what, why, how)
+5. Add process images (optional)
+6. Click **Save**
 
-4. Click "Publish" when ready
+### Viewing Your Portfolio
 
-#### Projects
+Your public portfolio URL: `app-url.com/student/YOUR-USERNAME`
 
-1. Go to `/admin` and click "Projects"
-2. Click "New Project"
-3. Fill in:
-   - **Title**: Project name
-   - **Order**: 1-4 determines display order
-   - **Summary**: One-line description
-   - **Hero Image**: Project showcase image
-   - **Body**: Full markdown description
+Share this link with anyone—no login required to view.
 
-4. Click "Publish" when ready
+## For Instructors
 
-### Markdown Syntax
+### Dashboard Access
 
-The portfolio supports standard markdown:
+Visit `app-url.com/dashboard` and log in with instructor credentials.
 
-```markdown
-# Heading 1
-## Heading 2
-### Heading 3
+**Features:**
+- View all student portfolios in grid
+- Click any student to see their full work
+- Monitor posting frequency
+- Filter by date range, content type
+- Export student data at semester end
 
-**Bold text** or __bold__
-*Italic text* or _italic_
-`inline code`
+### Managing Students
 
-[Link text](https://example.com)
-![Alt text](image-url.jpg)
-
-- Bullet list
-- Item 2
-
-1. Numbered list
-2. Item 2
-
-> Blockquote
-
-```code block```
-```
-
-## Deployment on GitHub Pages
-
-1. **Push to GitHub** (if you haven't already).
-2. Go to your repository → **Settings** → **Pages**.
-3. **Source:** Deploy from a branch.
-4. **Branch:** `main` and **/ (root)**.
-5. Click **Save**. GitHub will publish your site at:
-   - `https://YOUR-USERNAME.github.io/YOUR-REPO/`
-
-### Custom Domain (Optional)
-
-1. In GitHub Pages settings, add your custom domain.
-2. Create a `CNAME` file with your domain name.
-3. Update DNS records at your registrar to point to GitHub Pages.
-4. GitHub will provision HTTPS automatically.
-
-## How to Edit Locally
-
-If you want to preview changes before publishing:
-
-1. **Edit Markdown Files**:
-   - Edit `.md` files in `/posts` and `/projects` folders
-   - Use any text editor
+- Add students individually or bulk import
+- Reset passwords if needed
+- Archive students after semester ends
+- View analytics (posts per student, engagement)
 
 2. **Edit Settings**:
    - Modify `settings.json` with your info and theme preferences
