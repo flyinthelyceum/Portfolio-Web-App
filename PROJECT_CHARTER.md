@@ -16,6 +16,10 @@ Its purpose is to help students:
 
 This project is **not** a personal portfolio for the instructor.
 
+### Long-Term Goal — Living Archive
+
+Over multiple semesters, the system becomes a **diversely deployable living archive** of student work. The same dataset can be curated into different public views (class showcases, admin updates, social media collections, alumni spotlights) without re-hosting or rebuilding from scratch.
+
 ---
 
 ## 2. Primary Users
