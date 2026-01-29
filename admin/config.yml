@@ -37,3 +37,26 @@ collections:
       - {label: "Summary", name: "summary", widget: "string"}
       - {label: "Hero Image", name: "hero_image", widget: "image", required: false}
       - {label: "Body", name: "body", widget: "markdown"}
+
+  - name: "settings"
+    label: "Settings"
+    files:
+      - label: "Site Settings"
+        name: "settings"
+        file: "settings.json"
+        fields:
+          - {label: "Student Name", name: "studentName", widget: "string"}
+          - {label: "Site Title", name: "siteTitle", widget: "string"}
+          - {label: "Bio", name: "bio", widget: "text"}
+          - {label: "Accent Color", name: "accentColor", widget: "string"}
+          - {label: "Font Pairing", name: "fontPairing", widget: "string"}
+          - {label: "Card Radius", name: "cardRadius", widget: "string"}
+          - {label: "Spacing", name: "spacing", widget: "select", options: ["comfortable", "tight", "generous"]}
+          - {label: "GitHub Repo (owner/name)", name: "githubRepo", widget: "string"}
+          - label: "Links"
+            name: "links"
+            widget: "object"
+            fields:
+              - {label: "Instagram", name: "Instagram", widget: "string", required: false}
+              - {label: "GitHub", name: "GitHub", widget: "string", required: false}
+              - {label: "Email", name: "Email", widget: "string", required: false}

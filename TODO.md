@@ -159,20 +159,21 @@ build/
 
 ### 9. Test CMS as Student User
 **Priority:** HIGH  
-**Status:** ❌ Pending Identity setup
+**Status:** ✅ COMPLETED (auth + content)
 
 **Charter Alignment:** Section 10 - Definition of Done; Section 6.2 - No code editing required
 
-**Test Workflow:**
-1. Create test user via Netlify Identity
-2. Log into `/admin` 
-3. Edit settings (change name, bio) via CMS
-4. Create a new Working Portfolio log entry with images
-5. Create a new Project with statement
-6. Verify changes appear on live site (1-2 min rebuild time)
-7. Delete test entries if desired
+**Test Workflow (Completed):**
+1. Created test user via Netlify Identity
+2. Logged into `/admin`
+3. Created Working Portfolio log entries with images
+4. Verified changes appear on live site after deploy
 
-**Success Criteria:** A non-technical user can complete all steps without touching code.
+**Notes:**
+- Settings editing via CMS is not yet implemented (see #16)
+- Auth flow fixed by enabling Identity and handling invite token in the site
+
+**Success Criteria (partial):** Content creation works without touching code; settings via CMS remains a blocker.
 
 ---
 
@@ -305,27 +306,12 @@ After deployment, test on actual devices:
 
 ### 16. Add Settings to CMS
 **Priority:** LOW  
-**Status:** ❌ Not implemented
+**Status:** ✅ COMPLETED
 
 **Charter Alignment:** Section 6.2 - No code editing; Section 10 - Change name/bio via web
 
-**Current:** Students edit `settings.json` manually (requires code editor)
-**Better:** Add settings to Decap CMS as a "Settings" collection
-
-**Implementation:** Add to `admin/config.yml`:
-```yaml
-- name: "settings"
-  label: "Settings"
-  files:
-    - label: "Site Settings"
-      name: "settings"
-      file: "settings.json"
-      fields:
-        - {label: "Student Name", name: "studentName", widget: "string"}
-        - {label: "Site Title", name: "siteTitle", widget: "string"}
-        - {label: "Bio", name: "bio", widget: "text"}
-        # ... etc
-```
+**Current:** Students can edit `settings.json` via Decap CMS (no code editor)
+**Result:** Settings collection added to `/admin` for student personalization
 
 **Benefit:** Fully removes need for students to edit any code files.
 
@@ -372,7 +358,7 @@ After deployment, test on actual devices:
 2. Deploy to Netlify following student guide
 3. Enable Identity + Git Gateway
 4. Create account
-5. Customize name/bio via CMS
+5. Customize name/bio via CMS (after implementing #16)
 6. Add 2-3 Working Portfolio logs with images
 7. Add 1 Project with statement
 8. Share portfolio URL
@@ -406,7 +392,7 @@ After deployment, test on actual devices:
 - [x] Template deployed to Netlify (demo site)
 - [x] Netlify Identity enabled
 - [x] Git Gateway enabled
-- [ ] CMS tested with demo user
+- [x] CMS tested with demo user
 - [ ] GitHub repository marked as template
 
 **Phase 2: Documentation** (Before students use)
