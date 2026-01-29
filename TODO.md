@@ -1,101 +1,86 @@
 # Portfolio Deployment TODO
 
-**Project Purpose:** Student-facing portfolio template for Art & Technology course
+**Project Purpose:** Multi-tenant portfolio platform for Art & Technology course
 **Canonical Reference:** See [PROJECT_CHARTER.md](PROJECT_CHARTER.md)
 **Last Updated:** January 29, 2026
 
-> **Important:** This is a template repository for students. Placeholders (names, bios, sample content) are intentional examples and should NOT be replaced with instructor information.
+This repository has pivoted to a single multi-tenant Firebase architecture. The full updated task list is maintained in:
 
----
+- [TODO-FIREBASE.md](TODO-FIREBASE.md)
 
-## 🚨 CRITICAL - Template Setup
-
-### 1. Create `.gitignore` File
-**Priority:** HIGH  
-**Status:** ✅ COMPLETED
-
-Create a `.gitignore` file to exclude unnecessary files from version control:
-
-```
-# OS Files
-.DS_Store
-.DS_Store?
-._*
-.Spotlight-V100
-.Trashes
-Thumbs.db
-
-# IDE
-.vscode/
-.idea/
-
-# Node modules (if added later)
-node_modules/
-
-# Environment files
-.env
-.env.local
-
-# Build outputs (if added later)
-dist/
-build/
-
+Use that file as the sole source of truth for the new build plan.
+const app = initializeApp(firebaseConfig);
+export const auth = getAuth(app);
+export const db = getFirestore(app);
+export const storage = getStorage(app);
 ```
 
-**Why:** Prevents committing system files and IDE settings to your repository.
+---
+
+### 5. Build Authentication System
+**Priority:** HIGH  
+**Status:** ❌ Not started
+
+**Charter Alignment:** Section 6.2 - No code editing, web interface only
+
+**Features:**
+- Login page with email/password
+- Password reset flow
+- Session persistence
+- Redirect to editor after login
 
 ---
 
-### 2. Initialize Git Repository & Make First Commit
+### 6. Build Content Editor Interface
 **Priority:** HIGH  
-**Status:** ✅ COMPLETED
+**Status:** ❌ Not started
 
-**Commit Details:**
-- Commit hash: `b1b2865`
-- Files committed: 21 files, 3838 insertions
-- Date: January 29, 2026
+**Charter Alignment:** Section 10 - Never open VS Code; Section 7 - Logs vs Projects
 
-✅ Initial commit completed successfully!
+**Features:**
+- + button to add log/project
+- Image upload with drag-drop
+- Rich text editor (simple markdown)
+- Save to Firestore
+- Real-time preview
 
 ---
 
-### 3. Create GitHub/GitLab Repository
+### 7. Build Public Portfolio Viewer
 **Priority:** HIGH  
-**Status:** ✅ COMPLETED
+**Status:** ❌ Not started
 
-**Repository Details:**
-- Owner: `flyinthelyceum`
-- Repo: `Portfolio-Web-App`
-- URL: https://github.com/flyinthelyceum/Portfolio-Web-App
-- Branch: `main`
-
-✅ Remote configured and initial commit pushed successfully!
-
-**Why:** GitHub Pages and Decap CMS require a Git repository.
+**Features:**
+- Route: `/student/username`
+- Fetch user's posts from Firestore
+- Display in existing card layout
+- Filter by logs/projects
+- Modal for full view
 
 ---
 
-### 4. Create Assets Directory
-**Priority:** HIGH  
-**Status:** ✅ COMPLETED
+### 8. Build Instructor Dashboard
+**Priority:** MEDIUM  
+**Status:** ❌ Not started
 
-**Charter Alignment:** Section 6.2 - Students must not edit code; Section 7 - Content model requires image uploads
+**Charter Alignment:** Section 9 - Browse all student work from one interface
 
-**Completion Details:**
-- Directory created: `assets/uploads/`
-- `.gitkeep` file added to track empty directory
-- Commit hash: `3bde2bd`
-- Pushed to GitHub: ✅
-
-**Why:** Decap CMS needs this directory to store student-uploaded images. Without it, image uploads will fail.
+**Features:**
+- Grid view of all students
+- Click student → see their portfolio
+- Filter by date, post count
+- Export data as JSON/CSV
 
 ---
 
-## 🚀 TEMPLATE DEPLOYMENT (GitHub Pages)
+## PHASE 3: Migration & Cleanup
 
-### 5. Deploy Template to GitHub Pages
-**Priority:** HIGH  
-**Status:** ❌ Pending migration
+### 9. Remove Old CMS Code
+**Priority:** MEDIUM  
+**Status:** ❌ Not started
+
+**Delete:**
+- `admin/` folder (Decap CMS)
 
 **Charter Alignment:** Section 4 - Static web application on static hosting; Section 10 - Student publishes shareable URL
 
