@@ -1,0 +1,14 @@
+{
+  "studentName": "Alex Rivera",
+  "siteTitle": "Alex Rivera | Art & Technology",
+  "bio": "Exploring the intersection of computational art and spatial design. Using code as a creative tool to reimagine how we experience visual narratives.",
+  "accentColor": "#d4461f",
+  "fontPairing": "fraunces-inter",
+  "cardRadius": "8px",
+  "spacing": "comfortable",
+  "links": {
+    "Instagram": "https://instagram.com",
+    "GitHub": "https://github.com",
+    "Email": "mailto:student@brophyprep.org"
+  }
+}
