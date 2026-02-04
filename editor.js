@@ -124,7 +124,8 @@ function setupEventListeners() {
   // Share portfolio
   document.getElementById('share-btn').addEventListener('click', () => {
     const urlParam = userProfile?.username || currentUser.uid;
-    const shareUrl = `${window.location.origin}${window.location.pathname}index.html?user=${urlParam}`;
+    // Use relative URL (same as View Portfolio)
+    const shareUrl = `${window.location.origin}${window.location.pathname.split('editor.html')[0]}index.html?user=${urlParam}`;
     
     // Copy to clipboard
     navigator.clipboard.writeText(shareUrl).then(() => {
