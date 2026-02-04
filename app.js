@@ -316,9 +316,15 @@ class PortfolioApp {
     // Navigation links
     document.querySelectorAll('.nav__link').forEach(link => {
       link.addEventListener('click', (e) => {
-        e.preventDefault();
-        this.switchSection(link.dataset.section);
-        if (nav) nav.classList.remove('nav--open');
+        // Only prevent default if this is an internal section link
+        if (link.dataset.section) {
+          e.preventDefault();
+          this.switchSection(link.dataset.section);
+          if (nav) nav.classList.remove('nav--open');
+        } else {
+          // Allow external links to work normally
+          if (nav) nav.classList.remove('nav--open');
+        }
       });
     });
 
