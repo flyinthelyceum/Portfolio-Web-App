@@ -10,10 +10,10 @@
 
 This repository has completed its pivot to a **single multi-tenant Firebase architecture**. 
 
-**Status: Phase 1-4 Complete ✅**
+**Status: Phase 1-5 Complete ✅**
 
 The original GitHub-based static site approach has been replaced with:
-- Firebase Authentication (email/password)
+- Firebase Authentication (email/password + Google SSO)
 - Firestore Database (multi-tenant with security rules)
 - Firebase Storage (image uploads)
 - Single web app serving all student portfolios via URL routing
@@ -22,26 +22,30 @@ The original GitHub-based static site approach has been replaced with:
 
 ## 📋 CURRENT STATE
 
-### ✅ Completed (Phases 1-4 + Profile Editor)
+### ✅ Completed (Phases 1-5 + Authentication & Profile Editor)
 - Firebase project created (portfolio-web-app-26)
-- Authentication, Firestore, and Storage configured
+- Authentication (email/password + Google SSO), Firestore, and Storage configured
 - Security rules deployed (public read, owner write, admin access)
 - firebase-config.js created with CDN imports (v12.8.0)
-- login.html built with brutalist design system
+- **Authentication UI complete**:
+  - login.html with email/password + Google SSO
+  - signup.html with email/password + Google SSO
+  - Password validation and reset functionality
 - editor.html + editor.js built for content creation (+ Log, + Project buttons)
 - index.html converted from GitHub API to Firestore queries
 - app.js converted to Firebase (getDoc, getDocs, where, orderBy)
 - Firestore composite index created (userId + createdAt)
-- UI redesigned for consistency (login/editor match index.html brutalist design)
+- UI redesigned for consistency (all pages match brutalist design system)
 - **Profile editor built** (profile.html + profile.js) with username support
 - **Cleaner URLs enabled** (?user=username lookup in addition to ?user=userId)
 - **Old code removed**: Deleted admin/, posts/, projects/ folders (GitHub Pages-era files)
 - **Bulk import script** (Node.js + Firebase Admin SDK) for onboarding 20+ students at once
+- **Three auth methods**: Email/password, Google SSO, or bulk import
 
-### ⚠️ Remaining Work (Phases 5-7)
+### ⚠️ Remaining Work (Phases 6-7)
 - Instructor dashboard (view all students from single interface)
 - Documentation updates (README, STUDENT_GUIDE, INSTRUCTOR_GUIDE)
-- Deploy to live hosting (Firebase Hosting or custom domain)
+- Deploy to production (Firebase Hosting or custom domain)
 - End-to-end testing with multiple students
 
 ---

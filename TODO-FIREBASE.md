@@ -94,10 +94,54 @@ service firebase.storage {
 
 **Features:**
 - ✅ Email/password login form with Firebase Auth
+- ✅ Google Sign-In button (OAuth popup)
 - ✅ Password reset link
 - ✅ Error messaging
 - ✅ Redirect to editor.html after successful login
+- ✅ Auto-creates Firestore profile on first Google login
 - ✅ Styled with CSS variables from styles.css (sharp borders, box shadows, uppercase labels)
+
+---
+
+### 5.5. Build signup.html (Email/Password Registration) ✅
+**Priority:** HIGH  
+**Status:** Complete - Commit 3d3e5d4
+
+**Features:**
+- ✅ Email input with validation
+- ✅ Password strength requirements (8+ chars, letters, numbers, symbols)
+- ✅ Confirm password field
+- ✅ Real-time password validation feedback
+- ✅ Google Sign-Up button (OAuth popup)
+- ✅ Creates Firebase Auth account
+- ✅ Creates Firestore profile with initial data
+- ✅ Auto-redirects to profile.html for username/bio/avatar setup
+- ✅ Link to login.html for existing users
+- ✅ Error handling (duplicate emails, weak passwords, popup closure)
+- ✅ Styled to match login.html design system
+
+---
+
+### 5.6. Add Google SSO to Both Pages ✅
+**Priority:** HIGH  
+**Status:** Complete - Commit 343a178
+
+**Implementation (login.html + signup.html):**
+- ✅ Google OAuth button with official logo SVG
+- ✅ Uses signInWithPopup with GoogleAuthProvider
+- ✅ First-time: Creates profile, redirects to profile.html
+- ✅ Returning: Skips to editor.html
+- ✅ Auto-imports user's Google profile picture (avatarUrl)
+- ✅ Divider styling ("Or" between email and Google)
+- ✅ Loading state during popup
+- ✅ Error handling with user-friendly messages
+
+**Advantages:**
+- Perfect for school Google accounts
+- Single-click login/signup
+- No password to remember
+- Profile picture auto-imported
+- Falls back to email/password if preferred
 
 ---
 
@@ -203,7 +247,6 @@ service firebase.storage {
 - v2 Plan/ folder (for future planning)
 
 ---
-
 ### 11. Migrate Sample Content to Firestore ⚠️
 **Priority:** LOW  
 **Status:** Not started
@@ -218,7 +261,7 @@ service firebase.storage {
 
 ---
 
-## PHASE 4: Student Management ✅ COMPLETE
+## PHASE 6: Student Management ✅ COMPLETE
 
 ### 12. Create Bulk Student Import Script ✅
 **Priority:** MEDIUM  
