@@ -127,7 +127,7 @@ function setupEventListeners() {
 
   // Edit profile
   document.getElementById('edit-profile-btn').addEventListener('click', () => {
-    alert('Profile editor coming soon!');
+    window.location.href = 'profile.html';
   });
 
   // Add log button

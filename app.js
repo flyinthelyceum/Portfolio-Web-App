@@ -84,16 +84,24 @@ class PortfolioApp {
     console.log('🔥 FIREBASE BUILD v10', buildTime);
     console.log('Timestamp:', new Date().toISOString());
     
-    // Get user ID from URL parameter
+    // Get user from URL parameter (supports both userId and username)
     const urlParams = new URLSearchParams(window.location.search);
-    this.userId = urlParams.get('user');
+    const userParam = urlParams.get('user');
     
-    if (!this.userId) {
-      this.showError('No user specified. Add ?user=USER_ID to the URL.');
+    if (!userParam) {
+      this.showError('No user specified. Add ?user=username to the URL.');
       return;
     }
     
-    console.log('Loading portfolio for user:', this.userId);
+    console.log('Loading portfolio for:', userParam);
+    
+    // Try to resolve username to userId
+    await this.resolveUser(userParam);
+    
+    if (!this.userId) {
+      this.showError('User not found');
+      return;
+    }
     
     await this.loadUserProfile();
     await this.loadPosts();
@@ -101,6 +109,37 @@ class PortfolioApp {
     this.renderTicker();
     this.renderPortfolio();
     this.updatePageTitle();
+  }
+
+  async resolveUser(userParam) {
+    try {
+      // First try as a direct userId
+      const userDoc = await getDoc(doc(db, 'users', userParam));
+      
+      if (userDoc.exists()) {
+        this.userId = userParam;
+        console.log('Found user by userId:', this.userId);
+        return;
+      }
+      
+      // If not found, try as username
+      const q = query(
+        collection(db, 'users'),
+        where('username', '==', userParam)
+      );
+      
+      const querySnapshot = await getDocs(q);
+      
+      if (!querySnapshot.empty) {
+        this.userId = querySnapshot.docs[0].id;
+        console.log('Found user by username:', userParam, '→ userId:', this.userId);
+      } else {
+        console.error('User not found:', userParam);
+      }
+      
+    } catch (error) {
+      console.error('Error resolving user:', error);
+    }
   }
 
 
