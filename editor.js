@@ -119,10 +119,31 @@ function setupEventListeners() {
     await signOut(auth);
   });
 
+  // Share portfolio
+  document.getElementById('share-btn').addEventListener('click', () => {
+    const urlParam = userProfile?.username || currentUser.uid;
+    const shareUrl = `${window.location.origin}${window.location.pathname}index.html?user=${urlParam}`;
+    
+    // Copy to clipboard
+    navigator.clipboard.writeText(shareUrl).then(() => {
+      const btn = document.getElementById('share-btn');
+      const originalText = btn.textContent;
+      btn.textContent = 'Copied!';
+      btn.style.opacity = '0.7';
+      
+      setTimeout(() => {
+        btn.textContent = originalText;
+        btn.style.opacity = '1';
+      }, 2000);
+    }).catch(err => {
+      alert('Portfolio URL:\n\n' + shareUrl);
+    });
+  });
+
   // View portfolio
   document.getElementById('view-portfolio-btn').addEventListener('click', () => {
-    // TODO: Implement username lookup
-    window.open('index.html?user=' + currentUser.uid, '_blank');
+    const urlParam = userProfile?.username || currentUser.uid;
+    window.open('index.html?user=' + urlParam, '_blank');
   });
 
   // Edit profile

@@ -401,9 +401,9 @@ class PortfolioApp {
       feed.appendChild(card);
     });
     
-    // Add empty slot plates if posts < 5
-    if (filtered.length < 5 && filtered.length > 0) {
-      this.injectEmptySlots(feed, filtered.length);
+    // Add empty slot plates ONLY if NO posts at all
+    if (filtered.length === 0) {
+      this.injectEmptySlots(feed);
     }
   }
 
@@ -425,22 +425,18 @@ class PortfolioApp {
     feedMeta.textContent = `Showing ${count} ${plural} · Latest: ${latestDate}`;
   }
 
-  injectEmptySlots(feed, postCount) {
-    // Inject 2-3 empty slot plates when posts < 5
+  injectEmptySlots(feed) {
+    // Only show empty slots when portfolio is completely empty
     const slotMessages = [
       { label: 'EMPTY SLOT', message: 'Post something small' },
       { label: 'UNRECORDED DAY', message: 'Add a log' },
       { label: 'ABSENCE IS ALSO INFORMATION', message: '' }
     ];
     
-    const slotsToAdd = Math.min(3, 5 - postCount);
-    const existingCards = Array.from(feed.children);
-    
-    for (let i = 0; i < slotsToAdd; i++) {
+    // Show all 3 empty slots since portfolio is empty
+    slotMessages.forEach((msg) => {
       const slot = document.createElement('div');
       slot.className = 'empty-slot';
-      
-      const msg = slotMessages[i % slotMessages.length];
       
       const label = document.createElement('div');
       label.className = 'empty-slot__label';
@@ -454,14 +450,8 @@ class PortfolioApp {
         slot.appendChild(message);
       }
       
-      // Interleave: insert after every 2nd card, or append if not enough cards
-      const insertIndex = Math.min((i + 1) * 2, existingCards.length);
-      if (insertIndex < existingCards.length) {
-        feed.insertBefore(slot, existingCards[insertIndex]);
-      } else {
-        feed.appendChild(slot);
-      }
-    }
+      feed.appendChild(slot);
+    });
   }
 
   renderGhostCollage(feed) {
@@ -542,12 +532,12 @@ class PortfolioApp {
       card.appendChild(titleEl);
 
       // Create 3-up or 2-up image gallery
-      if (post.gallery_images && post.gallery_images.length > 0) {
+      if (post.images && post.images.length > 0) {
         const imagesContainer = document.createElement('div');
         imagesContainer.className = 'card__images';
 
-        const imageCount = Math.min(post.gallery_images.length, 3);
-        post.gallery_images.slice(0, imageCount).forEach(imgUrl => {
+        const imageCount = Math.min(post.images.length, 3);
+        post.images.slice(0, imageCount).forEach(imgUrl => {
           const img = document.createElement('img');
           img.className = 'card__image';
           img.src = imgUrl;
@@ -650,10 +640,10 @@ class PortfolioApp {
       const card = document.createElement('div');
       card.className = 'project-card';
 
-      if (project.hero_image) {
+      if (project.images && project.images.length > 0) {
         const img = document.createElement('img');
         img.className = 'project-card__image';
-        img.src = project.hero_image;
+        img.src = project.images[0];
         img.alt = project.title;
         card.appendChild(img);
       }
