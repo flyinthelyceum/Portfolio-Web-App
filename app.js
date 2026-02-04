@@ -89,7 +89,7 @@ class PortfolioApp {
     const userParam = urlParams.get('user');
     
     if (!userParam) {
-      this.showError('No user specified. Add ?user=username to the URL.');
+      this.showLandingPage();
       return;
     }
     
@@ -109,6 +109,35 @@ class PortfolioApp {
     this.renderTicker();
     this.renderPortfolio();
     this.updatePageTitle();
+  }
+
+  showLandingPage() {
+    // Always setup event listeners for menu
+    this.setupEventListeners();
+    
+    // Hide portfolio sections and show welcome message
+    const sections = document.querySelectorAll('.section');
+    sections.forEach(section => section.style.display = 'none');
+    
+    const portfolioFeed = document.getElementById('portfolio-feed');
+    if (portfolioFeed) {
+      portfolioFeed.innerHTML = `
+        <div style="text-align: center; padding: 6rem 2rem;">
+          <div style="font-size: 4rem; margin-bottom: 2rem;">🎨</div>
+          <h1 style="font-family: var(--font-display); font-size: 2.5rem; font-weight: 600; margin-bottom: 1rem; letter-spacing: -0.02em;">Art & Technology Portfolio</h1>
+          <p style="font-size: 1.125rem; color: var(--color-text-light); margin-bottom: 2rem; max-width: 600px; margin-left: auto; margin-right: auto;">
+            A platform for documenting your creative process. Add logs, projects, and share your work with a shareable link.
+          </p>
+          <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+            <a href="login.html" style="padding: 0.75rem 1.5rem; background: var(--color-accent); color: white; text-decoration: none; border: var(--border-medium) solid var(--color-accent); font-weight: 600; text-transform: uppercase; font-size: 0.875rem; letter-spacing: 0.05em;">Sign In</a>
+            <a href="login.html" style="padding: 0.75rem 1.5rem; background: var(--color-bg); color: var(--color-text); text-decoration: none; border: var(--border-medium) solid var(--color-text); font-weight: 600; text-transform: uppercase; font-size: 0.875rem; letter-spacing: 0.05em;">Create Account</a>
+          </div>
+          <p style="margin-top: 3rem; font-size: 0.875rem; color: var(--color-text-muted);">
+            Example portfolio: <a href="?user=Cpvy9X9rdMQrqEuefszUcuJ9Z852" style="color: var(--color-accent); text-decoration: underline;">View Sample</a>
+          </p>
+        </div>
+      `;
+    }
   }
 
   async resolveUser(userParam) {
