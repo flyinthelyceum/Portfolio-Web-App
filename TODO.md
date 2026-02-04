@@ -2,7 +2,7 @@
 
 **Project Purpose:** Multi-tenant portfolio platform for Art & Technology course
 **Canonical Reference:** See [PROJECT_CHARTER.md](PROJECT_CHARTER.md)
-**Last Updated:** February 3, 2026
+**Last Updated:** February 4, 2026
 
 ---
 
@@ -22,7 +22,7 @@ The original GitHub-based static site approach has been replaced with:
 
 ## 📋 CURRENT STATE
 
-### ✅ Completed (Phases 1-2)
+### ✅ Completed (Phases 1-2 + Profile Editor)
 - Firebase project created (portfolio-web-app-26)
 - Authentication, Firestore, and Storage configured
 - Security rules deployed (public read, owner write, admin access)
@@ -33,9 +33,10 @@ The original GitHub-based static site approach has been replaced with:
 - app.js converted to Firebase (getDoc, getDocs, where, orderBy)
 - Firestore composite index created (userId + createdAt)
 - UI redesigned for consistency (login/editor match index.html brutalist design)
+- **Profile editor built** (profile.html + profile.js) with username support
+- **Cleaner URLs enabled** (?user=username lookup in addition to ?user=userId)
 
 ### ⚠️ Remaining Work (Phases 3-7)
-- Profile editor UI (Edit Profile button is placeholder)
 - Instructor dashboard (view all students from single interface)
 - Bulk student import script (Node.js + Admin SDK)
 - Documentation updates (README, STUDENT_GUIDE, INSTRUCTOR_GUIDE)
@@ -62,20 +63,20 @@ That file contains the complete roadmap with:
 
 ## 🎯 NEXT PRIORITIES
 
-**Option A: Deploy to Production**
-- Get a live URL to test with real shareable links
+**Option A: Deploy to Production** ⭐ Recommended
+- Get a live URL to test with real shareable links (e.g., ?user=alexrivera)
 - Validate Firebase works in production environment
 - Share with test students for feedback
 
-**Option B: Build Profile Editor**
-- Enable students to set displayName, username, bio, avatar
-- Implement cleaner URLs (/?user=username instead of /?user=uid)
-- Complete the "Edit Profile" button functionality
-
-**Option C: Build Instructor Dashboard**
+**Option B: Build Instructor Dashboard**
 - View all student portfolios from single interface
 - Export data for assessment
 - Add/remove students
+
+**Option C: Bulk Student Import Script**
+- Create Node.js script for CSV import
+- Auto-generate student credentials
+- Email delivery template
 
 ---
 

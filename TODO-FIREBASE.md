@@ -3,7 +3,7 @@
 **Project Purpose:** Multi-tenant portfolio platform for Art & Technology course
 **Canonical Reference:** See [PROJECT_CHARTER.md](PROJECT_CHARTER.md)
 **Architecture:** Single Firebase app hosting all student portfolios
-**Last Updated:** February 3, 2026
+**Last Updated:** February 4, 2026
 
 ---
 
@@ -291,20 +291,32 @@ Questions? See the student guide or ask in class.
 
 ---
 
-## PHASE 5: Profile Editor
+## PHASE 5: Profile Editor ✅ COMPLETE
 
-### 14. Build Profile Editor UI ⚠️
+### 14. Build Profile Editor UI ✅
 **Priority:** HIGH  
-**Status:** Not started - Edit Profile button shows placeholder alert
+**Status:** Complete - Functional profile editor built
 
-**Features needed:**
-- Modal or separate page for profile editing
-- Fields: displayName, username (for cleaner URLs), bio, avatar upload
-- Save to Firestore /users/{uid}
-- Update Firebase Auth displayName
-- Validate username uniqueness
+**Features:**
+- ✅ Separate profile.html page with brutalist design
+- ✅ Fields: displayName, username, bio, avatar upload
+- ✅ Save to Firestore /users/{uid}
+- ✅ Update Firebase Auth displayName and photoURL
+- ✅ Username uniqueness validation (prevents duplicates)
+- ✅ Avatar upload to Storage with 2MB limit
+- ✅ Username generation suggestion from email
+- ✅ Auto-redirect to editor after save
 
-**Impact:** Enables cleaner URLs like `/?user=alexrivera` instead of `/?user=abc123uid`
+**Implementation:**
+- profile.html: Form UI matching editor/login design system
+- profile.js: Full CRUD logic with validation
+- editor.js: Edit Profile button now navigates to profile.html
+- app.js: Support for username lookup (?user=username) in addition to ?user=userId
+
+**Impact:** 
+- ✅ Enables cleaner URLs: `/?user=alexrivera` instead of `/?user=abc123uid`
+- ✅ Students can now set their display information
+- ✅ Complete student onboarding workflow
 
 ---
 
@@ -420,7 +432,7 @@ Questions? See the student guide or ask in class.
 - [x] editor.js with full CRUD operations
 - [x] index.html (portfolio viewer) converted to Firebase
 - [x] app.js converted to Firebase queries
-- [ ] Profile editor UI built
+- [x] Profile editor (profile.html + profile.js) built with username support
 - [ ] dashboard.html (instructor) built
 - [ ] Old CMS code removed
 
@@ -450,7 +462,6 @@ Questions? See the student guide or ask in class.
 
 | Task | Time |
 |------|------|
-| Profile editor UI | 2 hours |
 | Instructor dashboard | 3 hours |
 | Remove old code | 30 min |
 | Bulk import script | 1 hour |
