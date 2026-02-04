@@ -1,0 +1,19 @@
+{
+  "name": "portfolio-scripts",
+  "version": "1.0.0",
+  "description": "Student management scripts for Portfolio Web App",
+  "main": "import-students.js",
+  "scripts": {
+    "import": "node import-students.js"
+  },
+  "keywords": [
+    "firebase",
+    "student",
+    "portfolio"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "firebase-admin": "^12.0.0"
+  }
+}

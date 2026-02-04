@@ -1,0 +1,12 @@
+# Firebase Admin SDK credentials (NEVER COMMIT)
+serviceAccountKey.json
+
+# Node modules
+node_modules/
+package-lock.json
+
+# Generated files
+credentials-email.html
+
+# OS
+.DS_Store
