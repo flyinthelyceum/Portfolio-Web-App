@@ -10,7 +10,7 @@
 
 This repository has completed its pivot to a **single multi-tenant Firebase architecture**. 
 
-**Status: Phase 1-3 Complete ✅**
+**Status: Phase 1-4 Complete ✅**
 
 The original GitHub-based static site approach has been replaced with:
 - Firebase Authentication (email/password)
@@ -22,7 +22,7 @@ The original GitHub-based static site approach has been replaced with:
 
 ## 📋 CURRENT STATE
 
-### ✅ Completed (Phases 1-3 + Profile Editor)
+### ✅ Completed (Phases 1-4 + Profile Editor)
 - Firebase project created (portfolio-web-app-26)
 - Authentication, Firestore, and Storage configured
 - Security rules deployed (public read, owner write, admin access)
@@ -36,10 +36,10 @@ The original GitHub-based static site approach has been replaced with:
 - **Profile editor built** (profile.html + profile.js) with username support
 - **Cleaner URLs enabled** (?user=username lookup in addition to ?user=userId)
 - **Old code removed**: Deleted admin/, posts/, projects/ folders (GitHub Pages-era files)
+- **Bulk import script** (Node.js + Firebase Admin SDK) for onboarding 20+ students at once
 
-### ⚠️ Remaining Work (Phases 4-7)
+### ⚠️ Remaining Work (Phases 5-7)
 - Instructor dashboard (view all students from single interface)
-- Bulk student import script (Node.js + Admin SDK)
 - Documentation updates (README, STUDENT_GUIDE, INSTRUCTOR_GUIDE)
 - Deploy to live hosting (Firebase Hosting or custom domain)
 - End-to-end testing with multiple students
