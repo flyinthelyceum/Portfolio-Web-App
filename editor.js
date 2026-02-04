@@ -25,6 +25,7 @@ import {
 
 // Global state
 let currentUser = null;
+let userProfile = null;
 let currentFilter = 'all';
 let posts = [];
 let selectedLogImages = [];
@@ -48,9 +49,10 @@ async function loadUserProfile() {
   const userDoc = await getDoc(doc(db, 'users', currentUser.uid));
   
   if (userDoc.exists()) {
-    const userData = userDoc.data();
-    document.getElementById('user-display').textContent = userData.displayName || currentUser.email;
+    userProfile = userDoc.data();
+    document.getElementById('user-display').textContent = userProfile.displayName || currentUser.email;
   } else {
+    userProfile = { displayName: currentUser.email };
     document.getElementById('user-display').textContent = currentUser.email;
   }
 }
