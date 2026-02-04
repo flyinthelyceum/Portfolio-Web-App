@@ -1,4 +1,19 @@
 /* ============================================
+   Portfolio App - Firebase Version
+   ============================================ */
+
+import { db } from './firebase-config.js';
+import {
+  collection,
+  doc,
+  getDoc,
+  query,
+  where,
+  orderBy,
+  getDocs
+} from 'https://www.gstatic.com/firebasejs/12.8.0/firebase-firestore.js';
+
+/* ============================================
    Minimal Markdown Parser
    ============================================ */
 class MarkdownParser {
@@ -18,6 +33,7 @@ class MarkdownParser {
   }
 
   parse(markdown) {
+    if (!markdown) return '';
     let html = markdown;
 
     // Apply inline rules
@@ -56,11 +72,8 @@ class PortfolioApp {
     this.posts = [];
     this.projects = [];
     this.currentFilter = 'all';
-    this.settings = {};
-    
-    // GitHub repo info - auto-detected or from settings
-    this.repoOwner = null;
-    this.repoName = null;
+    this.userProfile = null;
+    this.userId = null;
 
     this.init();
   }
@@ -68,51 +81,117 @@ class PortfolioApp {
   async init() {
     // PROOF OF LIFE
     const buildTime = new Date().toLocaleString();
-    console.log('🟠 BUILD v9 - CLEAN STACK FIX', buildTime);
+    console.log('🔥 FIREBASE BUILD v10', buildTime);
     console.log('Timestamp:', new Date().toISOString());
     
-    // Update build badge timestamp
-    const timestampEl = document.getElementById('build-timestamp');
-    if (timestampEl) {
-      timestampEl.textContent = buildTime;
+    // Get user ID from URL parameter
+    const urlParams = new URLSearchParams(window.location.search);
+    this.userId = urlParams.get('user');
+    
+    if (!this.userId) {
+      this.showError('No user specified. Add ?user=USER_ID to the URL.');
+      return;
     }
     
-    await this.loadSettings();
-    await this.loadContent();
+    console.log('Loading portfolio for user:', this.userId);
+    
+    await this.loadUserProfile();
+    await this.loadPosts();
     this.setupEventListeners();
     this.renderTicker();
     this.renderPortfolio();
     this.updatePageTitle();
-    this.renderBuildStamp();
   }
 
-  // Render build timestamp in footer for cache debugging
-  renderBuildStamp() {
-    const buildStampEl = document.getElementById('build-stamp');
-    if (buildStampEl) {
-      const now = new Date();
-      const timestamp = now.toISOString().replace('T', ' ').substring(0, 19);
-      buildStampEl.textContent = `Build: ${timestamp} UTC`;
+
+  showError(message) {
+    const portfolioFeed = document.getElementById('portfolio-feed');
+    if (portfolioFeed) {
+      portfolioFeed.innerHTML = `
+        <div style="text-align: center; padding: 4rem 2rem; color: #999;">
+          <div style="font-size: 3rem; margin-bottom: 1rem;">⚠️</div>
+          <div style="font-size: 1.125rem;">${message}</div>
+        </div>
+      `;
     }
   }
+
+  async loadUserProfile() {
+    try {
+      const userDoc = await getDoc(doc(db, 'users', this.userId));
+      
+      if (!userDoc.exists()) {
+        this.showError('User not found');
+        return;
+      }
+
+      this.userProfile = userDoc.data();
+      console.log('Loaded user profile:', this.userProfile);
+      
+      // Update UI with user info
+      const displayName = this.userProfile.displayName || this.userProfile.email || 'Portfolio';
+      const bio = this.userProfile.bio || 'Exploring art and technology';
+      
+      document.getElementById('hero-name').textContent = displayName;
+      document.getElementById('hero-bio').textContent = bio;
+      document.getElementById('footer-name').textContent = displayName;
+      document.getElementById('page-title').textContent = `${displayName} — Portfolio`;
+      
+    } catch (error) {
+      console.error('Error loading user profile:', error);
+      this.showError('Error loading profile');
+    }
+  }
+
+  async loadPosts() {
+    try {
+      const q = query(
+        collection(db, 'posts'),
+        where('userId', '==', this.userId),
+        orderBy('createdAt', 'desc')
+      );
+
+      const querySnapshot = await getDocs(q);
+      const allPosts = querySnapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      }));
+
+      console.log(`Loaded ${allPosts.length} posts`);
+
+      // Separate logs and projects
+      this.posts = allPosts.filter(p => p.type === 'log');
+      this.projects = allPosts.filter(p => p.type === 'project');
+
+    } catch (error) {
+      console.error('Error loading posts:', error);
+      this.showError('Error loading posts');
+    }
+  }
+
 
   renderTicker() {
     const tickerContent = document.getElementById('ticker-content');
     const tickerClone = document.getElementById('ticker-content-clone');
     
+    if (!tickerContent || !tickerClone) return;
+    
     let phrases = [];
     let tickerDuration = 60; // Default 60s
     
-    if (this.posts.length > 0) {
+    const allPosts = [...this.posts, ...this.projects];
+    
+    if (allPosts.length > 0) {
       // Compute days since last update
-      const latestPost = this.posts[0];
-      const daysSinceUpdate = Math.floor((Date.now() - new Date(latestPost.date)) / (1000 * 60 * 60 * 24));
+      const latestPost = allPosts[0];
+      const postDate = latestPost.createdAt?.toDate ? latestPost.createdAt.toDate() : new Date(latestPost.date || Date.now());
+      const daysSinceUpdate = Math.floor((Date.now() - postDate.getTime()) / (1000 * 60 * 60 * 24));
       
       // Generate ticker from latest 6 posts
-      const recentPosts = this.posts.slice(0, 6);
+      const recentPosts = allPosts.slice(0, 6);
       phrases = recentPosts.map(post => {
         const type = post.type === 'log' ? 'LOG' : 'PROJECT';
-        const titleUpper = post.title.toUpperCase();
+        const titleUpper = (post.title || 'UNTITLED').toUpperCase();
         return `${type} · ${titleUpper}`;
       });
       
@@ -125,26 +204,10 @@ class PortfolioApp {
         phrases.unshift(`LAST UPDATE · ${daysSinceUpdate} DAYS AGO`);
       }
       
-      // Adjust speed based on posting frequency (recent posts = faster)
-      const recentPostCount = this.posts.filter(p => {
-        const days = Math.floor((Date.now() - new Date(p.date)) / (1000 * 60 * 60 * 24));
-        return days <= 30;
-      }).length;
-      
-      if (recentPostCount >= 10) {
-        tickerDuration = 45; // Faster
-      } else if (recentPostCount >= 5) {
-        tickerDuration = 55;
-      } else if (recentPostCount === 0) {
-        tickerDuration = 90; // Noticeably slower
-      } else {
-        tickerDuration = 70;
-      }
+      tickerDuration = allPosts.length >= 10 ? 45 : 60;
     } else {
-      // Default studio phrases with IBM quote
+      // Default studio phrases
       phrases = [
-        'A COMPUTER CAN NEVER BE HELD ACCOUNTABLE',
-        'THEREFORE A COMPUTER MUST NEVER MAKE A MANAGEMENT DECISION',
         'DOCUMENT EVERYTHING',
         'FAILURE IS DATA',
         'REVISION IS THE WORK',
@@ -152,7 +215,7 @@ class PortfolioApp {
         'PROCESS OVER PRODUCT',
         'CONSTRAINT BREEDS CREATIVITY'
       ];
-      tickerDuration = 75; // Slower for empty state
+      tickerDuration = 75;
     }
     
     // Set dynamic ticker speed
@@ -161,169 +224,6 @@ class PortfolioApp {
     const tickerText = phrases.join(' · ');
     tickerContent.textContent = tickerText + ' · ';
     tickerClone.textContent = tickerText + ' · ';
-  }
-
-  async loadSettings() {
-    try {
-      const response = await fetch('settings.json');
-      this.settings = await response.json();
-      this.applySettings();
-    } catch (error) {
-      console.log('Using default settings');
-      this.settings = {
-        studentName: 'Your Name',
-        siteTitle: 'Portfolio',
-        bio: 'A studio exploring the intersection of art and technology',
-        accentColor: '#d4461f',
-        fontPairing: 'fraunces-inter',
-        cardRadius: '8px',
-        spacing: 'comfortable'
-      };
-    }
-  }
-
-  applySettings() {
-    document.documentElement.style.setProperty('--color-accent', this.settings.accentColor);
-    if (this.settings.cardRadius) {
-      document.documentElement.style.setProperty('--radius-lg', this.settings.cardRadius);
-    }
-
-    document.getElementById('hero-name').textContent = this.settings.studentName;
-    document.getElementById('hero-bio').textContent = this.settings.bio;
-    document.getElementById('footer-name').textContent = this.settings.studentName;
-    document.getElementById('page-title').textContent = this.settings.siteTitle;
-    
-    // Parse GitHub repo from settings for auto-discovery
-    if (this.settings.githubRepo) {
-      const [owner, name] = this.settings.githubRepo.split('/');
-      this.repoOwner = owner;
-      this.repoName = name;
-    }
-  }
-
-  async loadContent() {
-    // Simulating loading posts and projects from markdown files
-    // In a real setup with Decap CMS, these would come from the /posts and /projects directories
-    this.posts = await this.fetchMarkdownFiles('posts');
-    this.projects = await this.fetchMarkdownFiles('projects');
-
-    // Sort posts by date (reverse chronological)
-    this.posts.sort((a, b) => new Date(b.date) - new Date(a.date));
-
-    // Sort projects by order
-    this.projects.sort((a, b) => (a.order || 999) - (b.order || 999));
-  }
-
-  async fetchMarkdownFiles(directory) {
-    const files = [];
-    let usedGitHubApi = false;
-
-    // Attempt GitHub API auto-discovery first (no manifest needed)
-    try {
-      if (!this.repoOwner || !this.repoName) {
-        throw new Error('GitHub repo not configured in settings.json');
-      }
-
-      const apiUrl = `https://api.github.com/repos/${this.repoOwner}/${this.repoName}/contents/${directory}`;
-      const response = await fetch(apiUrl);
-
-      if (!response.ok) {
-        throw new Error(`GitHub API error: ${response.status}`);
-      }
-
-      const items = await response.json();
-
-      if (!Array.isArray(items)) {
-        throw new Error('GitHub API response not an array (rate limit or error)');
-      }
-
-      // Filter for .md files only
-      const markdownFiles = items.filter(item =>
-        item.type === 'file' && item.name.endsWith('.md')
-      );
-
-      // Fetch content of each markdown file
-      for (const file of markdownFiles) {
-        try {
-          const fileResponse = await fetch(file.download_url);
-          const content = await fileResponse.text();
-          const metadata = this.parseMarkdownMetadata(content);
-          files.push(metadata);
-        } catch (error) {
-          console.log(`Could not load ${file.name}:`, error);
-        }
-      }
-
-      usedGitHubApi = true;
-    } catch (error) {
-      console.log(`GitHub API unavailable for ${directory}:`, error);
-    }
-
-    // Fallback to local manifest if GitHub API fails
-    if (!usedGitHubApi || files.length === 0) {
-      try {
-        const response = await fetch(`${directory}/manifest.json`);
-        const manifest = await response.json();
-
-        for (const file of manifest.files) {
-          const fileResponse = await fetch(`${directory}/${file}`);
-          const content = await fileResponse.text();
-          const metadata = this.parseMarkdownMetadata(content);
-          files.push(metadata);
-        }
-      } catch (error) {
-        console.log(`Could not load ${directory} from manifest fallback:`, error);
-      }
-    }
-
-    return files;
-  }
-
-  parseMarkdownMetadata(markdown) {
-    const lines = markdown.split('\n');
-    const metadata = {
-      title: '',
-      date: new Date().toISOString().split('T')[0],
-      type: 'log',
-      tags: [],
-      featured_image: '',
-      gallery_images: [],
-      project: [],
-      body: markdown,
-      summary: '',
-      order: 999,
-      next_step: ''
-    };
-
-    let frontmatterEnd = 0;
-    if (lines[0] === '---') {
-      for (let i = 1; i < lines.length; i++) {
-        if (lines[i] === '---') {
-          frontmatterEnd = i;
-          break;
-        }
-        const [key, ...valueParts] = lines[i].split(':');
-        const value = valueParts.join(':').trim();
-
-        if (key === 'title') metadata.title = value.replace(/['"]/g, '');
-        if (key === 'date') metadata.date = value;
-        if (key === 'type') metadata.type = value;
-        if (key === 'tags') metadata.tags = value.replace(/[\[\]]/g, '').split(',').map(t => t.trim());
-        if (key === 'featured_image') metadata.featured_image = value.replace(/['"]/g, '');
-        if (key === 'summary') metadata.summary = value.replace(/['"]/g, '');
-        if (key === 'order') metadata.order = parseInt(value);
-        if (key === 'next_step') metadata.next_step = value.replace(/['"]/g, '');
-      }
-      metadata.body = lines.slice(frontmatterEnd + 1).join('\n').trim();
-    }
-
-    // Extract first few lines as summary if not provided
-    if (!metadata.summary) {
-      const bodyLines = metadata.body.split('\n').filter(l => l.trim().length > 0);
-      metadata.summary = bodyLines[0]?.substring(0, 150) || '';
-    }
-
-    return metadata;
   }
 
   setupEventListeners() {
@@ -350,7 +250,7 @@ class PortfolioApp {
       link.addEventListener('click', (e) => {
         e.preventDefault();
         this.switchSection(link.dataset.section);
-        nav.classList.remove('nav--open');
+        if (nav) nav.classList.remove('nav--open');
       });
     });
 
@@ -366,17 +266,23 @@ class PortfolioApp {
 
     // Modal close
     const modal = document.getElementById('modal');
-    document.querySelector('.modal__close').addEventListener('click', () => {
-      modal.classList.remove('modal--active');
-      document.body.style.overflow = 'auto';
-    });
-
-    modal.addEventListener('click', (e) => {
-      if (e.target === modal) {
+    const closeBtn = document.querySelector('.modal__close');
+    
+    if (closeBtn) {
+      closeBtn.addEventListener('click', () => {
         modal.classList.remove('modal--active');
         document.body.style.overflow = 'auto';
-      }
-    });
+      });
+    }
+
+    if (modal) {
+      modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+          modal.classList.remove('modal--active');
+          document.body.style.overflow = 'auto';
+        }
+      });
+    }
   }
 
   switchSection(sectionName) {
@@ -419,6 +325,8 @@ class PortfolioApp {
 
   renderPortfolio() {
     const feed = document.getElementById('portfolio-feed');
+    if (!feed) return;
+    
     feed.innerHTML = '';
 
     const filtered = this.posts.filter(post => {
@@ -734,56 +642,21 @@ class PortfolioApp {
     });
   }
 
-  openProjectModal(project) {
-    const modal = document.getElementById('modal');
-    const article = document.getElementById('modal-article');
-
-    let html = `<h1 class="modal__title">${project.title}</h1>`;
-
-    if (project.hero_image) {
-      html += `<img src="${project.hero_image}" alt="${project.title}" class="modal__hero-image" />`;
-    }
-
-    html += `<div class="modal__body">${this.parser.parse(project.body)}</div>`;
-
-    article.innerHTML = html;
-    modal.classList.add('modal--active');
-    document.body.style.overflow = 'hidden';
-  }
-
   renderAbout() {
     const aboutContent = document.getElementById('about-content');
-    aboutContent.innerHTML = '';
-
-    const bio = document.createElement('p');
-    bio.className = 'about-content__bio';
-    bio.textContent = this.settings.bio;
-    aboutContent.appendChild(bio);
-
-    // Add links if available in settings
-    if (this.settings.links && Object.keys(this.settings.links).length > 0) {
-      const linksContainer = document.createElement('div');
-      linksContainer.className = 'about-links';
-
-      for (const [name, url] of Object.entries(this.settings.links)) {
-        const link = document.createElement('a');
-        link.className = 'about-link';
-        link.href = url;
-        link.target = '_blank';
-        link.textContent = name;
-        linksContainer.appendChild(link);
-      }
-
-      aboutContent.appendChild(linksContainer);
-    }
+    if (!aboutContent) return;
+    
+    aboutContent.innerHTML = `
+      <p>${this.userProfile?.bio || 'Student portfolio'}</p>
+    `;
   }
 
   updatePageTitle() {
-    document.title = this.settings.siteTitle || 'Portfolio';
+    const displayName = this.userProfile?.displayName || 'Portfolio';
+    document.title = `${displayName} — Portfolio`;
   }
 }
 
-// Initialize the app when DOM is ready
-document.addEventListener('DOMContentLoaded', () => {
-  new PortfolioApp();
-});
+// Initialize app
+new PortfolioApp();
+

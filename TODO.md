@@ -2,13 +2,111 @@
 
 **Project Purpose:** Multi-tenant portfolio platform for Art & Technology course
 **Canonical Reference:** See [PROJECT_CHARTER.md](PROJECT_CHARTER.md)
-**Last Updated:** January 29, 2026
+**Last Updated:** February 3, 2026
 
-This repository has pivoted to a single multi-tenant Firebase architecture. The full updated task list is maintained in:
+---
 
-- [TODO-FIREBASE.md](TODO-FIREBASE.md)
+## ⚠️ ARCHITECTURE CHANGE
 
-Use that file as the sole source of truth for the new build plan.
+This repository has completed its pivot to a **single multi-tenant Firebase architecture**. 
+
+**Status: Phase 1 & 2 Complete ✅**
+
+The original GitHub-based static site approach has been replaced with:
+- Firebase Authentication (email/password)
+- Firestore Database (multi-tenant with security rules)
+- Firebase Storage (image uploads)
+- Single web app serving all student portfolios via URL routing
+
+---
+
+## 📋 CURRENT STATE
+
+### ✅ Completed (Phases 1-2)
+- Firebase project created (portfolio-web-app-26)
+- Authentication, Firestore, and Storage configured
+- Security rules deployed (public read, owner write, admin access)
+- firebase-config.js created with CDN imports (v12.8.0)
+- login.html built with brutalist design system
+- editor.html + editor.js built for content creation (+ Log, + Project buttons)
+- index.html converted from GitHub API to Firestore queries
+- app.js converted to Firebase (getDoc, getDocs, where, orderBy)
+- Firestore composite index created (userId + createdAt)
+- UI redesigned for consistency (login/editor match index.html brutalist design)
+
+### ⚠️ Remaining Work (Phases 3-7)
+- Profile editor UI (Edit Profile button is placeholder)
+- Instructor dashboard (view all students from single interface)
+- Bulk student import script (Node.js + Admin SDK)
+- Documentation updates (README, STUDENT_GUIDE, INSTRUCTOR_GUIDE)
+- Remove old code (admin/, posts/, projects/ markdown folders)
+- Deploy to live hosting (Firebase Hosting, GitHub Pages, or Netlify)
+- End-to-end testing with multiple students
+
+---
+
+## 📖 FOR DETAILED TASKS
+
+**See:** [TODO-FIREBASE.md](TODO-FIREBASE.md)
+
+That file contains the complete roadmap with:
+- All Firebase setup steps (completed)
+- Frontend implementation tasks (Phase 2 complete)
+- Student management features (pending)
+- Documentation requirements
+- Deployment instructions
+- Testing checklist
+- Troubleshooting guide
+
+---
+
+## 🎯 NEXT PRIORITIES
+
+**Option A: Deploy to Production**
+- Get a live URL to test with real shareable links
+- Validate Firebase works in production environment
+- Share with test students for feedback
+
+**Option B: Build Profile Editor**
+- Enable students to set displayName, username, bio, avatar
+- Implement cleaner URLs (/?user=username instead of /?user=uid)
+- Complete the "Edit Profile" button functionality
+
+**Option C: Build Instructor Dashboard**
+- View all student portfolios from single interface
+- Export data for assessment
+- Add/remove students
+
+---
+
+## 💾 FILES TO KEEP
+
+These files are actively used in the Firebase architecture:
+
+- **index.html** - Public portfolio viewer (converted to Firebase)
+- **app.js** - Portfolio rendering logic (converted to Firebase)
+- **styles.css** - Brutalist design system (CSS variables, typography)
+- **login.html** - Authentication UI
+- **editor.html** - Content creation interface
+- **editor.js** - CRUD operations for logs/projects
+- **firebase-config.js** - Firebase initialization
+- **PROJECT_CHARTER.md** - Project vision and constraints
+- **STUDENT_GUIDE.md** - Student documentation
+- **README.md** - Repository overview
+- **TODO-FIREBASE.md** - Detailed task tracking
+
+## 🗑️ FILES TO REMOVE (When Ready)
+
+These files are no longer used:
+
+- **admin/** folder - Decap CMS (replaced by Firebase)
+- **posts/** folder - Markdown logs (now in Firestore)
+- **projects/** folder - Markdown projects (now in Firestore)
+- **manifest.json** - Manual content list (replaced by Firestore queries)
+
+---
+
+**For all implementation details, see [TODO-FIREBASE.md](TODO-FIREBASE.md)**
 const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
 export const db = getFirestore(app);
