@@ -9,6 +9,7 @@ const displayNameInput = document.getElementById('displayName');
 const usernameInput = document.getElementById('username');
 const bioInput = document.getElementById('bio');
 const emailInput = document.getElementById('email');
+const studentIdInput = document.getElementById('studentId');
 const avatarInput = document.getElementById('avatar');
 const avatarPreview = document.getElementById('avatar-preview');
 const usernamePreview = document.getElementById('username-preview');
@@ -42,6 +43,7 @@ async function loadProfile() {
       usernameInput.value = data.username || '';
       bioInput.value = data.bio || '';
       emailInput.value = data.email || currentUser.email || '';
+      studentIdInput.value = data.studentId || '';
       originalUsername = data.username || '';
       
       if (data.avatarUrl) {
@@ -129,6 +131,7 @@ profileForm.addEventListener('submit', async (e) => {
     const displayName = displayNameInput.value.trim();
     const username = usernameInput.value.trim().toLowerCase();
     const bio = bioInput.value.trim();
+    const studentId = studentIdInput.value.trim();
     
     // Validate username format
     if (!/^[a-z0-9]+$/.test(username)) {
@@ -159,6 +162,7 @@ profileForm.addEventListener('submit', async (e) => {
       username,
       bio,
       email: emailInput.value || currentUser.email,
+      studentId,
       avatarUrl,
       updatedAt: new Date()
     }, { merge: true });

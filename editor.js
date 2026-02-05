@@ -174,6 +174,11 @@ function setupEventListeners() {
     window.location.href = 'profile.html';
   });
 
+  // Attendance barcode
+  document.getElementById('attendance-btn').addEventListener('click', () => {
+    window.location.href = 'attendance.html';
+  });
+
   // Add log button
   document.getElementById('add-log-btn').addEventListener('click', () => {
     openModal('log-modal');
