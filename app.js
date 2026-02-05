@@ -199,10 +199,18 @@ class PortfolioApp {
       // Update UI with user info
       const displayName = this.userProfile.displayName || this.userProfile.email || 'Portfolio';
       const bio = this.userProfile.bio || 'Exploring art and technology';
+      const email = this.userProfile.email || '';
       
       document.getElementById('hero-name').textContent = displayName;
       document.getElementById('hero-bio').textContent = bio;
       document.getElementById('footer-name').textContent = displayName;
+      
+      // Update footer email
+      const footerContact = document.querySelector('.footer__contact');
+      if (footerContact && email) {
+        footerContact.innerHTML = `<p>Email: <a href="mailto:${email}">${email}</a></p>`;
+      }
+      
       document.getElementById('page-title').textContent = `${displayName} — Portfolio`;
       
     } catch (error) {
@@ -303,12 +311,35 @@ class PortfolioApp {
       navToggle.addEventListener('click', (e) => {
         e.stopPropagation();
         nav.classList.toggle('nav--open');
+        // Close filter dropdown when opening nav
+        const filterDropdown = document.getElementById('filter-dropdown');
+        if (filterDropdown) filterDropdown.classList.remove('filter-dropdown--open');
       });
       
       // Close nav when clicking outside
       document.addEventListener('click', (e) => {
         if (!nav.contains(e.target)) {
           nav.classList.remove('nav--open');
+        }
+      });
+    }
+
+    // Filter dropdown toggle
+    const filterToggle = document.getElementById('filter-toggle');
+    const filterDropdown = document.getElementById('filter-dropdown');
+    
+    if (filterToggle && filterDropdown) {
+      filterToggle.addEventListener('click', (e) => {
+        e.stopPropagation();
+        filterDropdown.classList.toggle('filter-dropdown--open');
+        // Close nav when opening filter
+        if (nav) nav.classList.remove('nav--open');
+      });
+      
+      // Close filter dropdown when clicking outside
+      document.addEventListener('click', (e) => {
+        if (!filterDropdown.contains(e.target)) {
+          filterDropdown.classList.remove('filter-dropdown--open');
         }
       });
     }
@@ -328,12 +359,22 @@ class PortfolioApp {
       });
     });
 
-    // Filter chips
-    document.querySelectorAll('.chip').forEach(chip => {
-      chip.addEventListener('click', () => {
-        document.querySelectorAll('.chip').forEach(c => c.classList.remove('chip--active'));
-        chip.classList.add('chip--active');
-        this.currentFilter = chip.dataset.filter;
+    // Filter options
+    document.querySelectorAll('.filter-option').forEach(option => {
+      option.addEventListener('click', () => {
+        document.querySelectorAll('.filter-option').forEach(o => o.classList.remove('filter-option--active'));
+        option.classList.add('filter-option--active');
+        this.currentFilter = option.dataset.filter;
+        
+        // Update filter toggle label
+        const filterLabel = document.getElementById('filter-current');
+        if (filterLabel) {
+          filterLabel.textContent = option.textContent;
+        }
+        
+        // Close dropdown
+        if (filterDropdown) filterDropdown.classList.remove('filter-dropdown--open');
+        
         this.renderPortfolio();
       });
     });
@@ -390,8 +431,6 @@ class PortfolioApp {
     // Render content
     if (sectionName === 'portfolio') {
       this.renderPortfolio();
-    } else if (sectionName === 'projects') {
-      this.renderProjects();
     } else if (sectionName === 'about') {
       this.renderAbout();
     }
@@ -403,7 +442,14 @@ class PortfolioApp {
     
     feed.innerHTML = '';
 
-    const filtered = this.posts.filter(post => {
+    // Combine both logs and projects, then sort by date (newest first)
+    const allPosts = [...this.posts, ...this.projects].sort((a, b) => {
+      const dateA = a.date || (a.createdAt?.toDate ? a.createdAt.toDate() : new Date(0));
+      const dateB = b.date || (b.createdAt?.toDate ? b.createdAt.toDate() : new Date(0));
+      return new Date(dateB) - new Date(dateA);
+    });
+    
+    const filtered = allPosts.filter(post => {
       if (this.currentFilter === 'all') return true;
       return post.type === this.currentFilter;
     });
@@ -542,7 +588,9 @@ class PortfolioApp {
     const card = document.createElement('div');
     card.className = post.type === 'log' ? 'card card--log' : 'card card--project';
 
-    const formattedDate = new Date(post.date).toLocaleDateString('en-US', {
+    // Handle both date string and Firestore timestamp
+    const dateValue = post.date || (post.createdAt?.toDate ? post.createdAt.toDate() : new Date());
+    const formattedDate = new Date(dateValue).toLocaleDateString('en-US', {
       year: 'numeric',
       month: 'short',
       day: 'numeric'
@@ -566,7 +614,7 @@ class PortfolioApp {
       titleEl.textContent = post.title;
       card.appendChild(titleEl);
 
-      // Create 3-up or 2-up image gallery
+      // Images grid (3-up or 2-up)
       if (post.images && post.images.length > 0) {
         const imagesContainer = document.createElement('div');
         imagesContainer.className = 'card__images';
@@ -583,7 +631,7 @@ class PortfolioApp {
         card.appendChild(imagesContainer);
       }
 
-      // "What changed" - first sentence of excerpt
+      // Excerpt
       const excerptEl = document.createElement('p');
       excerptEl.className = 'card__excerpt';
       const firstSentence = (post.summary || post.body).split('.')[0] + '.';
@@ -598,14 +646,12 @@ class PortfolioApp {
         card.appendChild(nextStepEl);
       }
     } else {
-      // PROJECT CARD
-      // Project tag if project number exists
-      if (post.project && post.project.length > 0) {
-        const projectTag = document.createElement('div');
-        projectTag.className = 'card__project-tag';
-        projectTag.textContent = `PROJECT ${String(post.project[0]).padStart(2, '0')}`;
-        card.appendChild(projectTag);
-      }
+      // PROJECT CARD - Same structure as log cards
+      // Project tag
+      const projectTag = document.createElement('div');
+      projectTag.className = 'card__project-tag';
+      projectTag.textContent = post.project_number ? `PROJECT ${String(post.project_number).padStart(2, '0')}` : 'PROJECT';
+      card.appendChild(projectTag);
 
       const dateEl = document.createElement('div');
       dateEl.className = 'card__date';
@@ -617,15 +663,34 @@ class PortfolioApp {
       titleEl.textContent = post.title;
       card.appendChild(titleEl);
 
-      // Featured image
-      if (post.featured_image) {
+      // Images grid (same treatment as logs)
+      if (post.images && post.images.length > 0) {
+        const imagesContainer = document.createElement('div');
+        imagesContainer.className = 'card__images';
+
+        const imageCount = Math.min(post.images.length, 3);
+        post.images.slice(0, imageCount).forEach(imgUrl => {
+          const img = document.createElement('img');
+          img.className = 'card__image';
+          img.src = imgUrl;
+          img.alt = post.title;
+          imagesContainer.appendChild(img);
+        });
+
+        card.appendChild(imagesContainer);
+      } else if (post.featured_image) {
+        // Fallback to featured_image if no images array
+        const imagesContainer = document.createElement('div');
+        imagesContainer.className = 'card__images';
         const img = document.createElement('img');
-        img.className = 'card__featured';
+        img.className = 'card__image';
         img.src = post.featured_image;
         img.alt = post.title;
-        card.appendChild(img);
+        imagesContainer.appendChild(img);
+        card.appendChild(imagesContainer);
       }
 
+      // Excerpt
       const excerptEl = document.createElement('p');
       excerptEl.className = 'card__excerpt';
       excerptEl.textContent = post.summary || post.body.substring(0, 150);
@@ -645,22 +710,38 @@ class PortfolioApp {
 
     let html = `<h1 class="modal__title">${post.title}</h1>`;
 
-    const formattedDate = new Date(post.date).toLocaleDateString('en-US', {
+    // Handle both date string and Firestore timestamp
+    const dateValue = post.date || (post.createdAt?.toDate ? post.createdAt.toDate() : new Date());
+    const formattedDate = new Date(dateValue).toLocaleDateString('en-US', {
       year: 'numeric',
       month: 'short',
       day: 'numeric'
     });
     html += `<p class="modal__meta">${formattedDate}</p>`;
 
+    // Display featured image OR first image from array
     if (post.featured_image) {
       html += `<img src="${post.featured_image}" alt="${post.title}" class="modal__hero-image" />`;
+    } else if (post.images && post.images.length > 0) {
+      html += `<img src="${post.images[0]}" alt="${post.title}" class="modal__hero-image" />`;
     }
 
     if (post.tags && post.tags.length > 0) {
       html += `<div class="modal__tags"><span class="modal__tag">Tags: ${post.tags.join(', ')}</span></div>`;
     }
 
-    html += `<div class="modal__body">${this.parser.parse(post.body)}</div>`;
+    html += `<div class="modal__body">${this.parser.parse(post.body || '')}</div>`;
+
+    // Display all images in a gallery at bottom
+    if (post.images && post.images.length > 1) {
+      html += `<div class="modal__gallery" style="margin-top: 2rem; padding-top: 2rem; border-top: 1px solid var(--color-border);">`;
+      html += `<h3 style="font-size: var(--text-sm); text-transform: uppercase; margin-bottom: 1rem;">IMAGES</h3>`;
+      html += `<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem;">`;
+      post.images.forEach((img, idx) => {
+        html += `<img src="${img}" alt="Image ${idx + 1}" style="width: 100%; height: 150px; object-fit: cover; border: 1px solid var(--color-border);" />`;
+      });
+      html += `</div></div>`;
+    }
 
     article.innerHTML = html;
     modal.classList.add('modal--active');
@@ -723,4 +804,22 @@ class PortfolioApp {
 
 // Initialize app
 new PortfolioApp();
+
+// Check auth state and update nav link
+import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/12.8.0/firebase-auth.js';
+
+const auth = getAuth();
+const authLink = document.getElementById('auth-link');
+
+if (authLink) {
+  onAuthStateChanged(auth, (user) => {
+    if (user) {
+      authLink.href = 'editor.html';
+      authLink.textContent = 'Editor';
+    } else {
+      authLink.href = 'login.html';
+      authLink.textContent = 'Sign In';
+    }
+  });
+}
 

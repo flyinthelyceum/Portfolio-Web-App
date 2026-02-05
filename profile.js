@@ -8,6 +8,7 @@ const profileForm = document.getElementById('profile-form');
 const displayNameInput = document.getElementById('displayName');
 const usernameInput = document.getElementById('username');
 const bioInput = document.getElementById('bio');
+const emailInput = document.getElementById('email');
 const avatarInput = document.getElementById('avatar');
 const avatarPreview = document.getElementById('avatar-preview');
 const usernamePreview = document.getElementById('username-preview');
@@ -40,6 +41,7 @@ async function loadProfile() {
       displayNameInput.value = data.displayName || currentUser.displayName || '';
       usernameInput.value = data.username || '';
       bioInput.value = data.bio || '';
+      emailInput.value = data.email || currentUser.email || '';
       originalUsername = data.username || '';
       
       if (data.avatarUrl) {
@@ -55,6 +57,7 @@ async function loadProfile() {
       displayNameInput.value = currentUser.displayName || '';
       usernameInput.value = generateUsernameFromEmail(currentUser.email);
       usernamePreview.textContent = usernameInput.value;
+      emailInput.value = currentUser.email || '';
     }
   } catch (error) {
     console.error('Error loading profile:', error);
@@ -155,8 +158,8 @@ profileForm.addEventListener('submit', async (e) => {
       displayName,
       username,
       bio,
+      email: emailInput.value || currentUser.email,
       avatarUrl,
-      email: currentUser.email,
       updatedAt: new Date()
     }, { merge: true });
     

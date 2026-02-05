@@ -38,18 +38,24 @@
         <span class="nav__toggle-icon"></span>
       </button>
       <div class="nav__menu" id="nav-menu">
-        <a href="#portfolio" class="nav__link nav__link--active" data-section="portfolio">Working Portfolio</a>
-        <a href="#projects" class="nav__link" data-section="projects">Projects</a>
+        <a href="#portfolio" class="nav__link nav__link--active" data-section="portfolio">Portfolio</a>
         <a href="#about" class="nav__link" data-section="about">About</a>
-        <div class="filter-chips">
-          <span class="filter-chips__label">Filter:</span>
-          <button class="chip chip--active" data-filter="all">All</button>
-          <button class="chip" data-filter="log">Logs</button>
-          <button class="chip" data-filter="project">Projects</button>
-        </div>
-        <a href="login.html" class="nav__link" style="border-top: var(--border-thin) solid var(--color-border); margin-top: var(--spacing-md); padding-top: var(--spacing-md); display: block;">Sign In</a>
+        <a href="login.html" class="nav__link" id="auth-link" style="border-top: var(--border-thin) solid var(--color-border); margin-top: var(--spacing-md); padding-top: var(--spacing-md); display: block;">Sign In</a>
       </div>
     </nav>
+
+    <!-- Filter Button - Separate from Nav -->
+    <div class="filter-dropdown" id="filter-dropdown">
+      <button class="filter-toggle" id="filter-toggle" aria-label="Filter content">
+        <span class="filter-toggle__icon">⊟</span>
+        <span class="filter-toggle__label" id="filter-current">All</span>
+      </button>
+      <div class="filter-menu" id="filter-menu">
+        <button class="filter-option filter-option--active" data-filter="all">All</button>
+        <button class="filter-option" data-filter="log">Logs</button>
+        <button class="filter-option" data-filter="project">Projects</button>
+      </div>
+    </div>
 
     <!-- Main Content -->
     <main class="content">
@@ -74,14 +80,6 @@
         
         <div id="portfolio-feed" class="feed">
           <!-- Posts will be rendered here -->
-        </div>
-      </section>
-
-      <!-- Projects Section -->
-      <section id="projects" class="section">
-        <h2 class="section__title">Projects</h2>
-        <div id="projects-grid" class="projects-grid">
-          <!-- Projects will be rendered here -->
         </div>
       </section>
 
