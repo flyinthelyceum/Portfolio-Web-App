@@ -818,7 +818,7 @@ if (authLink) {
       authLink.textContent = 'Editor';
     } else {
       authLink.href = 'login.html';
-      authLink.textContent = 'Sign In';
+      authLink.textContent = 'Log In';
     }
   });
 }
