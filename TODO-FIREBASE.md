@@ -560,26 +560,52 @@ Comprehensive instructor resource covering:
 - ✅ Firestore rules updated (admins can delete/update posts)
 - ✅ Linked to admin dashboard via "Moderation" button
 
+### CSV Export ✅
+**Status:** Complete - Commit 0229ad0
+- ✅ Download Students CSV (name, email, posts, last activity)
+- ✅ Download Posts CSV (title, student, type, date, status)
+- ✅ Proper CSV escaping for commas and quotes
+- ✅ Timestamped filenames
+- ✅ Integrated into admin dashboard quick actions
+
+### Student Analytics ✅
+**Status:** Complete - Commit 517bffc
+- ✅ Posts last 7 days column
+- ✅ Engagement status (Active/Somewhat Active/Inactive)
+- ✅ Average posts per week calculation
+- ✅ Color-coded status pills
+- ✅ Calculated from existing data (no new infrastructure)
+
+### Barcode Attendance System ✅
+**Status:** Complete - Commit 2aeabd3 + e4398c2
+- ✅ Student ID field added to profile (profile.html/js)
+- ✅ attendance.html + attendance.js (barcode display page)
+- ✅ CODE128 barcode generation using jsbarcode library
+- ✅ Print-optimized styling
+- ✅ Attendance button added to editor header
+- ✅ Cache-busting for immediate deployment
+
 ### Firestore Rules Updates ✅
 - ✅ Allow admins to read their own admin doc (for button visibility)
 - ✅ Allow admins to delete/update posts
 - ✅ Firestore rules deployment configured in firebase.json
 
-### A. Instructor Dashboard ⏳
-Possible features:
-- View all student portfolios in grid
-- Click student to preview their full portfolio
-- Search/filter by name, activity date, post count
-- Monitor engagement (frequency, last update)
-- Bulk operations (message students, export data)
+### A. Instructor Dashboard ✅ COMPLETE
+- ✅ View all student portfolios in grid
+- ✅ Stats dashboard (students, posts, logs, projects, last 7 days)
+- ✅ Student table with posts and activity
+- ✅ Recent activity feed
+- ✅ Engagement metrics (last 7 days, avg/week, status)
+- ✅ Bulk export (JSON, Students CSV, Posts CSV)
 
-### B. Student Analytics ⏳
-Possible features:
-- Activity timeline (when was last log added)
-- Post frequency chart
-- Engagement metrics
-- Time spent in editor
-- Image upload stats
+### B. Student Analytics ✅ COMPLETE
+- ✅ Engagement metrics (Active/Somewhat Active/Inactive)
+- ✅ Posts last 7 days tracking
+- ✅ Average posts per week calculation
+- ⏳ Activity timeline visualization (future enhancement)
+- ⏳ Post frequency chart (future enhancement)
+- ⏳ Time spent in editor (would require new tracking)
+- ⏳ Image upload stats (future enhancement)
 
 ### C. Advanced Features ⏳
 Possible features:

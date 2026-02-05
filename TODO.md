@@ -2,7 +2,7 @@
 
 **Project Purpose:** Multi-tenant portfolio platform for Art & Technology course
 **Canonical Reference:** See [PROJECT_CHARTER.md](PROJECT_CHARTER.md)
-**Last Updated:** February 4, 2026
+**Last Updated:** February 5, 2026
 
 ---
 
@@ -56,9 +56,11 @@ Fully functional, production-ready portfolio platform ready for classroom deploy
 ### ⏳ Remaining Work (Phase 8 - Optional → In Progress)
 - **Instructor Dashboard** ✅ (view all students, stats, activity, JSON export)
 - **Moderation Tools** ✅ (delete posts, restore posts, ban/unban students)
-- Student analytics (activity tracking, engagement metrics) — coming next
+- **CSV Export** ✅ (students.csv, posts.csv)
+- **Student Analytics** ✅ (engagement metrics, posts last 7 days, avg posts/week)
+- **Barcode Attendance** ✅ (student ID field, barcode generation, print-ready page)
 - Advanced features (comments, scheduling, PDF export)
-- QR/Barcode attendance (generate barcode using student's UID, display button in editor for quick attendance scan)
+- Activity charts/timeline visualization
 
 ---
 
