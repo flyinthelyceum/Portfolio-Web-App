@@ -94,11 +94,20 @@ function renderDashboard() {
   renderActivity();
 }
 
+function calculateEngagementStatus(postsLast7Days, averagePerWeek) {
+  if (postsLast7Days > 0) return 'Active';
+  if (averagePerWeek >= 0.5) return 'Somewhat Active';
+  return 'Inactive';
+}
+
 function renderStudents(postsByUser) {
   if (users.length === 0) {
     studentsContainer.innerHTML = '<div class="admin-empty">No students found.</div>';
     return;
   }
+
+  const now = new Date();
+  const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
 
   const rows = users
     .slice()
@@ -111,12 +120,33 @@ function renderStudents(postsByUser) {
       const email = user.email || '—';
       const profileLink = `index.html?user=${user.username || user.id}`;
 
+      // Calculate engagement metrics
+      const postsLast7Days = userPosts.filter(post => {
+        const postDate = parseDate(post.createdAt || post.date);
+        return postDate && postDate > sevenDaysAgo;
+      }).length;
+
+      // Calculate average posts per week (based on first post to now)
+      const firstPostDate = userPosts.length > 0 ? parseDate(userPosts[userPosts.length - 1].createdAt || userPosts[userPosts.length - 1].date) : null;
+      let averagePerWeek = 0;
+      if (firstPostDate) {
+        const daysSinceFirstPost = (now - firstPostDate) / (1000 * 60 * 60 * 24);
+        const weeksSinceFirstPost = Math.max(1, daysSinceFirstPost / 7);
+        averagePerWeek = userPosts.length / weeksSinceFirstPost;
+      }
+
+      const engagement = calculateEngagementStatus(postsLast7Days, averagePerWeek);
+      const engagementClass = engagement === 'Active' ? 'status-active' : engagement === 'Somewhat Active' ? 'status-medium' : 'status-inactive';
+
       return `
         <tr>
           <td>${escapeHtml(user.displayName || email)}</td>
           <td>${escapeHtml(username)}</td>
           <td>${escapeHtml(email)}</td>
           <td>${userPosts.length}</td>
+          <td>${postsLast7Days}</td>
+          <td><span class="admin-pill ${engagementClass}">${engagement}</span></td>
+          <td>${averagePerWeek.toFixed(2)}</td>
           <td>${lastPostDate}</td>
           <td><a href="${profileLink}" target="_blank">View</a></td>
         </tr>
@@ -131,7 +161,10 @@ function renderStudents(postsByUser) {
           <th>Name</th>
           <th>Username</th>
           <th>Email</th>
-          <th>Posts</th>
+          <th>Total Posts</th>
+          <th>Last 7 Days</th>
+          <th>Engagement</th>
+          <th>Avg/Week</th>
           <th>Last Post</th>
           <th>Portfolio</th>
         </tr>
