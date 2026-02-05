@@ -46,6 +46,7 @@ Fully functional, production-ready portfolio platform ready for classroom deploy
 - Instructor dashboard (view all students from single interface)
 - Student analytics (activity tracking, engagement metrics)
 - Advanced features (comments, scheduling, PDF export)
+- **QR/Barcode attendance** (generate barcode using student's UID, display button in editor for quick attendance scan)
 
 ---
 
