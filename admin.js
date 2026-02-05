@@ -206,6 +206,22 @@ function setupEventListeners() {
     });
   }
 
+  const exportCsvStudentsBtn = document.getElementById('export-csv-students-btn');
+  if (exportCsvStudentsBtn) {
+    exportCsvStudentsBtn.addEventListener('click', () => {
+      const csvContent = generateStudentsCSV();
+      downloadCSV(csvContent, `students-${new Date().toISOString().slice(0, 10)}.csv`);
+    });
+  }
+
+  const exportCsvPostsBtn = document.getElementById('export-csv-posts-btn');
+  if (exportCsvPostsBtn) {
+    exportCsvPostsBtn.addEventListener('click', () => {
+      const csvContent = generatePostsCSV();
+      downloadCSV(csvContent, `posts-${new Date().toISOString().slice(0, 10)}.csv`);
+    });
+  }
+
   refreshBtn.addEventListener('click', async () => {
     refreshBtn.textContent = 'Refreshing...';
     await loadData();
@@ -260,4 +276,78 @@ function escapeHtml(value) {
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#39;');
+}
+
+function escapeCSV(value) {
+  const str = String(value || '');
+  if (str.includes(',') || str.includes('"') || str.includes('\n')) {
+    return `"${str.replace(/"/g, '""')}"`;
+  }
+  return str;
+}
+
+function generateStudentsCSV() {
+  let csv = 'Name,Email,Posts,Last Activity\n';
+  
+  const sortedUsers = [...users].sort((a, b) => {
+    return (a.displayName || a.email || '').localeCompare(b.displayName || b.email || '');
+  });
+
+  sortedUsers.forEach(user => {
+    const postCount = posts.filter(p => p.userId === user.id && !p.deletedAt).length;
+    const userPosts = posts.filter(p => p.userId === user.id).sort((a, b) => {
+      const dateA = parseDate(a.createdAt) || new Date(0);
+      const dateB = parseDate(b.createdAt) || new Date(0);
+      return dateB - dateA;
+    });
+    const lastActivity = userPosts[0] ? formatDate(parseDate(userPosts[0].createdAt)) : '—';
+    
+    const row = [
+      escapeCSV(user.displayName || user.email || ''),
+      escapeCSV(user.email || ''),
+      postCount,
+      lastActivity
+    ].join(',');
+    csv += row + '\n';
+  });
+
+  return csv;
+}
+
+function generatePostsCSV() {
+  let csv = 'Title,Student,Type,Date,Status\n';
+  
+  const sortedPosts = [...posts].sort((a, b) => {
+    const dateA = parseDate(a.createdAt) || new Date(0);
+    const dateB = parseDate(b.createdAt) || new Date(0);
+    return dateB - dateA;
+  });
+
+  sortedPosts.forEach(post => {
+    const student = findUserName(post.userId);
+    const status = post.deletedAt ? 'Deleted' : 'Active';
+    
+    const row = [
+      escapeCSV(post.title || ''),
+      escapeCSV(student),
+      escapeCSV(post.type || ''),
+      formatDate(parseDate(post.createdAt)),
+      status
+    ].join(',');
+    csv += row + '\n';
+  });
+
+  return csv;
+}
+
+function downloadCSV(csvContent, filename) {
+  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = filename;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  URL.revokeObjectURL(url);
 }
