@@ -539,7 +539,31 @@ Comprehensive instructor resource covering:
 
 ---
 
-## PHASE 8: Optional Enhancements (Future) ⏳
+## PHASE 8: Instructor Dashboard & Moderation Tools ✅ IN PROGRESS
+
+### Instructor Dashboard ✅
+**Status:** Complete - Commit 0a24bba
+- ✅ admin.html + admin.js (view all students, stats, activity feed)
+- ✅ Real-time stats (students, total posts, logs, projects, last 7 days)
+- ✅ Student list with post count and last activity
+- ✅ Recent activity feed (type, title, student, date)
+- ✅ JSON export (all students + posts)
+- ✅ Admin role check (hides Admin button unless /admins/{uid} exists in Firestore)
+- ✅ Firestore rules updated (admins can read their own admin doc)
+
+### Moderation Tools ✅
+**Status:** Complete - Commit 3dcad96
+- ✅ moderation.html + moderation.js (delete posts, restore posts)
+- ✅ Ban/unban students interface
+- ✅ Confirmation dialogs for destructive actions
+- ✅ Post status display (Active vs Deleted)
+- ✅ Firestore rules updated (admins can delete/update posts)
+- ✅ Linked to admin dashboard via "Moderation" button
+
+### Firestore Rules Updates ✅
+- ✅ Allow admins to read their own admin doc (for button visibility)
+- ✅ Allow admins to delete/update posts
+- ✅ Firestore rules deployment configured in firebase.json
 
 ### A. Instructor Dashboard ⏳
 Possible features:

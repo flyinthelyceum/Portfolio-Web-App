@@ -53,11 +53,12 @@ Fully functional, production-ready portfolio platform ready for classroom deploy
   - Simplified navigation (removed redundant Projects section)
   - Projects visible via filter, not separate nav section
 
-### ⚠️ Remaining Work (Phase 8 - Optional)
-- Instructor dashboard (view all students from single interface)
-- Student analytics (activity tracking, engagement metrics)
+### ⏳ Remaining Work (Phase 8 - Optional → In Progress)
+- **Instructor Dashboard** ✅ (view all students, stats, activity, JSON export)
+- **Moderation Tools** ✅ (delete posts, restore posts, ban/unban students)
+- Student analytics (activity tracking, engagement metrics) — coming next
 - Advanced features (comments, scheduling, PDF export)
-- **QR/Barcode attendance** (generate barcode using student's UID, display button in editor for quick attendance scan)
+- QR/Barcode attendance (generate barcode using student's UID, display button in editor for quick attendance scan)
 
 ---
 
