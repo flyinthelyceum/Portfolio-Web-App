@@ -22,7 +22,7 @@ Fully functional, production-ready portfolio platform ready for classroom deploy
 
 ## 📋 CURRENT STATE
 
-### ✅ Completed (Phases 1-7 + Full Documentation)
+### ✅ Completed (Phases 1-7 + Full Deployment + UI/UX Polish)
 - Firebase project created (portfolio-web-app-26)
 - Authentication (email/password + Google SSO), Firestore, and Storage configured
 - Security rules deployed (public read, owner write, admin access)
@@ -33,7 +33,7 @@ Fully functional, production-ready portfolio platform ready for classroom deploy
 - app.js converted to Firebase (getDoc, getDocs, where, orderBy)
 - Firestore composite index created (userId + createdAt)
 - UI redesigned for consistency (all pages match brutalist design system)
-- **Profile editor built** (profile.html + profile.js) with username support
+- **Profile editor built** (profile.html + profile.js) with username + email support
 - **Cleaner URLs enabled** (?user=username lookup in addition to ?user=userId)
 - **Old code removed**: Deleted admin/, posts/, projects/ folders (GitHub Pages-era files)
 - **Bulk import script** (Node.js + Firebase Admin SDK) for onboarding 20+ students at once
@@ -41,6 +41,17 @@ Fully functional, production-ready portfolio platform ready for classroom deploy
   - README.md (technical overview, quick start)
   - STUDENT_GUIDE.md (student onboarding, how to add content)
   - INSTRUCTOR_GUIDE.md (setup, management, troubleshooting, semester workflow)
+- **Deployed to Firebase Hosting** (test.aaand.space, app.aaand.space ready)
+- **UI/UX Polish Complete**:
+  - Auth nav link updates (Sign In → Editor when logged in)
+  - Email field added to profile (displays in portfolio footer)
+  - Separate filter dropdown with sort icon (decoupled from nav)
+  - Unified card structure (logs + projects consistent hierarchy and images)
+  - Fixed date formatting (handles both date strings and Firestore timestamps)
+  - Markdown parsing enabled
+  - Card sorting by date (newest first)
+  - Simplified navigation (removed redundant Projects section)
+  - Projects visible via filter, not separate nav section
 
 ### ⚠️ Remaining Work (Phase 8 - Optional)
 - Instructor dashboard (view all students from single interface)

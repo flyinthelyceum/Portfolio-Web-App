@@ -568,6 +568,52 @@ Possible features:
 
 ---
 
+## PHASE 7B: Firebase Hosting Deployment ✅ COMPLETE
+
+### Live Deployment ✅
+**Status:** Complete and tested
+
+- ✅ firebase-tools CLI installed globally
+- ✅ firebase.json created with hosting config and rewrites
+- ✅ .firebaserc configured with project ID (portfolio-web-app-26)
+- ✅ Firebase CLI authenticated
+- ✅ Initial deployment to portfolio-web-app-26.web.app successful
+- ✅ test.aaand.space DNS configured and custom domain added
+- ✅ app.aaand.space ready for production (switch DNS when ready)
+- ✅ Firebase Auth authorized domains configured:
+  - test.aaand.space ✅
+  - app.aaand.space ✅
+  - portfolio-web-app-26.web.app ✅
+
+### UI/UX Polish ✅
+**Status:** Complete - Commit a48cc9f
+
+- ✅ Auth nav link updates dynamically (Sign In ↔ Editor when logged in)
+- ✅ Email field added to profile editor
+- ✅ Email displays in portfolio footer with mailto link
+- ✅ Separate filter dropdown (decoupled from navigation)
+- ✅ Unified card structure for logs and projects (consistent images, hierarchy)
+- ✅ Fixed date formatting (handles both strings and Firestore timestamps)
+- ✅ Markdown parsing working
+- ✅ Card sorting by date (newest first)
+- ✅ Simplified navigation (removed redundant Projects section)
+- ✅ Projects accessible via filter, not separate nav
+
+### Live URLs
+- **Testing:** https://test.aaand.space ✅ (working)
+- **Production:** https://app.aaand.space (ready - flip DNS at Squarespace to activate)
+- **Fallback:** https://portfolio-web-app-26.web.app (always available)
+
+### To Activate Production Domain
+1. Go to Squarespace DNS settings
+2. Find test.aaand.space CNAME record
+3. Change to point to app.aaand.space
+4. Wait 5-10 minutes for propagation
+5. Update STUDENT_GUIDE.md with new URL
+6. Update README.md with new URL
+
+---
+
 ## 🆘 TROUBLESHOOTING
 
 **Student can't log in:**
