@@ -34,7 +34,7 @@ let selectedProjectImage = null;
 // Initialize
 onAuthStateChanged(auth, async (user) => {
   if (!user) {
-    window.location.href = 'login.html';
+    window.location.href = 'index.html';
     return;
   }
 
