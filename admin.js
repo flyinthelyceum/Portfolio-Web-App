@@ -199,6 +199,13 @@ function setupEventListeners() {
     window.location.href = 'editor.html';
   });
 
+  const moderationBtn = document.getElementById('moderation-btn');
+  if (moderationBtn) {
+    moderationBtn.addEventListener('click', () => {
+      window.location.href = 'moderation.html';
+    });
+  }
+
   refreshBtn.addEventListener('click', async () => {
     refreshBtn.textContent = 'Refreshing...';
     await loadData();
