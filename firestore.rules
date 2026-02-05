@@ -42,7 +42,8 @@ service cloud.firestore {
     // Admin collection
     // Only admins can read/write
     match /admins/{adminId} {
-      allow read, write: if isAdmin();
+      allow read: if isSignedIn() && request.auth.uid == adminId;
+      allow write: if isAdmin();
     }
     
     // Fallback: Deny all other access
