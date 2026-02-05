@@ -129,7 +129,7 @@ class PortfolioApp {
             A platform for documenting your creative process. Add logs, projects, and share your work with a shareable link.
           </p>
           <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
-            <a href="login.html" style="padding: 0.75rem 1.5rem; background: var(--color-accent); color: white; text-decoration: none; border: var(--border-medium) solid var(--color-accent); font-weight: 600; text-transform: uppercase; font-size: 0.875rem; letter-spacing: 0.05em;">Sign In</a>
+            <a href="login.html" style="padding: 0.75rem 1.5rem; background: var(--color-accent); color: white; text-decoration: none; border: var(--border-medium) solid var(--color-accent); font-weight: 600; text-transform: uppercase; font-size: 0.875rem; letter-spacing: 0.05em;">Log In</a>
             <a href="signup.html" style="padding: 0.75rem 1.5rem; background: var(--color-bg); color: var(--color-text); text-decoration: none; border: var(--border-medium) solid var(--color-text); font-weight: 600; text-transform: uppercase; font-size: 0.875rem; letter-spacing: 0.05em;">Create Account</a>
           </div>
           <p style="margin-top: 3rem; font-size: 0.875rem; color: var(--color-text-muted);">
