@@ -30,6 +30,7 @@ let currentFilter = 'all';
 let posts = [];
 let selectedLogImages = [];
 let selectedProjectImage = null;
+let isAdmin = false;
 
 // Initialize
 onAuthStateChanged(auth, async (user) => {
@@ -40,9 +41,20 @@ onAuthStateChanged(auth, async (user) => {
 
   currentUser = user;
   await loadUserProfile();
+  await checkAdmin();
   await loadPosts();
   setupEventListeners();
 });
+
+async function checkAdmin() {
+  const adminDoc = await getDoc(doc(db, 'admins', currentUser.uid));
+  isAdmin = adminDoc.exists();
+
+  const adminBtn = document.getElementById('admin-btn');
+  if (adminBtn) {
+    adminBtn.style.display = isAdmin ? 'inline-flex' : 'none';
+  }
+}
 
 // Load user profile
 async function loadUserProfile() {
@@ -121,6 +133,13 @@ function setupEventListeners() {
     await signOut(auth);
     window.location.href = 'index.html';
   });
+
+  const adminBtn = document.getElementById('admin-btn');
+  if (adminBtn) {
+    adminBtn.addEventListener('click', () => {
+      window.location.href = 'admin.html';
+    });
+  }
 
   // Share portfolio
   document.getElementById('share-btn').addEventListener('click', () => {
