@@ -4,123 +4,43 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title id="page-title">Portfolio</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz@9..144&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css?v=9">
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <div class="container">
-    <!-- Hero Section -->
-    <header class="hero">
-      <div class="hero__top">
-        <p id="hero-bio" class="hero__bio">Exploring the intersection of computational art and spatial design. Using code as a creative tool to reimagine how we experience visual narratives.</p>
-      </div>
-      <div class="hero__bottom">
-        <span class="hero__icon"></span>
-        <span id="hero-name" class="hero__name">Your Name</span>
-        <span class="hero__separator">→</span>
-        <span class="hero__descriptor">Art & Technology Studio</span>
+  <aside class="index">
+    <div class="index__title">Index</div>
+    <nav class="index__nav" id="index-nav"></nav>
+  </aside>
+
+  <main class="content">
+    <header class="profile" id="profile-header">
+      <div class="profile__bio" id="profile-bio">Loading...</div>
+      <div class="profile__meta">
+        <div class="profile__name" id="profile-name">Portfolio</div>
+        <a class="profile__email" id="profile-email" href=""></a>
+        <a class="profile__link" id="profile-link" href=""></a>
       </div>
     </header>
 
-    <!-- Ticker Band -->
-    <div class="ticker">
-      <div class="ticker__track" id="ticker-track">
-        <span class="ticker__content" id="ticker-content"></span>
-        <span class="ticker__content" aria-hidden="true" id="ticker-content-clone"></span>
-      </div>
-    </div>
+    <div class="posts" id="posts-container"></div>
 
-    <!-- Navigation - Upper Right Dropdown -->
-    <nav class="nav" id="nav">
-      <button class="nav__toggle" id="nav-toggle" aria-label="Toggle menu">
-        <span class="nav__toggle-icon"></span>
-      </button>
-      <div class="nav__menu" id="nav-menu">
-        <a href="#portfolio" class="nav__link nav__link--active" data-section="portfolio">Portfolio</a>
-        <a href="#about" class="nav__link" data-section="about">About</a>
-        <a href="login.html" class="nav__link" id="auth-link" style="border-top: var(--border-thin) solid var(--color-border); margin-top: var(--spacing-md); padding-top: var(--spacing-md); display: block;">Log In</a>
-      </div>
-    </nav>
-
-    <!-- Filter Button - Separate from Nav -->
-    <div class="filter-dropdown" id="filter-dropdown">
-      <button class="filter-toggle" id="filter-toggle" aria-label="Filter content">
-        <span class="filter-toggle__icon">⊟</span>
-        <span class="filter-toggle__label" id="filter-current">All</span>
-      </button>
-      <div class="filter-menu" id="filter-menu">
-        <button class="filter-option filter-option--active" data-filter="all">All</button>
-        <button class="filter-option" data-filter="log">Logs</button>
-        <button class="filter-option" data-filter="project">Projects</button>
-      </div>
-    </div>
-
-    <!-- Main Content -->
-    <main class="content">
-      <!-- Portfolio Section -->
-      <section id="portfolio" class="section section--active">
-        <!-- Working Portfolio Frame -->
-        <div class="working-portfolio-frame">
-          <div class="working-portfolio-frame__label">WORKING PORTFOLIO</div>
-          <div class="working-portfolio-frame__statement">
-            <p>This space records decisions, not outcomes.</p>
-            <p>Incomplete entries beat absent ones.</p>
-          </div>
-          <div class="working-portfolio-frame__ritual">
-            <span class="working-portfolio-frame__ritual-label">LOG FORMAT:</span> 3 images · 2 sentences · 1 next step.
-          </div>
-        </div>
-        
-        <!-- Feed Meta Line -->
-        <div class="feed-meta" id="feed-meta">
-          <span id="feed-count">Loading...</span>
-        </div>
-        
-        <div id="portfolio-feed" class="feed">
-          <!-- Posts will be rendered here -->
-        </div>
-      </section>
-
-      <!-- About Section -->
-      <section id="about" class="section">
-        <h2 class="section__title">About</h2>
-        <div class="about-framing">
-          <p class="about-framing__statement">This is a working archive of decisions made under constraint.</p>
-          <p class="about-framing__statement">Finished work is a byproduct. Process is the evidence.</p>
-        </div>
-        <div id="about-content" class="about-content">
-          <!-- About content will be rendered here -->
-        </div>
-      </section>
-    </main>
-
-    <!-- Footer -->
     <footer class="footer">
-      <div class="footer__content">
-        <div class="footer__info">
-          <p class="footer__name" id="footer-name">Your Name</p>
-          <p class="footer__tagline">Art & Technology Studio</p>
-        </div>
-        <div class="footer__contact">
-          <p>Email studio@example.co</p>
-        </div>
-      </div>
+      <span id="footer-timestamp"></span>
+      <span class="footer__divider">—</span>
+      <a href="login.html" id="footer-auth">Log In</a>
     </footer>
-  </div>
+  </main>
 
-  <!-- Modal for viewing posts -->
-  <div id="modal" class="modal">
-    <div class="modal__content">
-      <button class="modal__close">&times;</button>
-      <article id="modal-article" class="modal__article">
-        <!-- Post content will be rendered here -->
-      </article>
+  <div class="lightbox" id="lightbox">
+    <button class="lightbox__close" id="lightbox-close">×</button>
+    <button class="lightbox__prev" id="lightbox-prev">‹</button>
+    <button class="lightbox__next" id="lightbox-next">›</button>
+    <div class="lightbox__content">
+      <img class="lightbox__image" id="lightbox-image" src="" alt="">
     </div>
+    <div class="lightbox__thumbs" id="lightbox-thumbs"></div>
   </div>
 
-
-  <script type="module" src="app.js?v=10"></script>
+  <script type="module" src="app.js"></script>
 </body>
 </html>

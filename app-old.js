@@ -1,0 +1,836 @@
+/* ============================================
+   Portfolio App - Firebase Version
+   ============================================ */
+
+import { db } from './firebase-config.js';
+import {
+  collection,
+  doc,
+  getDoc,
+  query,
+  where,
+  orderBy,
+  getDocs
+} from 'https://www.gstatic.com/firebasejs/12.8.0/firebase-firestore.js';
+
+/* ============================================
+   Minimal Markdown Parser
+   ============================================ */
+class MarkdownParser {
+  constructor() {
+    this.rules = [
+      { pattern: /!\[([^\]]*)\]\(([^)]+)\)/g, replacement: '<img src="$2" alt="$1" />' },
+      { pattern: /\[([^\]]+)\]\(([^)]+)\)/g, replacement: '<a href="$2">$1</a>' },
+      { pattern: /^### (.*?)$/gm, replacement: '<h3>$1</h3>' },
+      { pattern: /^## (.*?)$/gm, replacement: '<h2>$1</h2>' },
+      { pattern: /^# (.*?)$/gm, replacement: '<h1>$1</h1>' },
+      { pattern: /\*\*([^*]+)\*\*/g, replacement: '<strong>$1</strong>' },
+      { pattern: /__([^_]+)__/g, replacement: '<strong>$1</strong>' },
+      { pattern: /\*([^*]+)\*/g, replacement: '<em>$1</em>' },
+      { pattern: /_([^_]+)_/g, replacement: '<em>$1</em>' },
+      { pattern: /`([^`]+)`/g, replacement: '<code>$1</code>' },
+    ];
+  }
+
+  parse(markdown) {
+    if (!markdown) return '';
+    let html = markdown;
+
+    // Apply inline rules
+    this.rules.forEach(rule => {
+      html = html.replace(rule.pattern, rule.replacement);
+    });
+
+    // Parse paragraphs
+    html = html.split('\n\n').map(para => {
+      if (para.match(/^<h[1-6]>/) || para.match(/^<blockquote>/) || para.match(/^<ul>/) || para.match(/^<ol>/) || para.match(/^<pre>/)) {
+        return para;
+      }
+      if (para.trim().length === 0) return '';
+      return `<p>${para}</p>`;
+    }).join('\n\n');
+
+    // Parse lists
+    html = html.replace(/^\* (.+)$/gm, '<li>$1</li>');
+    html = html.replace(/^\d+\. (.+)$/gm, '<li>$1</li>');
+    html = html.replace(/(<li>.*?<\/li>)/s, '<ul>$1</ul>');
+    html = html.replace(/<\/ul>\s*<ul>/g, '');
+
+    // Parse blockquotes
+    html = html.replace(/^&gt; (.+)$/gm, '<blockquote>$1</blockquote>');
+
+    return html;
+  }
+}
+
+/* ============================================
+   Portfolio App
+   ============================================ */
+class PortfolioApp {
+  constructor() {
+    this.parser = new MarkdownParser();
+    this.posts = [];
+    this.projects = [];
+    this.currentFilter = 'all';
+    this.userProfile = null;
+    this.userId = null;
+
+    this.init();
+  }
+
+  async init() {
+    // PROOF OF LIFE
+    const buildTime = new Date().toLocaleString();
+    console.log('🔥 FIREBASE BUILD v10', buildTime);
+    console.log('Timestamp:', new Date().toISOString());
+    
+    // Get user from URL parameter (supports both userId and username)
+    const urlParams = new URLSearchParams(window.location.search);
+    const userParam = urlParams.get('user');
+    
+    if (!userParam) {
+      this.showLandingPage();
+      return;
+    }
+    
+    console.log('Loading portfolio for:', userParam);
+    
+    // Try to resolve username to userId
+    await this.resolveUser(userParam);
+    
+    if (!this.userId) {
+      this.showError('User not found');
+      return;
+    }
+    
+    await this.loadUserProfile();
+    await this.loadPosts();
+    this.setupEventListeners();
+    this.renderTicker();
+    this.renderPortfolio();
+    this.updatePageTitle();
+  }
+
+  showLandingPage() {
+    // Always setup event listeners for menu
+    this.setupEventListeners();
+    
+    // Hide portfolio sections and show welcome message
+    const sections = document.querySelectorAll('.section');
+    sections.forEach(section => section.style.display = 'none');
+    
+    const portfolioFeed = document.getElementById('portfolio-feed');
+    if (portfolioFeed) {
+      portfolioFeed.innerHTML = `
+        <div style="text-align: center; padding: 6rem 2rem;">
+          <div style="font-size: 4rem; margin-bottom: 2rem;">🎨</div>
+          <h1 style="font-family: var(--font-display); font-size: 2.5rem; font-weight: 600; margin-bottom: 1rem; letter-spacing: -0.02em;">Art & Technology Portfolio</h1>
+          <p style="font-size: 1.125rem; color: var(--color-text-light); margin-bottom: 2rem; max-width: 600px; margin-left: auto; margin-right: auto;">
+            A platform for documenting your creative process. Add logs, projects, and share your work with a shareable link.
+          </p>
+          <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+            <a href="login.html" style="padding: 0.75rem 1.5rem; background: var(--color-accent); color: white; text-decoration: none; border: var(--border-medium) solid var(--color-accent); font-weight: 600; text-transform: uppercase; font-size: 0.875rem; letter-spacing: 0.05em;">Log In</a>
+            <a href="signup.html" style="padding: 0.75rem 1.5rem; background: var(--color-bg); color: var(--color-text); text-decoration: none; border: var(--border-medium) solid var(--color-text); font-weight: 600; text-transform: uppercase; font-size: 0.875rem; letter-spacing: 0.05em;">Create Account</a>
+          </div>
+          <p style="margin-top: 3rem; font-size: 0.875rem; color: var(--color-text-muted);">
+            Example portfolio: <a href="?user=Cpvy9X9rdMQrqEuefszUcuJ9Z852" style="color: var(--color-accent); text-decoration: underline;">View Sample</a>
+          </p>
+        </div>
+      `;
+    }
+  }
+
+  async resolveUser(userParam) {
+    try {
+      // First try as a direct userId
+      const userDoc = await getDoc(doc(db, 'users', userParam));
+      
+      if (userDoc.exists()) {
+        this.userId = userParam;
+        console.log('Found user by userId:', this.userId);
+        return;
+      }
+      
+      // If not found, try as username
+      const q = query(
+        collection(db, 'users'),
+        where('username', '==', userParam)
+      );
+      
+      const querySnapshot = await getDocs(q);
+      
+      if (!querySnapshot.empty) {
+        this.userId = querySnapshot.docs[0].id;
+        console.log('Found user by username:', userParam, '→ userId:', this.userId);
+      } else {
+        console.error('User not found:', userParam);
+      }
+      
+    } catch (error) {
+      console.error('Error resolving user:', error);
+    }
+  }
+
+
+  showError(message) {
+    const portfolioFeed = document.getElementById('portfolio-feed');
+    if (portfolioFeed) {
+      portfolioFeed.innerHTML = `
+        <div style="text-align: center; padding: 4rem 2rem; color: #999;">
+          <div style="font-size: 3rem; margin-bottom: 1rem;">⚠️</div>
+          <div style="font-size: 1.125rem;">${message}</div>
+        </div>
+      `;
+    }
+  }
+
+  async loadUserProfile() {
+    try {
+      const userDoc = await getDoc(doc(db, 'users', this.userId));
+      
+      if (!userDoc.exists()) {
+        this.showError('User not found');
+        return;
+      }
+
+      this.userProfile = userDoc.data();
+      console.log('Loaded user profile:', this.userProfile);
+      
+      // Update UI with user info
+      const displayName = this.userProfile.displayName || this.userProfile.email || 'Portfolio';
+      const bio = this.userProfile.bio || 'Exploring art and technology';
+      const email = this.userProfile.email || '';
+      
+      document.getElementById('hero-name').textContent = displayName;
+      document.getElementById('hero-bio').textContent = bio;
+      document.getElementById('footer-name').textContent = displayName;
+      
+      // Update footer email
+      const footerContact = document.querySelector('.footer__contact');
+      if (footerContact && email) {
+        footerContact.innerHTML = `<p>Email: <a href="mailto:${email}">${email}</a></p>`;
+      }
+      
+      document.getElementById('page-title').textContent = `${displayName} — Portfolio`;
+      
+    } catch (error) {
+      console.error('Error loading user profile:', error);
+      this.showError('Error loading profile');
+    }
+  }
+
+  async loadPosts() {
+    try {
+      const q = query(
+        collection(db, 'posts'),
+        where('userId', '==', this.userId),
+        orderBy('createdAt', 'desc')
+      );
+
+      const querySnapshot = await getDocs(q);
+      const allPosts = querySnapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      }));
+
+      console.log(`Loaded ${allPosts.length} posts`);
+
+      // Separate logs and projects
+      this.posts = allPosts.filter(p => p.type === 'log');
+      this.projects = allPosts.filter(p => p.type === 'project');
+
+    } catch (error) {
+      console.error('Error loading posts:', error);
+      this.showError('Error loading posts');
+    }
+  }
+
+
+  renderTicker() {
+    const tickerContent = document.getElementById('ticker-content');
+    const tickerClone = document.getElementById('ticker-content-clone');
+    
+    if (!tickerContent || !tickerClone) return;
+    
+    let phrases = [];
+    let tickerDuration = 60; // Default 60s
+    
+    const allPosts = [...this.posts, ...this.projects];
+    
+    if (allPosts.length > 0) {
+      // Compute days since last update
+      const latestPost = allPosts[0];
+      const postDate = latestPost.createdAt?.toDate ? latestPost.createdAt.toDate() : new Date(latestPost.date || Date.now());
+      const daysSinceUpdate = Math.floor((Date.now() - postDate.getTime()) / (1000 * 60 * 60 * 24));
+      
+      // Generate ticker from latest 6 posts
+      const recentPosts = allPosts.slice(0, 6);
+      phrases = recentPosts.map(post => {
+        const type = post.type === 'log' ? 'LOG' : 'PROJECT';
+        const titleUpper = (post.title || 'UNTITLED').toUpperCase();
+        return `${type} · ${titleUpper}`;
+      });
+      
+      // Add temporal marker
+      if (daysSinceUpdate === 0) {
+        phrases.unshift('LAST UPDATE · TODAY');
+      } else if (daysSinceUpdate === 1) {
+        phrases.unshift('LAST UPDATE · 1 DAY AGO');
+      } else {
+        phrases.unshift(`LAST UPDATE · ${daysSinceUpdate} DAYS AGO`);
+      }
+      
+      tickerDuration = allPosts.length >= 10 ? 45 : 60;
+    } else {
+      // Default studio phrases
+      phrases = [
+        'DOCUMENT EVERYTHING',
+        'FAILURE IS DATA',
+        'REVISION IS THE WORK',
+        'BUILD / TEST / REBUILD',
+        'PROCESS OVER PRODUCT',
+        'CONSTRAINT BREEDS CREATIVITY'
+      ];
+      tickerDuration = 75;
+    }
+    
+    // Set dynamic ticker speed
+    document.documentElement.style.setProperty('--ticker-duration', `${tickerDuration}s`);
+    
+    const tickerText = phrases.join(' · ');
+    tickerContent.textContent = tickerText + ' · ';
+    tickerClone.textContent = tickerText + ' · ';
+  }
+
+  setupEventListeners() {
+    // Navigation toggle
+    const navToggle = document.getElementById('nav-toggle');
+    const nav = document.getElementById('nav');
+    
+    if (navToggle && nav) {
+      navToggle.addEventListener('click', (e) => {
+        e.stopPropagation();
+        nav.classList.toggle('nav--open');
+        // Close filter dropdown when opening nav
+        const filterDropdown = document.getElementById('filter-dropdown');
+        if (filterDropdown) filterDropdown.classList.remove('filter-dropdown--open');
+      });
+      
+      // Close nav when clicking outside
+      document.addEventListener('click', (e) => {
+        if (!nav.contains(e.target)) {
+          nav.classList.remove('nav--open');
+        }
+      });
+    }
+
+    // Filter dropdown toggle
+    const filterToggle = document.getElementById('filter-toggle');
+    const filterDropdown = document.getElementById('filter-dropdown');
+    
+    if (filterToggle && filterDropdown) {
+      filterToggle.addEventListener('click', (e) => {
+        e.stopPropagation();
+        filterDropdown.classList.toggle('filter-dropdown--open');
+        // Close nav when opening filter
+        if (nav) nav.classList.remove('nav--open');
+      });
+      
+      // Close filter dropdown when clicking outside
+      document.addEventListener('click', (e) => {
+        if (!filterDropdown.contains(e.target)) {
+          filterDropdown.classList.remove('filter-dropdown--open');
+        }
+      });
+    }
+    
+    // Navigation links
+    document.querySelectorAll('.nav__link').forEach(link => {
+      link.addEventListener('click', (e) => {
+        // Only prevent default if this is an internal section link
+        if (link.dataset.section) {
+          e.preventDefault();
+          this.switchSection(link.dataset.section);
+          if (nav) nav.classList.remove('nav--open');
+        } else {
+          // Allow external links to work normally
+          if (nav) nav.classList.remove('nav--open');
+        }
+      });
+    });
+
+    // Filter options
+    document.querySelectorAll('.filter-option').forEach(option => {
+      option.addEventListener('click', () => {
+        document.querySelectorAll('.filter-option').forEach(o => o.classList.remove('filter-option--active'));
+        option.classList.add('filter-option--active');
+        this.currentFilter = option.dataset.filter;
+        
+        // Update filter toggle label
+        const filterLabel = document.getElementById('filter-current');
+        if (filterLabel) {
+          filterLabel.textContent = option.textContent;
+        }
+        
+        // Close dropdown
+        if (filterDropdown) filterDropdown.classList.remove('filter-dropdown--open');
+        
+        this.renderPortfolio();
+      });
+    });
+
+    // Modal close
+    const modal = document.getElementById('modal');
+    const closeBtn = document.querySelector('.modal__close');
+    
+    if (closeBtn) {
+      closeBtn.addEventListener('click', () => {
+        modal.classList.remove('modal--active');
+        document.body.style.overflow = 'auto';
+      });
+    }
+
+    if (modal) {
+      modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+          modal.classList.remove('modal--active');
+          document.body.style.overflow = 'auto';
+        }
+      });
+    }
+  }
+
+  switchSection(sectionName) {
+    console.log('Switching to section:', sectionName);
+    
+    // Hide all sections
+    document.querySelectorAll('.section').forEach(s => {
+      s.classList.remove('section--active');
+      s.style.display = 'none';
+    });
+
+    // Show selected section
+    const targetSection = document.getElementById(sectionName);
+    if (targetSection) {
+      targetSection.classList.add('section--active');
+      targetSection.style.display = 'block';
+    }
+
+    // Update nav active state
+    document.querySelectorAll('.nav__link').forEach(link => {
+      link.classList.remove('nav__link--active');
+    });
+    const activeLink = document.querySelector(`[data-section="${sectionName}"]`);
+    if (activeLink) {
+      activeLink.classList.add('nav__link--active');
+    }
+
+    // Update URL hash
+    window.location.hash = sectionName;
+
+    // Render content
+    if (sectionName === 'portfolio') {
+      this.renderPortfolio();
+    } else if (sectionName === 'about') {
+      this.renderAbout();
+    }
+  }
+
+  renderPortfolio() {
+    const feed = document.getElementById('portfolio-feed');
+    if (!feed) return;
+    
+    feed.innerHTML = '';
+
+    // Combine both logs and projects, then sort by date (newest first)
+    const allPosts = [...this.posts, ...this.projects].sort((a, b) => {
+      const dateA = a.date || (a.createdAt?.toDate ? a.createdAt.toDate() : new Date(0));
+      const dateB = b.date || (b.createdAt?.toDate ? b.createdAt.toDate() : new Date(0));
+      return new Date(dateB) - new Date(dateA);
+    });
+    
+    const filtered = allPosts.filter(post => {
+      if (this.currentFilter === 'all') return true;
+      return post.type === this.currentFilter;
+    });
+
+    // Update feed meta line
+    this.updateFeedMeta(filtered);
+
+    // Show ghost collage if no posts
+    if (filtered.length === 0) {
+      this.renderGhostCollage(feed);
+      return;
+    }
+
+    // Compute LOG index for logs (chronological order, oldest = 001)
+    const logs = this.posts.filter(p => p.type === 'log').reverse();
+    const logIndexMap = new Map();
+    logs.forEach((log, index) => {
+      logIndexMap.set(log.title + log.date, String(index + 1).padStart(3, '0'));
+    });
+
+    // Render posts with rupture class on every 10th card
+    filtered.forEach((post, index) => {
+      const card = this.createPostCard(post, index, logIndexMap);
+      
+      // Apply rupture to every 10th visible card (controlled disobedience)
+      if ((index + 1) % 10 === 0) {
+        card.classList.add('rupture');
+      }
+      
+      feed.appendChild(card);
+    });
+    
+    // Add empty slot plates ONLY if NO posts at all
+    if (filtered.length === 0) {
+      this.injectEmptySlots(feed);
+    }
+  }
+
+  updateFeedMeta(filtered) {
+    const feedMeta = document.getElementById('feed-count');
+    if (filtered.length === 0) {
+      feedMeta.textContent = 'No posts yet';
+      return;
+    }
+
+    const latest = filtered[0];
+    const latestDate = new Date(latest.date).toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric'
+    });
+    
+    const count = filtered.length;
+    const plural = count === 1 ? 'post' : 'posts';
+    feedMeta.textContent = `Showing ${count} ${plural} · Latest: ${latestDate}`;
+  }
+
+  injectEmptySlots(feed) {
+    // Only show empty slots when portfolio is completely empty
+    const slotMessages = [
+      { label: 'EMPTY SLOT', message: 'Post something small' },
+      { label: 'UNRECORDED DAY', message: 'Add a log' },
+      { label: 'ABSENCE IS ALSO INFORMATION', message: '' }
+    ];
+    
+    // Show all 3 empty slots since portfolio is empty
+    slotMessages.forEach((msg) => {
+      const slot = document.createElement('div');
+      slot.className = 'empty-slot';
+      
+      const label = document.createElement('div');
+      label.className = 'empty-slot__label';
+      label.textContent = msg.label;
+      slot.appendChild(label);
+      
+      if (msg.message) {
+        const message = document.createElement('div');
+        message.className = 'empty-slot__message';
+        message.textContent = msg.message;
+        slot.appendChild(message);
+      }
+      
+      feed.appendChild(slot);
+    });
+  }
+
+  renderGhostCollage(feed) {
+    const labels = ['LOG', 'IMAGE', 'FAILED ATTEMPT', 'REVISION', 'NOTE', 'TEST PRINT', 'SKETCH', 'PROCESS', 'ITERATION'];
+    
+    // Intentional absence plates (3-4 of them)
+    const absenceLabels = [
+      'NO ENTRY FOR THIS DAY',
+      'DOCUMENTATION FAILED',
+      'PROCESS UNRECORDED',
+      'MATERIAL LOST'
+    ];
+    
+    for (let i = 0; i < 9; i++) {
+      const ghost = document.createElement('div');
+      
+      // Make 4 plates "absence" plates
+      const isAbsence = i < 4;
+      ghost.className = isAbsence ? 'ghost-plate ghost-plate--absence' : 'ghost-plate';
+      
+      const label = document.createElement('div');
+      label.className = 'ghost-plate__label';
+      label.textContent = isAbsence ? absenceLabels[i] : labels[i];
+      ghost.appendChild(label);
+      
+      // Alternate between 3-up blocks and wide blocks
+      if (i % 3 === 0) {
+        const wideBlock = document.createElement('div');
+        wideBlock.className = 'ghost-plate__block ghost-plate__block--wide';
+        ghost.appendChild(wideBlock);
+      } else {
+        const blocks = document.createElement('div');
+        blocks.className = 'ghost-plate__blocks';
+        for (let j = 0; j < 3; j++) {
+          const block = document.createElement('div');
+          block.className = 'ghost-plate__block';
+          blocks.appendChild(block);
+        }
+        ghost.appendChild(blocks);
+      }
+      
+      if (i % 2 === 0) {
+        const rule = document.createElement('div');
+        rule.className = 'ghost-plate__rule';
+        ghost.appendChild(rule);
+      }
+      
+      feed.appendChild(ghost);
+    }
+  }
+
+  createPostCard(post, index, logIndexMap) {
+    const card = document.createElement('div');
+    card.className = post.type === 'log' ? 'card card--log' : 'card card--project';
+
+    // Handle both date string and Firestore timestamp
+    const dateValue = post.date || (post.createdAt?.toDate ? post.createdAt.toDate() : new Date());
+    const formattedDate = new Date(dateValue).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric'
+    });
+
+    if (post.type === 'log') {
+      // LOG INDEX
+      const logIndex = logIndexMap.get(post.title + post.date) || '000';
+      const indexEl = document.createElement('div');
+      indexEl.className = 'card__log-index';
+      indexEl.textContent = `LOG ${logIndex}`;
+      card.appendChild(indexEl);
+
+      const dateEl = document.createElement('div');
+      dateEl.className = 'card__date';
+      dateEl.textContent = formattedDate;
+      card.appendChild(dateEl);
+
+      const titleEl = document.createElement('h3');
+      titleEl.className = 'card__title';
+      titleEl.textContent = post.title;
+      card.appendChild(titleEl);
+
+      // Images grid (3-up or 2-up)
+      if (post.images && post.images.length > 0) {
+        const imagesContainer = document.createElement('div');
+        imagesContainer.className = 'card__images';
+
+        const imageCount = Math.min(post.images.length, 3);
+        post.images.slice(0, imageCount).forEach(imgUrl => {
+          const img = document.createElement('img');
+          img.className = 'card__image';
+          img.src = imgUrl;
+          img.alt = post.title;
+          imagesContainer.appendChild(img);
+        });
+
+        card.appendChild(imagesContainer);
+      }
+
+      // Excerpt
+      const excerptEl = document.createElement('p');
+      excerptEl.className = 'card__excerpt';
+      const firstSentence = (post.summary || post.body).split('.')[0] + '.';
+      excerptEl.textContent = firstSentence;
+      card.appendChild(excerptEl);
+
+      // "Next step" from frontmatter if present
+      if (post.next_step) {
+        const nextStepEl = document.createElement('div');
+        nextStepEl.className = 'card__next-step';
+        nextStepEl.innerHTML = `<span class="card__next-step-label">Next:</span> ${post.next_step}`;
+        card.appendChild(nextStepEl);
+      }
+    } else {
+      // PROJECT CARD - Same structure as log cards
+      // Project tag
+      const projectTag = document.createElement('div');
+      projectTag.className = 'card__project-tag';
+      projectTag.textContent = post.project_number ? `PROJECT ${String(post.project_number).padStart(2, '0')}` : 'PROJECT';
+      card.appendChild(projectTag);
+
+      const dateEl = document.createElement('div');
+      dateEl.className = 'card__date';
+      dateEl.textContent = formattedDate;
+      card.appendChild(dateEl);
+
+      const titleEl = document.createElement('h3');
+      titleEl.className = 'card__title';
+      titleEl.textContent = post.title;
+      card.appendChild(titleEl);
+
+      // Images grid (same treatment as logs)
+      if (post.images && post.images.length > 0) {
+        const imagesContainer = document.createElement('div');
+        imagesContainer.className = 'card__images';
+
+        const imageCount = Math.min(post.images.length, 3);
+        post.images.slice(0, imageCount).forEach(imgUrl => {
+          const img = document.createElement('img');
+          img.className = 'card__image';
+          img.src = imgUrl;
+          img.alt = post.title;
+          imagesContainer.appendChild(img);
+        });
+
+        card.appendChild(imagesContainer);
+      } else if (post.featured_image) {
+        // Fallback to featured_image if no images array
+        const imagesContainer = document.createElement('div');
+        imagesContainer.className = 'card__images';
+        const img = document.createElement('img');
+        img.className = 'card__image';
+        img.src = post.featured_image;
+        img.alt = post.title;
+        imagesContainer.appendChild(img);
+        card.appendChild(imagesContainer);
+      }
+
+      // Excerpt
+      const excerptEl = document.createElement('p');
+      excerptEl.className = 'card__excerpt';
+      excerptEl.textContent = post.summary || post.body.substring(0, 150);
+      card.appendChild(excerptEl);
+    }
+
+    card.addEventListener('click', () => {
+      this.openPostModal(post);
+    });
+
+    return card;
+  }
+
+  openPostModal(post) {
+    const modal = document.getElementById('modal');
+    const article = document.getElementById('modal-article');
+
+    let html = `<h1 class="modal__title">${post.title}</h1>`;
+
+    // Handle both date string and Firestore timestamp
+    const dateValue = post.date || (post.createdAt?.toDate ? post.createdAt.toDate() : new Date());
+    const formattedDate = new Date(dateValue).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric'
+    });
+    html += `<p class="modal__meta">${formattedDate}</p>`;
+
+    // Display featured image OR first image from array
+    if (post.featured_image) {
+      html += `<img src="${post.featured_image}" alt="${post.title}" class="modal__hero-image" />`;
+    } else if (post.images && post.images.length > 0) {
+      html += `<img src="${post.images[0]}" alt="${post.title}" class="modal__hero-image" />`;
+    }
+
+    if (post.tags && post.tags.length > 0) {
+      html += `<div class="modal__tags"><span class="modal__tag">Tags: ${post.tags.join(', ')}</span></div>`;
+    }
+
+    html += `<div class="modal__body">${this.parser.parse(post.body || '')}</div>`;
+
+    // Display all images in a gallery at bottom
+    if (post.images && post.images.length > 1) {
+      html += `<div class="modal__gallery" style="margin-top: 2rem; padding-top: 2rem; border-top: 1px solid var(--color-border);">`;
+      html += `<h3 style="font-size: var(--text-sm); text-transform: uppercase; margin-bottom: 1rem;">IMAGES</h3>`;
+      html += `<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem;">`;
+      post.images.forEach((img, idx) => {
+        html += `<img src="${img}" alt="Image ${idx + 1}" style="width: 100%; height: 150px; object-fit: cover; border: 1px solid var(--color-border);" />`;
+      });
+      html += `</div></div>`;
+    }
+
+    article.innerHTML = html;
+    modal.classList.add('modal--active');
+    document.body.style.overflow = 'hidden';
+  }
+
+  renderProjects() {
+    const grid = document.getElementById('projects-grid');
+    grid.innerHTML = '';
+
+    this.projects.forEach((project) => {
+      const card = document.createElement('div');
+      card.className = 'project-card';
+
+      if (project.images && project.images.length > 0) {
+        const img = document.createElement('img');
+        img.className = 'project-card__image';
+        img.src = project.images[0];
+        img.alt = project.title;
+        card.appendChild(img);
+      }
+
+      const body = document.createElement('div');
+      body.className = 'project-card__body';
+
+      const title = document.createElement('h3');
+      title.className = 'project-card__title';
+      title.textContent = project.title;
+      body.appendChild(title);
+
+      const summary = document.createElement('p');
+      summary.className = 'project-card__summary';
+      summary.textContent = project.summary || project.body.substring(0, 100);
+      body.appendChild(summary);
+
+      card.appendChild(body);
+
+      card.addEventListener('click', () => {
+        this.openProjectModal(project);
+      });
+
+      grid.appendChild(card);
+    });
+  }
+
+  renderAbout() {
+    const aboutContent = document.getElementById('about-content');
+    if (!aboutContent) return;
+    
+    aboutContent.innerHTML = `
+      <p>${this.userProfile?.bio || 'Student portfolio'}</p>
+    `;
+  }
+
+  updatePageTitle() {
+    const displayName = this.userProfile?.displayName || 'Portfolio';
+    document.title = `${displayName} — Portfolio`;
+  }
+}
+
+// Initialize app
+new PortfolioApp();
+
+// Check auth state and update nav link
+import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/12.8.0/firebase-auth.js';
+
+const auth = getAuth();
+const authLink = document.getElementById('auth-link');
+
+if (authLink) {
+  onAuthStateChanged(auth, async (user) => {
+    if (user) {
+      authLink.href = 'editor.html';
+      authLink.textContent = 'Editor';
+
+      // Auto-redirect to user's portfolio if no ?user parameter
+      const urlParams = new URLSearchParams(window.location.search);
+      if (!urlParams.has('user')) {
+        // Get user's username for clean URL
+        const userDoc = await getDoc(doc(db, 'users', user.uid));
+        if (userDoc.exists()) {
+          const username = userDoc.data().username || user.uid;
+          window.location.href = `?user=${username}`;
+        }
+      }
+    } else {
+      authLink.href = 'login.html';
+      authLink.textContent = 'Log In';
+    }
+  });
+}
+
