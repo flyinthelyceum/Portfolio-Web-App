@@ -812,10 +812,21 @@ const auth = getAuth();
 const authLink = document.getElementById('auth-link');
 
 if (authLink) {
-  onAuthStateChanged(auth, (user) => {
+  onAuthStateChanged(auth, async (user) => {
     if (user) {
       authLink.href = 'editor.html';
       authLink.textContent = 'Editor';
+
+      // Auto-redirect to user's portfolio if no ?user parameter
+      const urlParams = new URLSearchParams(window.location.search);
+      if (!urlParams.has('user')) {
+        // Get user's username for clean URL
+        const userDoc = await getDoc(doc(db, 'users', user.uid));
+        if (userDoc.exists()) {
+          const username = userDoc.data().username || user.uid;
+          window.location.href = `?user=${username}`;
+        }
+      }
     } else {
       authLink.href = 'login.html';
       authLink.textContent = 'Log In';
