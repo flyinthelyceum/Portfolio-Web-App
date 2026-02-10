@@ -2,50 +2,258 @@ rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
-    
-    // Helper function: Check if user is authenticated
+
+    // ========================================================================
+    // HELPER FUNCTIONS
+    // ========================================================================
+
     function isSignedIn() {
       return request.auth != null;
     }
-    
-    // Helper function: Check if user owns the resource
+
     function isOwner(userId) {
       return isSignedIn() && request.auth.uid == userId;
     }
-    
-    // Helper function: Check if user is an admin
+
+    function getUserData() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
+    }
+
     function isAdmin() {
-      return isSignedIn() && 
-        exists(/databases/$(database)/documents/admins/$(request.auth.uid));
+      return isSignedIn() && getUserData().role == 'admin';
     }
-    
-    // User profiles
-    // Read: Public (for portfolio viewing)
-    // Write: Only the user themselves
-    match /users/{userId} {
-      allow read: if true;
-      allow create: if isOwner(userId);
-      allow update, delete: if isOwner(userId) || isAdmin();
+
+    function isActive() {
+      return isSignedIn() && getUserData().active == true;
     }
-    
-    // Posts (logs and projects)
-    // Read: Public (for portfolio viewing)
-    // Create: Any authenticated user
-    // Update/Delete: Only the post owner
+
+    // ========================================================================
+    // V1 COLLECTIONS (Backward Compatibility)
+    // ========================================================================
+
+    // Legacy posts collection (v1)
     match /posts/{postId} {
       allow read: if true;
       allow create: if isSignedIn();
-      allow update, delete: if isSignedIn() && 
-        resource.data.userId == request.auth.uid;
+      allow update, delete: if isSignedIn() && resource.data.userId == request.auth.uid;
     }
-    
-    // Admin collection
-    // Only admins can read/write
+
+    // Legacy admins collection (v1)
     match /admins/{adminId} {
       allow read, write: if isAdmin();
     }
-    
-    // Fallback: Deny all other access
+
+    // ========================================================================
+    // V2 COLLECTIONS
+    // ========================================================================
+
+    // --- USERS (private member record) ---
+    match /users/{userId} {
+      // Anyone can read (for class identity display)
+      allow read: if true;
+
+      // User can create their own profile (including setting initial role)
+      allow create: if isOwner(userId);
+
+      // User can update limited fields only
+      // Cannot write: role, points*, streak*, moderation flags
+      allow update: if isOwner(userId) && (
+        !request.resource.data.diff(resource.data).affectedKeys().hasAny([
+          'role', 'active', 'pointsTotal', 'pointsLogsTotal',
+          'pointsSocialTotal', 'pointsFeatureTotal',
+          'streakLogCurrent', 'streakIterationCurrent'
+        ])
+      );
+
+      // BOOTSTRAP: Allow user to set themselves as admin if they're a student
+      // This enables first-time setup without Firebase Console
+      // TODO: Remove this rule after initial admin is set up
+      allow update: if isOwner(userId) &&
+        resource.data.role == 'student' &&
+        request.resource.data.role == 'admin' &&
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['role', 'active', 'updatedAt']);
+
+      // Admin can update any field
+      allow update: if isAdmin();
+
+      // Only admin can delete
+      allow delete: if isAdmin();
+
+      // --- BADGES (subcollection) ---
+      match /badges/{badgeId} {
+        // Users can read their own and others can see for display
+        allow read: if isSignedIn();
+        // Only system/admin can write (via Cloud Functions)
+        allow write: if false;
+      }
+    }
+
+    // --- PUBLIC PROFILES (public-readable record) ---
+    match /publicProfiles/{userId} {
+      // Public if publicEnabled, otherwise only members
+      allow read: if resource.data.publicEnabled == true || isSignedIn();
+
+      // User can update their own public-facing fields
+      allow create, update: if isOwner(userId) && (
+        !request.resource.data.diff(resource.data).affectedKeys().hasAny(['publicEnabled'])
+      );
+
+      // Admin can toggle publicEnabled
+      allow update: if isAdmin();
+    }
+
+    // --- TASK CATEGORIES ---
+    match /taskCategories/{categoryId} {
+      allow read: if isSignedIn();
+      allow write: if isAdmin();
+    }
+
+    // --- TASKS ---
+    match /tasks/{taskId} {
+      allow read: if isSignedIn();
+      allow write: if isAdmin();
+    }
+
+    // --- PROJECTS ---
+    match /projects/{projectId} {
+      // Public visibility: anyone can read
+      // Class visibility: signed-in users
+      // Draft visibility: owner or admin only
+      allow read: if resource.data.visibility == 'public' ||
+                    (isSignedIn() && resource.data.visibility == 'class') ||
+                    isOwner(resource.data.ownerUserId) ||
+                    isAdmin();
+
+      // Owner can create/update their own projects
+      allow create: if isSignedIn() && request.resource.data.ownerUserId == request.auth.uid;
+      allow update: if isOwner(resource.data.ownerUserId) && (
+        // Cannot write scoring fields
+        !request.resource.data.diff(resource.data).affectedKeys().hasAny([
+          'basePoints', 'likeCount', 'commentCount',
+          'featureBonusAwarded', 'featureBonusValue'
+        ])
+      );
+
+      // Admin can moderate
+      allow update: if isAdmin();
+
+      // Soft delete only (set deletedAt)
+      allow delete: if false;
+    }
+
+    // --- LOGS ---
+    match /logs/{logId} {
+      // Visibility-based read access
+      allow read: if resource.data.visibility == 'public' ||
+                    (isSignedIn() && resource.data.visibility == 'class') ||
+                    isOwner(resource.data.ownerUserId) ||
+                    isAdmin();
+
+      // IMPORTANT: Logs are created via Cloud Function (publishLog)
+      // Client can only create drafts
+      allow create: if isSignedIn() &&
+                      request.resource.data.ownerUserId == request.auth.uid &&
+                      request.resource.data.visibility == 'draft';
+
+      // Client can update draft content only
+      allow update: if isOwner(resource.data.ownerUserId) &&
+                      resource.data.visibility == 'draft' &&
+                      request.resource.data.visibility == 'draft' && (
+        !request.resource.data.diff(resource.data).affectedKeys().hasAny([
+          'basePoints', 'dayKey', 'weekKey', 'eligibleForPoints',
+          'featureBonusAwarded', 'featureBonusValue', 'likeCount', 'commentCount'
+        ])
+      );
+
+      // Publishing (draft -> class/public) must go through Cloud Function
+      // Admin can moderate
+      allow update: if isAdmin();
+
+      allow delete: if false;
+    }
+
+    // --- LIKES ---
+    match /likes/{likeId} {
+      // Signed-in users can read likes
+      allow read: if isSignedIn();
+
+      // User can create/delete their own likes
+      allow create: if isSignedIn() &&
+                      request.resource.data.likerUserId == request.auth.uid;
+      allow delete: if isOwner(resource.data.likerUserId);
+
+      // No updates to likes
+      allow update: if false;
+    }
+
+    // --- COMMENTS ---
+    match /comments/{commentId} {
+      // Signed-in users can read comments
+      allow read: if isSignedIn();
+
+      // User can create comments
+      allow create: if isSignedIn() &&
+                      request.resource.data.authorUserId == request.auth.uid;
+
+      // Author can soft-delete their own comment
+      allow update: if isOwner(resource.data.authorUserId) &&
+                      request.resource.data.diff(resource.data).affectedKeys().hasOnly(['removedAt']);
+
+      // Admin can moderate (set removedAt, removedByUserId)
+      allow update: if isAdmin();
+
+      allow delete: if false;
+    }
+
+    // --- HIGHLIGHTS (Pins + Features) ---
+    match /highlights/{highlightId} {
+      allow read: if isSignedIn();
+
+      // Students can create pins (own work only)
+      allow create: if isSignedIn() &&
+                      request.resource.data.type == 'pin' &&
+                      request.resource.data.targetOwnerUserId == request.auth.uid &&
+                      request.resource.data.createdByUserId == request.auth.uid;
+
+      // Admin can create features
+      allow create: if isAdmin() && request.resource.data.type == 'feature';
+
+      // Admin can remove highlights
+      allow update: if isAdmin();
+
+      allow delete: if isAdmin();
+    }
+
+    // --- BADGE DEFINITIONS ---
+    match /badgeDefs/{badgeId} {
+      allow read: if isSignedIn();
+      allow write: if isAdmin();
+    }
+
+    // --- POINTS EVENTS (Audit Log) ---
+    match /pointsEvents/{eventId} {
+      // Admin can read for auditing
+      allow read: if isAdmin();
+      // Only Cloud Functions can write
+      allow write: if false;
+    }
+
+    // --- SCOREBOARDS ---
+    match /scoreboards/{boardId} {
+      allow read: if isSignedIn();
+      // Admin can create/configure scoreboards, Cloud Functions update entries
+      allow write: if isAdmin();
+
+      match /entries/{userId} {
+        allow read: if isSignedIn();
+        // Only Cloud Functions can write entries
+        allow write: if false;
+      }
+    }
+
+    // ========================================================================
+    // FALLBACK: Deny all other access
+    // ========================================================================
     match /{document=**} {
       allow read, write: if false;
     }

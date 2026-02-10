@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Settings — Studio Log</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <div class="app-shell">
+    <nav class="nav-bar">
+      <div class="nav-container">
+        <a href="index.html" class="nav-brand">Studio Log</a>
+        <div class="nav-tabs">
+          <a href="index.html" class="nav-tab">Home</a>
+          <a href="tasks.html" class="nav-tab">Tasks</a>
+          <a href="highlights.html" class="nav-tab">Highlights</a>
+          <a href="leaderboard.html" class="nav-tab">Leaderboard</a>
+        </div>
+        <button class="nav-gear" title="Settings" style="background: var(--color-text); color: var(--color-bg);">⚙</button>
+      </div>
+    </nav>
+
+    <main class="main-content">
+      <div style="max-width: 600px;">
+        <h1 style="margin-bottom: var(--spacing-md);">Settings</h1>
+
+        <!-- Loading -->
+        <div id="loading" class="loading">
+          <div class="loading-spinner"></div>
+        </div>
+
+        <!-- Not logged in -->
+        <div id="auth-required" class="empty-state" style="display: none;">
+          <h2 class="empty-state-headline">Log in to continue</h2>
+          <a href="login.html" class="btn btn-primary">Log In</a>
+        </div>
+
+        <!-- Settings Form -->
+        <div id="settings-content" style="display: none;">
+
+          <!-- Profile Section -->
+          <div class="task-detail" style="margin-bottom: var(--spacing-md);">
+            <div class="task-detail-header">
+              <h3>Profile</h3>
+            </div>
+            <div class="task-detail-body">
+              <form id="profile-form">
+                <!-- Avatar -->
+                <div class="form-group">
+                  <label class="form-label">Photo</label>
+                  <div style="display: flex; align-items: center; gap: var(--spacing-md);">
+                    <div id="avatar-preview" style="width: 80px; height: 80px; border: 2px solid var(--color-border); display: flex; align-items: center; justify-content: center; font-size: var(--text-2xl); font-weight: 700; background: var(--color-grid);">
+                      ?
+                    </div>
+                    <div>
+                      <input type="file" id="avatar-input" accept="image/*" style="display: none;">
+                      <button type="button" id="avatar-btn" class="btn btn-small btn-secondary">Change Photo</button>
+                      <p class="form-hint" style="margin-top: var(--spacing-xs);">Max 2MB. Square images work best.</p>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Name -->
+                <div class="form-group">
+                  <label class="form-label" for="full-name">Display Name</label>
+                  <input type="text" id="full-name" class="form-input" required>
+                </div>
+
+                <!-- Handle -->
+                <div class="form-group">
+                  <label class="form-label" for="handle">Handle (optional)</label>
+                  <input type="text" id="handle" class="form-input" placeholder="@username">
+                  <p class="form-hint">Used in your public portfolio URL.</p>
+                </div>
+
+                <!-- Bio -->
+                <div class="form-group">
+                  <label class="form-label" for="bio">Bio</label>
+                  <textarea id="bio" class="form-textarea" rows="3" placeholder="A short description of yourself..."></textarea>
+                </div>
+
+                <!-- Links -->
+                <div class="form-group">
+                  <label class="form-label" for="links">Links (one per line)</label>
+                  <textarea id="links" class="form-textarea" rows="3" placeholder="https://instagram.com/yourname&#10;https://github.com/yourname"></textarea>
+                </div>
+
+                <button type="submit" class="btn btn-primary">Save Profile</button>
+              </form>
+            </div>
+          </div>
+
+          <!-- Public Portfolio Section -->
+          <div class="task-detail" style="margin-bottom: var(--spacing-md);">
+            <div class="task-detail-header">
+              <h3>Public Portfolio</h3>
+            </div>
+            <div class="task-detail-body">
+              <div class="form-group">
+                <label style="display: flex; align-items: center; gap: var(--spacing-xs); cursor: pointer;">
+                  <input type="checkbox" id="public-enabled">
+                  <span>Enable public portfolio</span>
+                </label>
+                <p class="form-hint">When enabled, your public work is visible to anyone with the link.</p>
+              </div>
+
+              <div id="public-url-section" style="display: none; margin-top: var(--spacing-md); padding: var(--spacing-sm); background: var(--color-slab-mint); border: 1px solid var(--color-border);">
+                <p style="font-size: var(--text-sm); margin-bottom: var(--spacing-xs);">Your public portfolio URL:</p>
+                <code id="public-url" style="font-family: var(--font-mono); font-size: var(--text-sm); word-break: break-all;"></code>
+                <button id="copy-url" class="btn btn-small btn-secondary" style="margin-top: var(--spacing-xs);">Copy Link</button>
+              </div>
+
+              <a href="portfolio.html" class="btn btn-secondary" style="margin-top: var(--spacing-md);">Preview Portfolio →</a>
+            </div>
+          </div>
+
+          <!-- Account Section -->
+          <div class="task-detail">
+            <div class="task-detail-header">
+              <h3>Account</h3>
+            </div>
+            <div class="task-detail-body">
+              <p style="color: var(--color-text-muted); margin-bottom: var(--spacing-sm);">
+                Email: <span id="user-email"></span>
+              </p>
+              <p style="color: var(--color-text-muted); margin-bottom: var(--spacing-md);">
+                Role: <span id="user-role"></span>
+              </p>
+              <button id="logout-btn" class="btn btn-secondary" style="color: var(--color-error); border-color: var(--color-error);">Log Out</button>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <div id="toast-container" class="toast-container"></div>
+
+  <script type="module">
+    import { initAuth, getCurrentUser, logout } from './js/auth.js';
+    import {
+      db, storage, doc, getDoc, updateDoc, serverTimestamp,
+      ref, uploadBytes, getDownloadURL
+    } from './js/firebase-config.js';
+
+    let currentUser = null;
+    let currentUserData = null;
+
+    const loading = document.getElementById('loading');
+    const authRequired = document.getElementById('auth-required');
+    const settingsContent = document.getElementById('settings-content');
+
+    initAuth(async (user, userData) => {
+      currentUser = user;
+      currentUserData = userData;
+      loading.style.display = 'none';
+
+      if (!user) {
+        authRequired.style.display = 'block';
+        return;
+      }
+
+      settingsContent.style.display = 'block';
+      populateForm(userData, user);
+    });
+
+    function populateForm(userData, user) {
+      // Avatar
+      const avatarPreview = document.getElementById('avatar-preview');
+      if (userData.photoUrl) {
+        avatarPreview.innerHTML = `<img src="${userData.photoUrl}" style="width: 100%; height: 100%; object-fit: cover;">`;
+      } else {
+        const initials = (userData.fullName || 'S').split(' ').map(n => n[0]).join('').slice(0, 2);
+        avatarPreview.textContent = initials;
+      }
+
+      // Form fields
+      document.getElementById('full-name').value = userData.fullName || '';
+      document.getElementById('handle').value = userData.handle || '';
+      document.getElementById('bio').value = userData.bio || '';
+      document.getElementById('links').value = (userData.links || []).join('\n');
+
+      // Public portfolio
+      document.getElementById('public-enabled').checked = userData.publicEnabled || false;
+      updatePublicUrlSection(userData);
+
+      // Account
+      document.getElementById('user-email').textContent = user.email || 'Unknown';
+      document.getElementById('user-role').textContent = userData.role || 'student';
+    }
+
+    function updatePublicUrlSection(userData) {
+      const section = document.getElementById('public-url-section');
+      const urlEl = document.getElementById('public-url');
+
+      if (userData.publicEnabled) {
+        section.style.display = 'block';
+        const handle = userData.handle || currentUser.uid;
+        const url = `${window.location.origin}/portfolio.html?user=${handle}`;
+        urlEl.textContent = url;
+      } else {
+        section.style.display = 'none';
+      }
+    }
+
+    // Avatar upload
+    document.getElementById('avatar-btn').addEventListener('click', () => {
+      document.getElementById('avatar-input').click();
+    });
+
+    document.getElementById('avatar-input').addEventListener('change', async (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      if (file.size > 2 * 1024 * 1024) {
+        showToast('Image must be under 2MB', 'error');
+        return;
+      }
+
+      try {
+        showToast('Uploading...', 'info');
+
+        const fileName = `avatars/${currentUser.uid}/${Date.now()}_${file.name}`;
+        const storageRef = ref(storage, fileName);
+        await uploadBytes(storageRef, file);
+        const url = await getDownloadURL(storageRef);
+
+        await updateDoc(doc(db, 'users', currentUser.uid), {
+          photoUrl: url,
+          updatedAt: serverTimestamp()
+        });
+
+        document.getElementById('avatar-preview').innerHTML = `<img src="${url}" style="width: 100%; height: 100%; object-fit: cover;">`;
+        showToast('Photo updated!', 'success');
+      } catch (error) {
+        console.error(error);
+        showToast('Error uploading photo', 'error');
+      }
+    });
+
+    // Profile form
+    document.getElementById('profile-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const btn = e.target.querySelector('button[type="submit"]');
+      btn.disabled = true;
+      btn.textContent = 'Saving...';
+
+      try {
+        const linksText = document.getElementById('links').value;
+        const links = linksText.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+
+        await updateDoc(doc(db, 'users', currentUser.uid), {
+          fullName: document.getElementById('full-name').value.trim(),
+          handle: document.getElementById('handle').value.trim() || null,
+          bio: document.getElementById('bio').value.trim() || null,
+          links: links,
+          updatedAt: serverTimestamp()
+        });
+
+        showToast('Profile saved!', 'success');
+      } catch (error) {
+        console.error(error);
+        showToast('Error saving profile', 'error');
+      }
+
+      btn.disabled = false;
+      btn.textContent = 'Save Profile';
+    });
+
+    // Public toggle
+    document.getElementById('public-enabled').addEventListener('change', async (e) => {
+      const enabled = e.target.checked;
+
+      try {
+        await updateDoc(doc(db, 'users', currentUser.uid), {
+          publicEnabled: enabled,
+          updatedAt: serverTimestamp()
+        });
+
+        currentUserData.publicEnabled = enabled;
+        updatePublicUrlSection(currentUserData);
+        showToast(enabled ? 'Public portfolio enabled!' : 'Public portfolio disabled', 'success');
+      } catch (error) {
+        console.error(error);
+        e.target.checked = !enabled; // Revert
+        showToast('Error updating setting', 'error');
+      }
+    });
+
+    // Copy URL
+    document.getElementById('copy-url').addEventListener('click', () => {
+      const url = document.getElementById('public-url').textContent;
+      navigator.clipboard.writeText(url);
+      showToast('Link copied!', 'success');
+    });
+
+    // Logout
+    document.getElementById('logout-btn').addEventListener('click', async () => {
+      await logout();
+      window.location.href = 'login.html';
+    });
+
+    function showToast(message, type = 'info') {
+      const container = document.getElementById('toast-container');
+      const toast = document.createElement('div');
+      toast.className = `toast ${type}`;
+      toast.textContent = message;
+      container.appendChild(toast);
+      setTimeout(() => toast.remove(), 4000);
+    }
+  </script>
+</body>
+</html>

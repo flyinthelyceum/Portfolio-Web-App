@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tasks — Portfolio Admin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/styles.css">
+  <style>
+    .admin-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: var(--spacing-md);
+    }
+    .task-admin-tile {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: var(--spacing-sm) var(--spacing-md);
+      background: white;
+      border: 2px solid var(--color-border);
+      margin-bottom: var(--spacing-xs);
+    }
+    .task-admin-tile.draft {
+      opacity: 0.6;
+      border-style: dashed;
+    }
+    .task-admin-actions {
+      display: flex;
+      gap: var(--spacing-xs);
+    }
+    .status-badge {
+      font-size: var(--text-xs);
+      padding: 2px 6px;
+      text-transform: uppercase;
+      border: 1px solid currentColor;
+    }
+    .status-badge.published { color: var(--color-success); }
+    .status-badge.draft { color: var(--color-text-muted); }
+    .status-badge.archived { color: var(--color-error); }
+  </style>
+</head>
+<body>
+  <div class="app-shell">
+    <nav class="nav-bar">
+      <div class="nav-container">
+        <a href="../index.html" class="nav-brand">Portfolio Admin</a>
+        <div class="nav-tabs">
+          <a href="tasks.html" class="nav-tab active">Tasks</a>
+          <a href="categories.html" class="nav-tab">Categories</a>
+          <a href="moderate.html" class="nav-tab">Moderate</a>
+        </div>
+        <a href="../index.html" class="btn btn-small btn-secondary">← Back to App</a>
+      </div>
+    </nav>
+
+    <main class="main-content">
+      <!-- Loading -->
+      <div id="loading" class="loading">
+        <div class="loading-spinner"></div>
+      </div>
+
+      <!-- Not Admin -->
+      <div id="not-admin" class="empty-state" style="display: none;">
+        <h2 class="empty-state-headline">Admin access required</h2>
+        <p class="empty-state-body">You need admin permissions to access this page.</p>
+        <a href="../index.html" class="btn btn-primary">Go Home</a>
+      </div>
+
+      <!-- Admin Content -->
+      <div id="admin-content" style="display: none;">
+        <div class="admin-header">
+          <h1>Tasks</h1>
+          <button id="btn-new-task" class="btn btn-primary">+ New Task</button>
+        </div>
+
+        <!-- Filter -->
+        <div style="margin-bottom: var(--spacing-md);">
+          <select id="filter-category" class="form-input" style="width: auto; display: inline-block;">
+            <option value="">All Categories</option>
+          </select>
+          <select id="filter-status" class="form-input" style="width: auto; display: inline-block; margin-left: var(--spacing-xs);">
+            <option value="">All Statuses</option>
+            <option value="published">Published</option>
+            <option value="draft">Draft</option>
+            <option value="archived">Archived</option>
+          </select>
+        </div>
+
+        <!-- Tasks List -->
+        <div id="tasks-list">
+          <!-- Tasks will be populated here -->
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Task Editor Modal -->
+  <div id="task-modal" class="modal-overlay hidden">
+    <div class="modal" style="max-width: 700px;">
+      <div class="modal-header">
+        <h2 class="modal-title" id="modal-title">New Task</h2>
+        <button class="modal-close" id="modal-close">×</button>
+      </div>
+      <div class="modal-body">
+        <form id="task-form">
+          <input type="hidden" id="task-id">
+
+          <div class="form-group">
+            <label class="form-label" for="task-category">Category</label>
+            <select id="task-category" class="form-input" required>
+              <!-- Options populated dynamically -->
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="task-title">Title</label>
+            <input type="text" id="task-title" class="form-input" required placeholder="Verb first if possible">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="task-subtitle">Subtitle (optional)</label>
+            <input type="text" id="task-subtitle" class="form-input" placeholder="Short description">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="task-body">Body (HTML)</label>
+            <textarea id="task-body" class="form-textarea" rows="8" placeholder="<p>Task instructions...</p>"></textarea>
+            <p class="form-hint">Use HTML tags: &lt;p&gt;, &lt;ul&gt;, &lt;ol&gt;, &lt;li&gt;, &lt;strong&gt;</p>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="task-status">Status</label>
+            <select id="task-status" class="form-input">
+              <option value="draft">Draft (not visible to students)</option>
+              <option value="published">Published (visible to students)</option>
+              <option value="archived">Archived (hidden)</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label style="display: flex; align-items: center; gap: var(--spacing-xs); cursor: pointer;">
+              <input type="checkbox" id="task-pinned">
+              <span>Pin to top of list</span>
+            </label>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="task-cert-badge">Certification Badge (Office Hours only)</label>
+            <select id="task-cert-badge" class="form-input">
+              <option value="">None</option>
+              <!-- Badge options populated dynamically -->
+            </select>
+            <p class="form-hint">Students earn this badge when they complete this task.</p>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" id="modal-cancel">Cancel</button>
+        <button class="btn btn-primary" id="modal-save">Save Task</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Container -->
+  <div id="toast-container" class="toast-container"></div>
+
+  <script type="module">
+    import { initAuth, getCurrentUser, getCurrentUserData, isAdmin } from '../js/auth.js';
+    import {
+      db, collection, doc, getDoc, getDocs, setDoc, updateDoc, addDoc,
+      query, where, orderBy, serverTimestamp
+    } from '../js/firebase-config.js';
+
+    // State
+    let currentUser = null;
+    let categories = [];
+    let tasks = [];
+    let badges = [];
+    let editingTaskId = null;
+
+    // DOM
+    const loading = document.getElementById('loading');
+    const notAdmin = document.getElementById('not-admin');
+    const adminContent = document.getElementById('admin-content');
+    const tasksList = document.getElementById('tasks-list');
+    const taskModal = document.getElementById('task-modal');
+    const filterCategory = document.getElementById('filter-category');
+    const filterStatus = document.getElementById('filter-status');
+
+    // Init
+    initAuth(async (user, userData) => {
+      currentUser = user;
+      loading.style.display = 'none';
+
+      if (!user || userData?.role !== 'admin') {
+        notAdmin.style.display = 'block';
+        return;
+      }
+
+      adminContent.style.display = 'block';
+      await loadData();
+      renderTasks();
+    });
+
+    // Load all data
+    async function loadData() {
+      // Categories
+      const catsSnap = await getDocs(query(collection(db, 'taskCategories'), orderBy('sortOrder')));
+      categories = [];
+      catsSnap.forEach(doc => categories.push({ id: doc.id, ...doc.data() }));
+
+      // Tasks
+      const tasksSnap = await getDocs(query(collection(db, 'tasks'), orderBy('updatedAt', 'desc')));
+      tasks = [];
+      tasksSnap.forEach(doc => tasks.push({ id: doc.id, ...doc.data() }));
+
+      // Badges (for certification dropdown)
+      const badgesSnap = await getDocs(query(collection(db, 'badgeDefs'), where('family', '==', 'certification')));
+      badges = [];
+      badgesSnap.forEach(doc => badges.push({ id: doc.id, ...doc.data() }));
+
+      // Populate filter dropdown
+      filterCategory.innerHTML = '<option value="">All Categories</option>' +
+        categories.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+
+      // Populate form dropdowns
+      document.getElementById('task-category').innerHTML =
+        categories.map(c => `<option value="${c.id}">${c.name} (+${c.pointsPerLog})</option>`).join('');
+
+      document.getElementById('task-cert-badge').innerHTML =
+        '<option value="">None</option>' +
+        badges.map(b => `<option value="${b.id}">${b.icon || ''} ${b.name}</option>`).join('');
+    }
+
+    // Render tasks list
+    function renderTasks() {
+      const catFilter = filterCategory.value;
+      const statusFilter = filterStatus.value;
+
+      let filtered = tasks;
+      if (catFilter) filtered = filtered.filter(t => t.categoryId === catFilter);
+      if (statusFilter) filtered = filtered.filter(t => t.status === statusFilter);
+
+      if (filtered.length === 0) {
+        tasksList.innerHTML = '<div class="empty-state"><p>No tasks found.</p></div>';
+        return;
+      }
+
+      tasksList.innerHTML = filtered.map(task => {
+        const cat = categories.find(c => c.id === task.categoryId);
+        const isDraft = task.status === 'draft';
+        const isArchived = task.status === 'archived';
+
+        return `
+          <div class="task-admin-tile ${isDraft ? 'draft' : ''}" data-id="${task.id}">
+            <div>
+              <strong>${task.title}</strong>
+              ${task.subtitle ? `<span style="color: var(--color-text-muted);"> — ${task.subtitle}</span>` : ''}
+              <br>
+              <span style="font-size: var(--text-xs); color: var(--color-text-muted);">
+                ${cat?.name || 'Unknown'} · +${cat?.pointsPerLog || 0} pts
+                ${task.isPinned ? ' · 📌 Pinned' : ''}
+                ${task.certificationBadgeId ? ' · 🏅 Certification' : ''}
+              </span>
+            </div>
+            <div class="task-admin-actions">
+              <span class="status-badge ${task.status}">${task.status}</span>
+              <button class="btn btn-small btn-secondary edit-btn" data-id="${task.id}">Edit</button>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      // Edit handlers
+      tasksList.querySelectorAll('.edit-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          openEditModal(btn.dataset.id);
+        });
+      });
+    }
+
+    // Filters
+    filterCategory.addEventListener('change', renderTasks);
+    filterStatus.addEventListener('change', renderTasks);
+
+    // New task button
+    document.getElementById('btn-new-task').addEventListener('click', () => {
+      openNewModal();
+    });
+
+    // Open modal for new task
+    function openNewModal() {
+      editingTaskId = null;
+      document.getElementById('modal-title').textContent = 'New Task';
+      document.getElementById('task-id').value = '';
+      document.getElementById('task-category').value = categories[0]?.id || '';
+      document.getElementById('task-title').value = '';
+      document.getElementById('task-subtitle').value = '';
+      document.getElementById('task-body').value = '';
+      document.getElementById('task-status').value = 'draft';
+      document.getElementById('task-pinned').checked = false;
+      document.getElementById('task-cert-badge').value = '';
+      taskModal.classList.remove('hidden');
+    }
+
+    // Open modal for editing
+    function openEditModal(taskId) {
+      const task = tasks.find(t => t.id === taskId);
+      if (!task) return;
+
+      editingTaskId = taskId;
+      document.getElementById('modal-title').textContent = 'Edit Task';
+      document.getElementById('task-id').value = taskId;
+      document.getElementById('task-category').value = task.categoryId || '';
+      document.getElementById('task-title').value = task.title || '';
+      document.getElementById('task-subtitle').value = task.subtitle || '';
+      document.getElementById('task-body').value = task.body || '';
+      document.getElementById('task-status').value = task.status || 'draft';
+      document.getElementById('task-pinned').checked = task.isPinned || false;
+      document.getElementById('task-cert-badge').value = task.certificationBadgeId || '';
+      taskModal.classList.remove('hidden');
+    }
+
+    // Close modal
+    document.getElementById('modal-close').addEventListener('click', closeModal);
+    document.getElementById('modal-cancel').addEventListener('click', closeModal);
+    taskModal.addEventListener('click', (e) => {
+      if (e.target === taskModal) closeModal();
+    });
+
+    function closeModal() {
+      taskModal.classList.add('hidden');
+      editingTaskId = null;
+    }
+
+    // Save task
+    document.getElementById('modal-save').addEventListener('click', async () => {
+      const btn = document.getElementById('modal-save');
+      btn.disabled = true;
+      btn.textContent = 'Saving...';
+
+      const taskData = {
+        categoryId: document.getElementById('task-category').value,
+        title: document.getElementById('task-title').value.trim(),
+        subtitle: document.getElementById('task-subtitle').value.trim() || null,
+        body: document.getElementById('task-body').value.trim() || null,
+        status: document.getElementById('task-status').value,
+        isPinned: document.getElementById('task-pinned').checked,
+        certificationBadgeId: document.getElementById('task-cert-badge').value || null,
+        updatedAt: serverTimestamp()
+      };
+
+      if (!taskData.title) {
+        showToast('Title is required', 'error');
+        btn.disabled = false;
+        btn.textContent = 'Save Task';
+        return;
+      }
+
+      try {
+        if (editingTaskId) {
+          // Update existing
+          await updateDoc(doc(db, 'tasks', editingTaskId), taskData);
+          showToast('Task updated!', 'success');
+        } else {
+          // Create new
+          taskData.createdAt = serverTimestamp();
+          taskData.createdByUserId = currentUser.uid;
+          await addDoc(collection(db, 'tasks'), taskData);
+          showToast('Task created!', 'success');
+        }
+
+        await loadData();
+        renderTasks();
+        closeModal();
+      } catch (error) {
+        console.error(error);
+        showToast('Error: ' + error.message, 'error');
+      }
+
+      btn.disabled = false;
+      btn.textContent = 'Save Task';
+    });
+
+    // Toast
+    function showToast(message, type = 'info') {
+      const container = document.getElementById('toast-container');
+      const toast = document.createElement('div');
+      toast.className = `toast ${type}`;
+      toast.textContent = message;
+      container.appendChild(toast);
+      setTimeout(() => toast.remove(), 4000);
+    }
+  </script>
+</body>
+</html>

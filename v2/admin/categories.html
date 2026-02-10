@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Categories — Portfolio Admin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/styles.css">
+  <style>
+    .category-tile {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: var(--spacing-md);
+      background: white;
+      border: 2px solid var(--color-border);
+      margin-bottom: var(--spacing-xs);
+    }
+    .category-points {
+      font-family: var(--font-mono);
+      font-weight: 600;
+      font-size: var(--text-xl);
+    }
+  </style>
+</head>
+<body>
+  <div class="app-shell">
+    <nav class="nav-bar">
+      <div class="nav-container">
+        <a href="../index.html" class="nav-brand">Portfolio Admin</a>
+        <div class="nav-tabs">
+          <a href="tasks.html" class="nav-tab">Tasks</a>
+          <a href="categories.html" class="nav-tab active">Categories</a>
+          <a href="moderate.html" class="nav-tab">Moderate</a>
+        </div>
+        <a href="../index.html" class="btn btn-small btn-secondary">← Back to App</a>
+      </div>
+    </nav>
+
+    <main class="main-content">
+      <div id="loading" class="loading">
+        <div class="loading-spinner"></div>
+      </div>
+
+      <div id="not-admin" class="empty-state" style="display: none;">
+        <h2 class="empty-state-headline">Admin access required</h2>
+        <a href="../index.html" class="btn btn-primary">Go Home</a>
+      </div>
+
+      <div id="admin-content" style="display: none;">
+        <h1 style="margin-bottom: var(--spacing-md);">Task Categories</h1>
+
+        <p style="margin-bottom: var(--spacing-md); color: var(--color-text-light);">
+          Categories define point values for tasks. Changes apply to future logs only (forward-only scoring).
+        </p>
+
+        <div id="categories-list">
+          <!-- Categories populated here -->
+        </div>
+
+        <div style="margin-top: var(--spacing-lg); padding: var(--spacing-md); background: var(--color-slab-yellow); border: 2px solid var(--color-border);">
+          <h3>Point Values (from POINTS_MODEL.md)</h3>
+          <p style="margin-top: var(--spacing-xs); font-size: var(--text-sm);">
+            Recommended values: Office Hours (253), News (126), Project (371), Chore (184), Ritual (213).
+            Non-round numbers are intentional.
+          </p>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Edit Modal -->
+  <div id="category-modal" class="modal-overlay hidden">
+    <div class="modal" style="max-width: 400px;">
+      <div class="modal-header">
+        <h2 class="modal-title">Edit Category</h2>
+        <button class="modal-close" id="modal-close">×</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="cat-id">
+
+        <div class="form-group">
+          <label class="form-label" for="cat-name">Name</label>
+          <input type="text" id="cat-name" class="form-input" readonly>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="cat-points">Points Per Log</label>
+          <input type="number" id="cat-points" class="form-input" min="1" max="1000">
+          <p class="form-hint">Changes apply to future logs only.</p>
+        </div>
+
+        <div class="form-group">
+          <label style="display: flex; align-items: center; gap: var(--spacing-xs); cursor: pointer;">
+            <input type="checkbox" id="cat-enabled">
+            <span>Enabled (visible to students)</span>
+          </label>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" id="modal-cancel">Cancel</button>
+        <button class="btn btn-primary" id="modal-save">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast-container" class="toast-container"></div>
+
+  <script type="module">
+    import { initAuth, getCurrentUser } from '../js/auth.js';
+    import {
+      db, collection, doc, getDocs, updateDoc, query, orderBy, serverTimestamp
+    } from '../js/firebase-config.js';
+
+    let categories = [];
+    let editingId = null;
+
+    const loading = document.getElementById('loading');
+    const notAdmin = document.getElementById('not-admin');
+    const adminContent = document.getElementById('admin-content');
+    const categoriesList = document.getElementById('categories-list');
+    const modal = document.getElementById('category-modal');
+
+    initAuth(async (user, userData) => {
+      loading.style.display = 'none';
+
+      if (!user || userData?.role !== 'admin') {
+        notAdmin.style.display = 'block';
+        return;
+      }
+
+      adminContent.style.display = 'block';
+      await loadCategories();
+      renderCategories();
+    });
+
+    async function loadCategories() {
+      const snap = await getDocs(query(collection(db, 'taskCategories'), orderBy('sortOrder')));
+      categories = [];
+      snap.forEach(doc => categories.push({ id: doc.id, ...doc.data() }));
+    }
+
+    function renderCategories() {
+      categoriesList.innerHTML = categories.map(cat => `
+        <div class="category-tile">
+          <div>
+            <strong style="font-size: var(--text-lg);">${cat.name}</strong>
+            <span style="margin-left: var(--spacing-sm); font-size: var(--text-xs); color: ${cat.enabled !== false ? 'var(--color-success)' : 'var(--color-text-muted)'};">
+              ${cat.enabled !== false ? '● Enabled' : '○ Disabled'}
+            </span>
+          </div>
+          <div style="display: flex; align-items: center; gap: var(--spacing-md);">
+            <span class="category-points">+${cat.pointsPerLog}</span>
+            <button class="btn btn-small btn-secondary edit-btn" data-id="${cat.id}">Edit</button>
+          </div>
+        </div>
+      `).join('');
+
+      categoriesList.querySelectorAll('.edit-btn').forEach(btn => {
+        btn.addEventListener('click', () => openEdit(btn.dataset.id));
+      });
+    }
+
+    function openEdit(id) {
+      const cat = categories.find(c => c.id === id);
+      if (!cat) return;
+
+      editingId = id;
+      document.getElementById('cat-id').value = id;
+      document.getElementById('cat-name').value = cat.name;
+      document.getElementById('cat-points').value = cat.pointsPerLog;
+      document.getElementById('cat-enabled').checked = cat.enabled !== false;
+      modal.classList.remove('hidden');
+    }
+
+    function closeModal() {
+      modal.classList.add('hidden');
+      editingId = null;
+    }
+
+    document.getElementById('modal-close').addEventListener('click', closeModal);
+    document.getElementById('modal-cancel').addEventListener('click', closeModal);
+    modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
+
+    document.getElementById('modal-save').addEventListener('click', async () => {
+      const btn = document.getElementById('modal-save');
+      btn.disabled = true;
+      btn.textContent = 'Saving...';
+
+      try {
+        await updateDoc(doc(db, 'taskCategories', editingId), {
+          pointsPerLog: parseInt(document.getElementById('cat-points').value) || 0,
+          enabled: document.getElementById('cat-enabled').checked,
+          updatedAt: serverTimestamp()
+        });
+
+        showToast('Category updated!', 'success');
+        await loadCategories();
+        renderCategories();
+        closeModal();
+      } catch (error) {
+        showToast('Error: ' + error.message, 'error');
+      }
+
+      btn.disabled = false;
+      btn.textContent = 'Save';
+    });
+
+    function showToast(message, type = 'info') {
+      const container = document.getElementById('toast-container');
+      const toast = document.createElement('div');
+      toast.className = `toast ${type}`;
+      toast.textContent = message;
+      container.appendChild(toast);
+      setTimeout(() => toast.remove(), 4000);
+    }
+  </script>
+</body>
+</html>

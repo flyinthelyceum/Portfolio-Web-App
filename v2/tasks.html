@@ -1,0 +1,1051 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tasks — Studio Log</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=Inter:wght@400;500;600;700;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+  <style>
+    /* ============================================
+       Tasks Page - Tom Sachs ISRU Style
+       Studio Color Doctrine: #EEF1E6, #030506, #565B21
+       ============================================ */
+
+    body.tasks-page {
+      background-color: #EEF1E6;
+    }
+
+    body.tasks-page::before {
+      display: none;
+    }
+
+    /* Override base styles */
+    body.tasks-page .main-content {
+      max-width: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    body.tasks-page .nav-bar {
+      background: #EEF1E6;
+    }
+
+    body.tasks-page .nav-container {
+      max-width: none;
+      padding: 0 24px;
+    }
+
+    /* ============================================
+       Page Layout - Fill Viewport
+       ============================================ */
+    .tasks-layout {
+      padding: 16px 24px;
+      min-height: calc(100vh - 80px);
+      box-sizing: border-box;
+    }
+
+    /* Page Header with Applied Label style */
+    .page-header {
+      margin-bottom: 20px;
+    }
+
+    .page-title-label {
+      display: inline-block;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      padding: 4px 12px;
+      background: #030506;
+      color: #FFFFFF;
+      margin-bottom: 8px;
+    }
+
+    /* ============================================
+       Task Categories - FrameC Panels
+       ============================================ */
+    .task-categories {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .task-category-panel {
+      background: #FFFFFF;
+      border: 4px solid #030506;
+      position: relative;
+    }
+
+    /* Inset keyline */
+    .task-category-panel::after {
+      content: '';
+      position: absolute;
+      top: 4px;
+      left: 4px;
+      right: 4px;
+      bottom: 4px;
+      border: 1px solid #030506;
+      pointer-events: none;
+    }
+
+    .task-category-body {
+      padding: 12px;
+      position: relative;
+    }
+
+    /* Category Label - Applied Label style */
+    .task-category-label {
+      display: inline-block;
+      font-family: var(--font-mono);
+      font-size: 9px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      padding: 3px 8px;
+      background: #030506;
+      color: #FFFFFF;
+      position: relative;
+      transform: translate(-6px, -6px);
+      margin-bottom: 8px;
+    }
+
+    .task-category-label::after {
+      content: '';
+      position: absolute;
+      bottom: -3px;
+      left: 0;
+      width: calc(100% + 16px);
+      height: 1px;
+      background: #030506;
+    }
+
+    /* ============================================
+       Task Tiles - FrameB style
+       ============================================ */
+    .task-tiles {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 12px;
+    }
+
+    .task-tile-v2 {
+      background: #FFFFFF;
+      border: 3px solid #030506;
+      padding: 12px;
+      cursor: pointer;
+      transition: all 0.1s ease;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 12px;
+    }
+
+    .task-tile-v2:hover {
+      background: #565B21;
+      color: #FFFFFF;
+    }
+
+    .task-tile-v2:hover .task-tile-points {
+      background: #FFFFFF;
+      color: #030506;
+    }
+
+    .task-tile-v2:hover .task-tile-status {
+      color: rgba(255,255,255,0.7);
+    }
+
+    .task-tile-content {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .task-tile-title {
+      font-family: var(--font-display);
+      font-size: 15px;
+      font-weight: 700;
+      line-height: 1.3;
+      margin-bottom: 4px;
+    }
+
+    .task-tile-subtitle {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      opacity: 0.7;
+      line-height: 1.4;
+    }
+
+    .task-tile-meta {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 4px;
+      flex-shrink: 0;
+    }
+
+    .task-tile-points {
+      font-family: var(--font-mono);
+      font-size: 13px;
+      font-weight: 700;
+      padding: 3px 8px;
+      background: #030506;
+      color: #FFFFFF;
+      transition: all 0.1s ease;
+    }
+
+    .task-tile-status {
+      font-family: var(--font-mono);
+      font-size: 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: #030506;
+      opacity: 0.6;
+    }
+
+    .task-tile-status.logged {
+      color: #565B21;
+      opacity: 1;
+      font-weight: 700;
+    }
+
+    /* Micro-interactions */
+    .task-tile-v2:active {
+      transform: scale(0.98);
+    }
+
+    .task-category-panel {
+      transition: box-shadow 0.15s ease;
+    }
+
+    .task-category-panel:hover {
+      box-shadow: 4px 4px 0 rgba(3, 5, 6, 0.1);
+    }
+
+    .task-category-panel:hover .task-category-label {
+      background: #565B21;
+    }
+
+    /* ============================================
+       Empty State - Plate style
+       ============================================ */
+    .empty-plate {
+      background: #FFFFFF;
+      border: 3px solid #030506;
+      padding: 32px 24px;
+      text-align: center;
+    }
+
+    .empty-plate-text {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: #030506;
+      opacity: 0.6;
+    }
+
+    /* ============================================
+       Modals - ISRU Style
+       ============================================ */
+    body.tasks-page .modal {
+      background: #FFFFFF;
+      border: 4px solid #030506;
+      border-radius: 0;
+      box-shadow: none;
+    }
+
+    body.tasks-page .modal-header {
+      background: #565B21;
+      border-bottom: 4px solid #030506;
+      padding: 12px 16px;
+    }
+
+    body.tasks-page .modal-title {
+      color: #FFFFFF;
+      font-family: var(--font-display);
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: -0.02em;
+    }
+
+    body.tasks-page .modal-close {
+      color: #FFFFFF;
+      background: transparent;
+      border: 2px solid #FFFFFF;
+      width: 28px;
+      height: 28px;
+      font-size: 18px;
+    }
+
+    body.tasks-page .modal-close:hover {
+      background: #FFFFFF;
+      color: #565B21;
+    }
+
+    body.tasks-page .modal-body {
+      padding: 16px;
+    }
+
+    body.tasks-page .modal-footer {
+      border-top: 2px solid #030506;
+      padding: 12px 16px;
+      background: #EEF1E6;
+    }
+
+    /* Task Detail Category Label */
+    .task-detail-category {
+      font-family: var(--font-mono);
+      font-size: 9px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: rgba(255,255,255,0.7);
+      display: block;
+      margin-bottom: 2px;
+    }
+
+    .task-detail-points {
+      display: inline-block;
+      font-family: var(--font-mono);
+      font-size: 14px;
+      font-weight: 700;
+      padding: 4px 12px;
+      background: #030506;
+      color: #FFFFFF;
+      margin-bottom: 12px;
+    }
+
+    .task-detail-body {
+      font-family: var(--font-body);
+      font-size: 14px;
+      line-height: 1.6;
+      color: #030506;
+    }
+
+    .task-detail-body p {
+      margin-bottom: 12px;
+    }
+
+    /* ============================================
+       Form Elements - ISRU Style
+       ============================================ */
+    body.tasks-page .form-label {
+      font-family: var(--font-mono);
+      font-size: 9px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: #030506;
+    }
+
+    body.tasks-page .form-hint {
+      font-family: var(--font-mono);
+      font-size: 9px;
+      color: #030506;
+      opacity: 0.6;
+    }
+
+    body.tasks-page .form-textarea {
+      border: 2px solid #030506;
+      border-radius: 0;
+      font-family: var(--font-mono);
+      font-size: 12px;
+      padding: 10px;
+      background: #FFFFFF;
+    }
+
+    body.tasks-page .form-textarea:focus {
+      outline: none;
+      border-color: #565B21;
+    }
+
+    /* Media Upload */
+    body.tasks-page .media-upload {
+      border: 2px dashed #030506;
+      background: #EEF1E6;
+      padding: 24px;
+      text-align: center;
+      cursor: pointer;
+    }
+
+    body.tasks-page .media-upload:hover {
+      background: #FFFFFF;
+    }
+
+    body.tasks-page .media-upload-text {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    /* Phase & Visibility Selectors */
+    body.tasks-page .phase-selector,
+    body.tasks-page .visibility-selector {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    body.tasks-page .phase-option,
+    body.tasks-page .visibility-option {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      padding: 6px 12px;
+      border: 2px solid #030506;
+      background: #FFFFFF;
+      color: #030506;
+      cursor: pointer;
+    }
+
+    body.tasks-page .phase-option:hover,
+    body.tasks-page .visibility-option:hover {
+      background: #EEF1E6;
+    }
+
+    body.tasks-page .phase-option.selected,
+    body.tasks-page .visibility-option.selected {
+      background: #030506;
+      color: #FFFFFF;
+    }
+
+    /* Buttons */
+    body.tasks-page .btn {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      padding: 8px 16px;
+      border: 3px solid #030506;
+      border-radius: 0;
+    }
+
+    body.tasks-page .btn-primary {
+      background: #030506;
+      color: #FFFFFF;
+    }
+
+    body.tasks-page .btn-primary:hover {
+      background: #565B21;
+      border-color: #565B21;
+    }
+
+    body.tasks-page .btn-secondary {
+      background: #FFFFFF;
+      color: #030506;
+    }
+
+    body.tasks-page .btn-secondary:hover {
+      background: #EEF1E6;
+    }
+
+    /* ============================================
+       Responsive
+       ============================================ */
+    @media (min-width: 900px) {
+      .tasks-layout {
+        padding: 20px 32px;
+      }
+
+      .task-tiles {
+        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      }
+    }
+
+    @media (min-width: 1600px) {
+      .tasks-layout {
+        padding: 24px 48px;
+      }
+    }
+
+    @media (max-width: 600px) {
+      .tasks-layout {
+        padding: 12px 16px;
+      }
+
+      .task-tiles {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body class="tasks-page">
+  <div class="app-shell">
+    <!-- Navigation -->
+    <nav class="nav-bar">
+      <div class="nav-container">
+        <a href="index.html" class="nav-brand">Studio Log</a>
+        <div class="nav-tabs">
+          <a href="index.html" class="nav-tab">Home</a>
+          <a href="tasks.html" class="nav-tab active">Tasks</a>
+          <a href="highlights.html" class="nav-tab">Highlights</a>
+          <a href="leaderboard.html" class="nav-tab">Leaderboard</a>
+        </div>
+        <button class="nav-gear" id="gear-btn" title="Settings">⚙</button>
+      </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <!-- Loading State -->
+      <div id="loading" class="loading">
+        <div class="loading-spinner"></div>
+      </div>
+
+      <!-- Auth Required State -->
+      <div id="auth-required" class="empty-plate" style="display: none; max-width: 400px; margin: 40px auto;">
+        <div class="empty-plate-text">Log in to view Tasks</div>
+        <a href="login.html" class="btn btn-primary" style="margin-top: 16px;">Log In</a>
+      </div>
+
+      <!-- Tasks Content -->
+      <div id="tasks-content" class="tasks-layout" style="display: none;">
+        <div class="page-header">
+          <div class="page-title-label">Tasks</div>
+        </div>
+
+        <!-- Tasks List (grouped by category) -->
+        <div id="tasks-list" class="task-categories">
+          <!-- Tasks will be populated here -->
+        </div>
+
+        <!-- No Tasks State -->
+        <div id="no-tasks" class="empty-plate" style="display: none;">
+          <div class="empty-plate-text">No tasks posted yet</div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Task Detail Modal -->
+  <div id="task-modal" class="modal-overlay hidden">
+    <div class="modal" style="max-width: 700px;">
+      <div class="modal-header">
+        <div>
+          <span class="task-detail-category" id="modal-category"></span>
+          <h2 class="modal-title" id="modal-title"></h2>
+        </div>
+        <button class="modal-close" id="modal-close">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="task-detail-points" id="modal-points"></div>
+        <div class="task-detail-body" id="modal-body"></div>
+      </div>
+      <div class="modal-footer">
+        <span id="modal-status" style="flex: 1; font-size: var(--text-sm); color: var(--color-text-muted);"></span>
+        <button class="btn btn-secondary" id="modal-edit-btn" style="display: none;">Edit Today's Log</button>
+        <button class="btn btn-primary" id="modal-log-btn">Log Work</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Log Work Modal -->
+  <div id="log-modal" class="modal-overlay hidden">
+    <div class="modal">
+      <div class="modal-header">
+        <h2 class="modal-title">Log Work</h2>
+        <button class="modal-close" id="log-modal-close">×</button>
+      </div>
+      <div class="modal-body">
+        <form id="log-form">
+          <!-- Media Upload -->
+          <div class="form-group">
+            <label class="form-label">Photos</label>
+            <div class="media-upload" id="media-upload">
+              <div class="media-upload-icon">📷</div>
+              <div class="media-upload-text">Add photos. Proof first.</div>
+            </div>
+            <input type="file" id="media-input" accept="image/*" multiple style="display: none;">
+            <div class="media-preview" id="media-preview"></div>
+            <p class="form-hint">At least one photo required.</p>
+          </div>
+
+          <!-- Phase Selector -->
+          <div class="form-group">
+            <label class="form-label">Phase</label>
+            <div class="phase-selector" id="phase-selector">
+              <button type="button" class="phase-option" data-phase="Sketch">Sketch</button>
+              <button type="button" class="phase-option" data-phase="Build">Build</button>
+              <button type="button" class="phase-option" data-phase="Test">Test</button>
+              <button type="button" class="phase-option" data-phase="Iteration">Iteration</button>
+              <button type="button" class="phase-option" data-phase="Reflection">Reflection</button>
+            </div>
+            <p class="form-hint">Select a phase.</p>
+          </div>
+
+          <!-- Note -->
+          <div class="form-group">
+            <label class="form-label" for="log-note">Note</label>
+            <textarea id="log-note" class="form-textarea" placeholder="What changed and why? (1-3 sentences)" rows="3"></textarea>
+            <p class="form-hint">Say what changed.</p>
+          </div>
+
+          <!-- Visibility -->
+          <div class="form-group">
+            <label class="form-label">Visibility</label>
+            <div class="visibility-selector" id="visibility-selector">
+              <button type="button" class="visibility-option" data-visibility="draft">Draft</button>
+              <button type="button" class="visibility-option selected" data-visibility="class">Class</button>
+              <button type="button" class="visibility-option" data-visibility="public">Public</button>
+            </div>
+            <p class="form-hint" id="visibility-hint">Visible to your class and instructor.</p>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <span id="log-draft-warning" style="flex: 1; font-size: var(--text-sm); color: var(--color-warning); display: none;">Draft earns 0 points.</span>
+        <button class="btn btn-secondary" id="log-cancel">Cancel</button>
+        <button class="btn btn-primary" id="log-submit">Publish</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Container -->
+  <div id="toast-container" class="toast-container"></div>
+
+  <script type="module">
+    import { initAuth, getCurrentUser, getCurrentUserData, isAdmin } from './js/auth.js';
+    import {
+      db, storage, collection, doc, getDoc, getDocs, query, where, orderBy,
+      ref, uploadBytes, getDownloadURL, publishLog
+    } from './js/firebase-config.js';
+
+    // State
+    let currentUser = null;
+    let currentUserData = null;
+    let categories = [];
+    let tasks = [];
+    let todaysLogs = {}; // taskId -> logData
+    let selectedTask = null;
+    let selectedPhase = null;
+    let selectedVisibility = 'class';
+    let uploadedMedia = [];
+
+    // DOM Elements
+    const loading = document.getElementById('loading');
+    const authRequired = document.getElementById('auth-required');
+    const tasksContent = document.getElementById('tasks-content');
+    const tasksList = document.getElementById('tasks-list');
+    const noTasks = document.getElementById('no-tasks');
+
+    // Task Detail Modal
+    const taskModal = document.getElementById('task-modal');
+    const modalClose = document.getElementById('modal-close');
+    const modalLogBtn = document.getElementById('modal-log-btn');
+    const modalEditBtn = document.getElementById('modal-edit-btn');
+
+    // Log Work Modal
+    const logModal = document.getElementById('log-modal');
+    const logModalClose = document.getElementById('log-modal-close');
+    const logCancel = document.getElementById('log-cancel');
+    const logSubmit = document.getElementById('log-submit');
+    const mediaUpload = document.getElementById('media-upload');
+    const mediaInput = document.getElementById('media-input');
+    const mediaPreview = document.getElementById('media-preview');
+    const phaseSelector = document.getElementById('phase-selector');
+    const visibilitySelector = document.getElementById('visibility-selector');
+    const visibilityHint = document.getElementById('visibility-hint');
+    const draftWarning = document.getElementById('log-draft-warning');
+
+    // Get today's dayKey (Phoenix timezone)
+    function getDayKey() {
+      return new Date().toLocaleDateString('en-CA', { timeZone: 'America/Phoenix' });
+    }
+
+    // Initialize auth
+    initAuth(async (user, userData) => {
+      currentUser = user;
+      currentUserData = userData;
+      loading.style.display = 'none';
+
+      if (!user) {
+        authRequired.style.display = 'block';
+        tasksContent.style.display = 'none';
+        return;
+      }
+
+      authRequired.style.display = 'none';
+      tasksContent.style.display = 'block';
+
+      await loadCategories();
+      await loadTasks();
+      await loadTodaysLogs();
+      renderTasks();
+    });
+
+    // Load task categories
+    async function loadCategories() {
+      try {
+        const categoriesRef = collection(db, 'taskCategories');
+        const q = query(categoriesRef, orderBy('sortOrder', 'asc'));
+        const snapshot = await getDocs(q);
+
+        categories = [];
+        snapshot.forEach(doc => {
+          categories.push({ id: doc.id, ...doc.data() });
+        });
+      } catch (error) {
+        console.error('Error loading categories:', error);
+      }
+    }
+
+    // Load tasks
+    async function loadTasks() {
+      try {
+        const tasksRef = collection(db, 'tasks');
+        const q = query(
+          tasksRef,
+          where('status', '==', 'published'),
+          orderBy('updatedAt', 'desc')
+        );
+        const snapshot = await getDocs(q);
+
+        tasks = [];
+        snapshot.forEach(doc => {
+          tasks.push({ id: doc.id, ...doc.data() });
+        });
+      } catch (error) {
+        console.error('Error loading tasks:', error);
+      }
+    }
+
+    // Load today's logs for current user
+    async function loadTodaysLogs() {
+      try {
+        const dayKey = getDayKey();
+        const logsRef = collection(db, 'logs');
+        const q = query(
+          logsRef,
+          where('ownerUserId', '==', currentUser.uid),
+          where('dayKey', '==', dayKey)
+        );
+        const snapshot = await getDocs(q);
+
+        todaysLogs = {};
+        snapshot.forEach(doc => {
+          const log = doc.data();
+          todaysLogs[log.taskId] = { id: doc.id, ...log };
+        });
+      } catch (error) {
+        console.error('Error loading today\'s logs:', error);
+      }
+    }
+
+    // Render tasks grouped by category
+    function renderTasks() {
+      if (tasks.length === 0) {
+        tasksList.style.display = 'none';
+        noTasks.style.display = 'block';
+        return;
+      }
+
+      tasksList.style.display = 'flex';
+      noTasks.style.display = 'none';
+
+      // Group tasks by category
+      const grouped = {};
+      categories.forEach(cat => {
+        grouped[cat.id] = { category: cat, tasks: [] };
+      });
+
+      tasks.forEach(task => {
+        if (grouped[task.categoryId]) {
+          grouped[task.categoryId].tasks.push(task);
+        }
+      });
+
+      let html = '';
+      Object.values(grouped).forEach(group => {
+        if (group.tasks.length === 0) return;
+
+        const cat = group.category;
+
+        // FrameC panel for each category
+        html += `
+          <div class="task-category-panel">
+            <div class="task-category-body">
+              <span class="task-category-label">${cat.name}</span>
+              <div class="task-tiles">
+        `;
+
+        group.tasks.forEach(task => {
+          const hasLogged = !!todaysLogs[task.id];
+          const statusClass = hasLogged ? 'logged' : '';
+          const statusText = hasLogged ? 'Logged Today' : 'Open';
+
+          html += `
+            <div class="task-tile-v2" data-task-id="${task.id}">
+              <div class="task-tile-content">
+                <div class="task-tile-title">${task.title}</div>
+                ${task.subtitle ? `<div class="task-tile-subtitle">${task.subtitle}</div>` : ''}
+              </div>
+              <div class="task-tile-meta">
+                <span class="task-tile-points">+${cat.pointsPerLog || 0}</span>
+                <span class="task-tile-status ${statusClass}">${statusText}</span>
+              </div>
+            </div>
+          `;
+        });
+
+        html += `
+              </div>
+            </div>
+          </div>
+        `;
+      });
+
+      tasksList.innerHTML = html;
+
+      // Add click handlers
+      tasksList.querySelectorAll('.task-tile-v2').forEach(tile => {
+        tile.addEventListener('click', () => {
+          const taskId = tile.dataset.taskId;
+          openTaskDetail(taskId);
+        });
+      });
+    }
+
+    // Open task detail modal
+    function openTaskDetail(taskId) {
+      const task = tasks.find(t => t.id === taskId);
+      if (!task) return;
+
+      selectedTask = task;
+      const category = categories.find(c => c.id === task.categoryId);
+      const hasLogged = !!todaysLogs[taskId];
+
+      document.getElementById('modal-category').textContent = category?.name || '';
+      document.getElementById('modal-title').textContent = task.title;
+      document.getElementById('modal-points').textContent = `+${category?.pointsPerLog || 0} points`;
+      document.getElementById('modal-body').innerHTML = task.body || '<p>Complete this task and log your work.</p>';
+
+      if (hasLogged) {
+        document.getElementById('modal-status').textContent = 'You\'ve already logged this task today. Edits won\'t add points.';
+        modalLogBtn.style.display = 'none';
+        modalEditBtn.style.display = 'inline-flex';
+      } else {
+        document.getElementById('modal-status').textContent = '';
+        modalLogBtn.style.display = 'inline-flex';
+        modalEditBtn.style.display = 'none';
+      }
+
+      taskModal.classList.remove('hidden');
+    }
+
+    // Close task detail modal
+    modalClose.addEventListener('click', () => {
+      taskModal.classList.add('hidden');
+      selectedTask = null;
+    });
+
+    taskModal.addEventListener('click', (e) => {
+      if (e.target === taskModal) {
+        taskModal.classList.add('hidden');
+        selectedTask = null;
+      }
+    });
+
+    // Open log work modal
+    function openLogModal() {
+      // Reset form
+      selectedPhase = null;
+      selectedVisibility = 'class';
+      uploadedMedia = [];
+
+      mediaPreview.innerHTML = '';
+      document.getElementById('log-note').value = '';
+
+      phaseSelector.querySelectorAll('.phase-option').forEach(btn => {
+        btn.classList.remove('selected');
+      });
+
+      visibilitySelector.querySelectorAll('.visibility-option').forEach(btn => {
+        btn.classList.toggle('selected', btn.dataset.visibility === 'class');
+      });
+
+      updateVisibilityHint('class');
+
+      taskModal.classList.add('hidden');
+      logModal.classList.remove('hidden');
+    }
+
+    modalLogBtn.addEventListener('click', openLogModal);
+    modalEditBtn.addEventListener('click', openLogModal);
+
+    // Close log modal
+    function closeLogModal() {
+      logModal.classList.add('hidden');
+    }
+
+    logModalClose.addEventListener('click', closeLogModal);
+    logCancel.addEventListener('click', closeLogModal);
+
+    logModal.addEventListener('click', (e) => {
+      if (e.target === logModal) {
+        closeLogModal();
+      }
+    });
+
+    // Media upload
+    mediaUpload.addEventListener('click', () => {
+      mediaInput.click();
+    });
+
+    mediaInput.addEventListener('change', async (e) => {
+      const files = Array.from(e.target.files);
+
+      for (const file of files) {
+        if (file.size > 5 * 1024 * 1024) {
+          showToast('Image must be under 5MB', 'error');
+          continue;
+        }
+
+        // Create preview
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          uploadedMedia.push({
+            file,
+            preview: event.target.result
+          });
+          renderMediaPreview();
+        };
+        reader.readAsDataURL(file);
+      }
+
+      mediaInput.value = '';
+    });
+
+    function renderMediaPreview() {
+      mediaPreview.innerHTML = uploadedMedia.map((item, index) => `
+        <div class="media-preview-item">
+          <img src="${item.preview}" alt="Preview">
+          <button type="button" class="media-preview-remove" data-index="${index}">×</button>
+        </div>
+      `).join('');
+
+      // Remove handlers
+      mediaPreview.querySelectorAll('.media-preview-remove').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const index = parseInt(btn.dataset.index);
+          uploadedMedia.splice(index, 1);
+          renderMediaPreview();
+        });
+      });
+    }
+
+    // Phase selector
+    phaseSelector.querySelectorAll('.phase-option').forEach(btn => {
+      btn.addEventListener('click', () => {
+        phaseSelector.querySelectorAll('.phase-option').forEach(b => b.classList.remove('selected'));
+        btn.classList.add('selected');
+        selectedPhase = btn.dataset.phase;
+      });
+    });
+
+    // Visibility selector
+    visibilitySelector.querySelectorAll('.visibility-option').forEach(btn => {
+      btn.addEventListener('click', () => {
+        visibilitySelector.querySelectorAll('.visibility-option').forEach(b => b.classList.remove('selected'));
+        btn.classList.add('selected');
+        selectedVisibility = btn.dataset.visibility;
+        updateVisibilityHint(selectedVisibility);
+      });
+    });
+
+    function updateVisibilityHint(visibility) {
+      const hints = {
+        draft: 'Only you can see this.',
+        class: 'Visible to your class and instructor.',
+        public: 'Visible to anyone with the link.'
+      };
+      visibilityHint.textContent = hints[visibility];
+      draftWarning.style.display = visibility === 'draft' ? 'block' : 'none';
+    }
+
+    // Submit log
+    logSubmit.addEventListener('click', async () => {
+      // Validate
+      if (uploadedMedia.length === 0) {
+        showToast('Add at least one photo.', 'error');
+        return;
+      }
+
+      if (!selectedPhase) {
+        showToast('Select a phase.', 'error');
+        return;
+      }
+
+      const note = document.getElementById('log-note').value.trim();
+      if (!note) {
+        showToast('Write a short note.', 'error');
+        return;
+      }
+
+      logSubmit.disabled = true;
+      logSubmit.textContent = 'Saving...';
+
+      try {
+        // Upload images to Firebase Storage
+        const mediaUrls = [];
+        for (const item of uploadedMedia) {
+          const fileName = `logs/${currentUser.uid}/${Date.now()}_${item.file.name}`;
+          const storageRef = ref(storage, fileName);
+          await uploadBytes(storageRef, item.file);
+          const url = await getDownloadURL(storageRef);
+          mediaUrls.push(url);
+        }
+
+        // Call Cloud Function to publish log
+        const result = await publishLog({
+          taskId: selectedTask.id,
+          media: mediaUrls,
+          phase: selectedPhase,
+          note: note,
+          visibility: selectedVisibility
+        });
+
+        if (result.data.success) {
+          const points = result.data.pointsAwarded;
+          if (points > 0) {
+            showToast(`Logged! +${points} points`, 'success');
+          } else {
+            showToast('Saved as draft.', 'success');
+          }
+
+          // Refresh today's logs
+          await loadTodaysLogs();
+          renderTasks();
+
+          closeLogModal();
+        }
+      } catch (error) {
+        console.error('Error publishing log:', error);
+        showToast('Error saving log. Try again.', 'error');
+      } finally {
+        logSubmit.disabled = false;
+        logSubmit.textContent = 'Publish';
+      }
+    });
+
+    // Toast helper
+    function showToast(message, type = 'info') {
+      const container = document.getElementById('toast-container');
+      const toast = document.createElement('div');
+      toast.className = `toast ${type}`;
+      toast.textContent = message;
+      container.appendChild(toast);
+
+      setTimeout(() => {
+        toast.remove();
+      }, 4000);
+    }
+  </script>
+</body>
+</html>

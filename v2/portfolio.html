@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Studio Log</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+  <style>
+    .portfolio-header {
+      text-align: center;
+      padding: var(--spacing-2xl) 0;
+      border-bottom: 3px solid var(--color-border);
+      margin-bottom: var(--spacing-lg);
+    }
+    .portfolio-avatar {
+      width: 120px;
+      height: 120px;
+      border: 3px solid var(--color-border);
+      margin: 0 auto var(--spacing-md);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: var(--text-3xl);
+      font-weight: 700;
+      background: white;
+    }
+    .portfolio-avatar img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .portfolio-name {
+      font-size: var(--text-3xl);
+      margin-bottom: var(--spacing-xs);
+    }
+    .portfolio-bio {
+      color: var(--color-text-light);
+      max-width: 500px;
+      margin: 0 auto var(--spacing-md);
+    }
+    .portfolio-links {
+      display: flex;
+      justify-content: center;
+      gap: var(--spacing-sm);
+      flex-wrap: wrap;
+    }
+    .portfolio-links a {
+      font-size: var(--text-sm);
+      padding: var(--spacing-xs) var(--spacing-sm);
+      border: 1px solid var(--color-border);
+    }
+    .portfolio-links a:hover {
+      background: var(--color-text);
+      color: var(--color-bg);
+    }
+    .preview-banner {
+      background: var(--color-slab-yellow);
+      border: 2px solid var(--color-border);
+      padding: var(--spacing-sm) var(--spacing-md);
+      margin-bottom: var(--spacing-md);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+  </style>
+</head>
+<body>
+  <div class="app-shell">
+    <!-- Preview Banner (only shown when viewing your own) -->
+    <div id="preview-banner" class="preview-banner" style="display: none;">
+      <span>This is a preview of your public portfolio.</span>
+      <a href="settings.html" class="btn btn-small btn-secondary">← Back to Settings</a>
+    </div>
+
+    <main class="main-content">
+      <!-- Loading -->
+      <div id="loading" class="loading">
+        <div class="loading-spinner"></div>
+      </div>
+
+      <!-- Not Found -->
+      <div id="not-found" class="empty-state" style="display: none;">
+        <h2 class="empty-state-headline">Portfolio not found</h2>
+        <p class="empty-state-body">This portfolio doesn't exist or isn't public.</p>
+      </div>
+
+      <!-- Portfolio Content -->
+      <div id="portfolio-content" style="display: none;">
+        <!-- Header -->
+        <div class="portfolio-header">
+          <div class="portfolio-avatar" id="portfolio-avatar">?</div>
+          <h1 class="portfolio-name" id="portfolio-name"></h1>
+          <p class="portfolio-bio" id="portfolio-bio"></p>
+          <div class="portfolio-links" id="portfolio-links"></div>
+        </div>
+
+        <!-- Work Grid -->
+        <h2 style="margin-bottom: var(--spacing-md);">Work</h2>
+        <div id="work-grid" class="highlights-grid">
+          <!-- Public logs and projects -->
+        </div>
+
+        <!-- No Public Work -->
+        <div id="no-work" class="empty-state" style="display: none;">
+          <h2 class="empty-state-headline">No public work yet.</h2>
+          <p class="empty-state-body">This student hasn't published any work publicly.</p>
+        </div>
+      </div>
+    </main>
+
+    <!-- Footer -->
+    <footer style="text-align: center; padding: var(--spacing-lg); border-top: 1px solid var(--color-border); margin-top: var(--spacing-2xl);">
+      <p style="font-size: var(--text-sm); color: var(--color-text-muted);">
+        Built with Portfolio v2
+      </p>
+    </footer>
+  </div>
+
+  <script type="module">
+    import { initAuth, getCurrentUser } from './js/auth.js';
+    import {
+      db, collection, doc, getDoc, getDocs, query, where, orderBy
+    } from './js/firebase-config.js';
+
+    const loading = document.getElementById('loading');
+    const notFound = document.getElementById('not-found');
+    const portfolioContent = document.getElementById('portfolio-content');
+    const previewBanner = document.getElementById('preview-banner');
+
+    // Get user from URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const userParam = urlParams.get('user');
+
+    let currentUser = null;
+    let targetUserId = null;
+
+    // Init
+    initAuth(async (user) => {
+      currentUser = user;
+
+      // If no user param and logged in, show own portfolio preview
+      if (!userParam && user) {
+        targetUserId = user.uid;
+        previewBanner.style.display = 'flex';
+        await loadPortfolio(user.uid);
+        return;
+      }
+
+      // If no user param and not logged in, show not found
+      if (!userParam) {
+        loading.style.display = 'none';
+        notFound.style.display = 'block';
+        return;
+      }
+
+      // Find user by handle or ID
+      await findAndLoadUser(userParam);
+    });
+
+    async function findAndLoadUser(param) {
+      try {
+        // First try by handle
+        const usersRef = collection(db, 'users');
+        const handleQuery = query(usersRef, where('handle', '==', param));
+        const handleSnap = await getDocs(handleQuery);
+
+        if (!handleSnap.empty) {
+          const userDoc = handleSnap.docs[0];
+          targetUserId = userDoc.id;
+          const userData = userDoc.data();
+
+          // Check if public
+          if (!userData.publicEnabled && (!currentUser || currentUser.uid !== targetUserId)) {
+            loading.style.display = 'none';
+            notFound.style.display = 'block';
+            return;
+          }
+
+          // Show preview banner if viewing own
+          if (currentUser && currentUser.uid === targetUserId) {
+            previewBanner.style.display = 'flex';
+          }
+
+          await loadPortfolio(targetUserId);
+          return;
+        }
+
+        // Try by user ID
+        const userDoc = await getDoc(doc(db, 'users', param));
+        if (userDoc.exists()) {
+          targetUserId = param;
+          const userData = userDoc.data();
+
+          if (!userData.publicEnabled && (!currentUser || currentUser.uid !== targetUserId)) {
+            loading.style.display = 'none';
+            notFound.style.display = 'block';
+            return;
+          }
+
+          if (currentUser && currentUser.uid === targetUserId) {
+            previewBanner.style.display = 'flex';
+          }
+
+          await loadPortfolio(targetUserId);
+          return;
+        }
+
+        // Not found
+        loading.style.display = 'none';
+        notFound.style.display = 'block';
+      } catch (error) {
+        console.error(error);
+        loading.style.display = 'none';
+        notFound.style.display = 'block';
+      }
+    }
+
+    async function loadPortfolio(userId) {
+      try {
+        // Get user data
+        const userDoc = await getDoc(doc(db, 'users', userId));
+        if (!userDoc.exists()) {
+          loading.style.display = 'none';
+          notFound.style.display = 'block';
+          return;
+        }
+
+        const userData = userDoc.data();
+
+        // Update page title
+        document.title = `${userData.fullName || 'Portfolio'} — Portfolio`;
+
+        // Populate header
+        const avatarEl = document.getElementById('portfolio-avatar');
+        if (userData.photoUrl) {
+          avatarEl.innerHTML = `<img src="${userData.photoUrl}" alt="${userData.fullName}">`;
+        } else {
+          const initials = (userData.fullName || 'S').split(' ').map(n => n[0]).join('').slice(0, 2);
+          avatarEl.textContent = initials;
+        }
+
+        document.getElementById('portfolio-name').textContent = userData.fullName || 'Student';
+        document.getElementById('portfolio-bio').textContent = userData.bio || '';
+
+        // Links
+        const linksEl = document.getElementById('portfolio-links');
+        if (userData.links && userData.links.length > 0) {
+          linksEl.innerHTML = userData.links.map(link => {
+            try {
+              const url = new URL(link);
+              return `<a href="${link}" target="_blank" rel="noopener">${url.hostname}</a>`;
+            } catch {
+              return '';
+            }
+          }).join('');
+        }
+
+        // Load public logs
+        const logsRef = collection(db, 'logs');
+        const logsQuery = query(
+          logsRef,
+          where('ownerUserId', '==', userId),
+          where('visibility', '==', 'public'),
+          orderBy('createdAt', 'desc')
+        );
+
+        let logsSnap;
+        try {
+          logsSnap = await getDocs(logsQuery);
+        } catch (e) {
+          // Index might not exist, try simpler query
+          const simpleQuery = query(logsRef, where('ownerUserId', '==', userId), orderBy('createdAt', 'desc'));
+          logsSnap = await getDocs(simpleQuery);
+          // Filter client-side
+          logsSnap = { docs: logsSnap.docs.filter(d => d.data().visibility === 'public') };
+        }
+
+        // Load public projects
+        const projectsRef = collection(db, 'projects');
+        const projectsQuery = query(
+          projectsRef,
+          where('ownerUserId', '==', userId),
+          where('visibility', '==', 'public'),
+          orderBy('createdAt', 'desc')
+        );
+
+        let projectsSnap;
+        try {
+          projectsSnap = await getDocs(projectsQuery);
+        } catch (e) {
+          const simpleQuery = query(projectsRef, where('ownerUserId', '==', userId));
+          projectsSnap = await getDocs(simpleQuery);
+          projectsSnap = { docs: (projectsSnap.docs || []).filter(d => d.data().visibility === 'public') };
+        }
+
+        loading.style.display = 'none';
+
+        const allWork = [];
+
+        (logsSnap.docs || []).forEach(d => {
+          allWork.push({ type: 'log', ...d.data(), id: d.id });
+        });
+
+        (projectsSnap.docs || []).forEach(d => {
+          allWork.push({ type: 'project', ...d.data(), id: d.id });
+        });
+
+        // Sort by date
+        allWork.sort((a, b) => {
+          const aTime = a.createdAt?.toMillis?.() || 0;
+          const bTime = b.createdAt?.toMillis?.() || 0;
+          return bTime - aTime;
+        });
+
+        if (allWork.length === 0) {
+          portfolioContent.style.display = 'block';
+          document.getElementById('no-work').style.display = 'block';
+          document.getElementById('work-grid').style.display = 'none';
+          return;
+        }
+
+        portfolioContent.style.display = 'block';
+        document.getElementById('no-work').style.display = 'none';
+
+        const workGrid = document.getElementById('work-grid');
+        workGrid.innerHTML = allWork.map(item => {
+          const mediaUrl = item.type === 'log' ? item.media?.[0] : item.coverMedia;
+          const text = item.type === 'log' ? item.note : item.statement;
+
+          return `
+            <div class="log-card">
+              <div class="log-card-media">
+                ${mediaUrl ? `<img src="${mediaUrl}" alt="Work">` : ''}
+                ${item.type === 'log' && item.phase ? `<span class="log-card-phase">${item.phase}</span>` : ''}
+                ${item.type === 'project' ? `<span class="log-card-phase">Project</span>` : ''}
+              </div>
+              <div class="log-card-body">
+                ${item.type === 'project' && item.title ? `<strong style="display: block; margin-bottom: var(--spacing-xs);">${item.title}</strong>` : ''}
+                <p class="log-card-note">${text || ''}</p>
+              </div>
+            </div>
+          `;
+        }).join('');
+
+      } catch (error) {
+        console.error(error);
+        loading.style.display = 'none';
+        notFound.style.display = 'block';
+      }
+    }
+  </script>
+</body>
+</html>

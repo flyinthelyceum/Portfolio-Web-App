@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Highlights — Studio Log</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=Inter:wght@400;500;600;700;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+  <style>
+    /* ============================================
+       Highlights Page - Tom Sachs ISRU Style
+       Studio Color Doctrine: #EEF1E6, #030506, #565B21
+       ============================================ */
+
+    body.highlights-page {
+      background-color: #EEF1E6;
+    }
+
+    body.highlights-page::before {
+      display: none;
+    }
+
+    /* Override base styles */
+    body.highlights-page .main-content {
+      max-width: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    body.highlights-page .nav-bar {
+      background: #EEF1E6;
+    }
+
+    body.highlights-page .nav-container {
+      max-width: none;
+      padding: 0 24px;
+    }
+
+    /* ============================================
+       Page Layout
+       ============================================ */
+    .highlights-layout {
+      padding: 16px 24px;
+      min-height: calc(100vh - 80px);
+      box-sizing: border-box;
+    }
+
+    /* Page Header */
+    .page-header {
+      margin-bottom: 20px;
+    }
+
+    .page-title-label {
+      display: inline-block;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      padding: 4px 12px;
+      background: #030506;
+      color: #FFFFFF;
+      margin-bottom: 8px;
+    }
+
+    /* ============================================
+       Highlights Grid - Masonry-like
+       ============================================ */
+    .highlights-grid-v2 {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 16px;
+    }
+
+    /* ============================================
+       Highlight Card - FrameA style
+       ============================================ */
+    .highlight-card-v2 {
+      background: #FFFFFF;
+      border: 4px solid #030506;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .highlight-card-media {
+      aspect-ratio: 4/3;
+      background: #EEF1E6;
+      border-bottom: 4px solid #030506;
+      overflow: hidden;
+    }
+
+    .highlight-card-media img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .highlight-card-body {
+      padding: 12px;
+      flex: 1;
+    }
+
+    .highlight-card-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .highlight-card-author {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: #030506;
+    }
+
+    .highlight-card-badge {
+      font-family: var(--font-mono);
+      font-size: 8px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      padding: 2px 6px;
+      background: #565B21;
+      color: #FFFFFF;
+    }
+
+    .highlight-card-note {
+      font-family: var(--font-body);
+      font-size: 13px;
+      line-height: 1.5;
+      color: #030506;
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .highlight-card-footer {
+      padding: 10px 12px;
+      border-top: 2px solid #030506;
+      display: flex;
+      gap: 12px;
+      background: #EEF1E6;
+    }
+
+    /* Social Buttons */
+    .social-btn-v2 {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 600;
+      padding: 4px 8px;
+      border: 2px solid #030506;
+      background: #FFFFFF;
+      color: #030506;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .social-btn-v2:hover {
+      background: #030506;
+      color: #FFFFFF;
+    }
+
+    .social-btn-v2.liked {
+      background: #565B21;
+      border-color: #565B21;
+      color: #FFFFFF;
+    }
+
+    /* Micro-interactions */
+    .highlight-card-v2 {
+      transition: all 0.15s ease;
+    }
+
+    .highlight-card-v2:hover {
+      transform: translateY(-4px);
+      box-shadow: 4px 4px 0 rgba(3, 5, 6, 0.15);
+    }
+
+    .social-btn-v2:active {
+      transform: scale(0.95);
+    }
+
+    /* ============================================
+       Empty State
+       ============================================ */
+    .empty-plate {
+      background: #FFFFFF;
+      border: 3px solid #030506;
+      padding: 32px 24px;
+      text-align: center;
+      max-width: 400px;
+      margin: 40px auto;
+    }
+
+    .empty-plate-text {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: #030506;
+      opacity: 0.6;
+      margin-bottom: 12px;
+    }
+
+    .empty-plate-hint {
+      font-family: var(--font-mono);
+      font-size: 9px;
+      color: #030506;
+      opacity: 0.5;
+      margin-top: 12px;
+    }
+
+    /* Buttons */
+    .btn {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      padding: 8px 16px;
+      border: 3px solid #030506;
+      border-radius: 0;
+      display: inline-block;
+      text-decoration: none;
+    }
+
+    .btn-primary {
+      background: #030506;
+      color: #FFFFFF;
+    }
+
+    .btn-primary:hover {
+      background: #565B21;
+      border-color: #565B21;
+    }
+
+    /* ============================================
+       Responsive
+       ============================================ */
+    @media (min-width: 900px) {
+      .highlights-layout {
+        padding: 20px 32px;
+      }
+
+      .highlights-grid-v2 {
+        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+        gap: 20px;
+      }
+    }
+
+    @media (min-width: 1600px) {
+      .highlights-layout {
+        padding: 24px 48px;
+      }
+
+      .highlights-grid-v2 {
+        grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+      }
+    }
+
+    @media (max-width: 600px) {
+      .highlights-layout {
+        padding: 12px 16px;
+      }
+
+      .highlights-grid-v2 {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body class="highlights-page">
+  <div class="app-shell">
+    <!-- Navigation -->
+    <nav class="nav-bar">
+      <div class="nav-container">
+        <a href="index.html" class="nav-brand">Studio Log</a>
+        <div class="nav-tabs">
+          <a href="index.html" class="nav-tab">Home</a>
+          <a href="tasks.html" class="nav-tab">Tasks</a>
+          <a href="highlights.html" class="nav-tab active">Highlights</a>
+          <a href="leaderboard.html" class="nav-tab">Leaderboard</a>
+        </div>
+        <button class="nav-gear" id="gear-btn" title="Settings">⚙</button>
+      </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <!-- Loading State -->
+      <div id="loading" class="loading">
+        <div class="loading-spinner"></div>
+      </div>
+
+      <!-- Auth Required State -->
+      <div id="auth-required" class="empty-plate" style="display: none;">
+        <div class="empty-plate-text">Log in to view Highlights</div>
+        <a href="login.html" class="btn btn-primary">Log In</a>
+      </div>
+
+      <!-- Highlights Content -->
+      <div id="highlights-content" class="highlights-layout" style="display: none;">
+        <div class="page-header">
+          <div class="page-title-label">Highlights</div>
+        </div>
+
+        <!-- Highlights Grid -->
+        <div id="highlights-grid" class="highlights-grid-v2">
+          <!-- Cards will be populated here -->
+        </div>
+
+        <!-- Empty State -->
+        <div id="no-highlights" class="empty-plate" style="display: none;">
+          <div class="empty-plate-text">Nothing featured yet</div>
+          <a href="tasks.html" class="btn btn-primary">Go to Tasks</a>
+          <div class="empty-plate-hint">Pin lives on your Log after you Log Work.</div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Toast Container -->
+  <div id="toast-container" class="toast-container"></div>
+
+  <script type="module">
+    import { initAuth, getCurrentUser } from './js/auth.js';
+    import {
+      db, collection, doc, getDoc, getDocs, setDoc, deleteDoc,
+      query, where, orderBy, limit, serverTimestamp
+    } from './js/firebase-config.js';
+
+    // State
+    let currentUser = null;
+    let highlights = [];
+    let userLikes = {}; // targetId -> likeId
+
+    // DOM Elements
+    const loading = document.getElementById('loading');
+    const authRequired = document.getElementById('auth-required');
+    const highlightsContent = document.getElementById('highlights-content');
+    const highlightsGrid = document.getElementById('highlights-grid');
+    const noHighlights = document.getElementById('no-highlights');
+
+    // Initialize auth
+    initAuth(async (user, userData) => {
+      currentUser = user;
+      loading.style.display = 'none';
+
+      if (!user) {
+        authRequired.style.display = 'block';
+        highlightsContent.style.display = 'none';
+        return;
+      }
+
+      authRequired.style.display = 'none';
+      highlightsContent.style.display = 'block';
+
+      await loadUserLikes();
+      await loadHighlights();
+    });
+
+    // Load user's likes
+    async function loadUserLikes() {
+      try {
+        const likesRef = collection(db, 'likes');
+        const q = query(likesRef, where('likerUserId', '==', currentUser.uid));
+        const snapshot = await getDocs(q);
+
+        userLikes = {};
+        snapshot.forEach(doc => {
+          const like = doc.data();
+          userLikes[like.targetId] = doc.id;
+        });
+      } catch (error) {
+        console.error('Error loading likes:', error);
+      }
+    }
+
+    // Load highlights
+    async function loadHighlights() {
+      try {
+        const highlightsRef = collection(db, 'highlights');
+        const q = query(
+          highlightsRef,
+          where('removedAt', '==', null),
+          orderBy('createdAt', 'desc'),
+          limit(50)
+        );
+
+        let snapshot;
+        try {
+          snapshot = await getDocs(q);
+        } catch (e) {
+          // If index doesn't exist, try simpler query
+          const simpleQ = query(highlightsRef, orderBy('createdAt', 'desc'), limit(50));
+          snapshot = await getDocs(simpleQ);
+        }
+
+        if (snapshot.empty) {
+          highlightsGrid.style.display = 'none';
+          noHighlights.style.display = 'block';
+          return;
+        }
+
+        highlightsGrid.style.display = 'grid';
+        noHighlights.style.display = 'none';
+
+        // Get target documents
+        const highlightData = [];
+        for (const highlightDoc of snapshot.docs) {
+          const highlight = { id: highlightDoc.id, ...highlightDoc.data() };
+
+          // Skip if removed
+          if (highlight.removedAt) continue;
+
+          // Get target (log or project)
+          const targetCollection = highlight.targetType === 'log' ? 'logs' : 'projects';
+          const targetDoc = await getDoc(doc(db, targetCollection, highlight.targetId));
+
+          if (!targetDoc.exists()) continue;
+
+          const target = targetDoc.data();
+
+          // Get owner info
+          const ownerDoc = await getDoc(doc(db, 'users', highlight.targetOwnerUserId));
+          const owner = ownerDoc.exists() ? ownerDoc.data() : { fullName: 'Student' };
+
+          highlightData.push({
+            highlight,
+            target: { id: targetDoc.id, ...target },
+            owner
+          });
+        }
+
+        renderHighlights(highlightData);
+      } catch (error) {
+        console.error('Error loading highlights:', error);
+        highlightsGrid.style.display = 'none';
+        noHighlights.style.display = 'block';
+      }
+    }
+
+    // Render highlights
+    function renderHighlights(data) {
+      highlightsGrid.innerHTML = data.map(({ highlight, target, owner }) => {
+        const isFeature = highlight.type === 'feature';
+        const mediaUrl = target.media?.[0] || target.coverMedia || '';
+        const isLiked = !!userLikes[target.id];
+
+        return `
+          <div class="highlight-card-v2" data-target-id="${target.id}" data-target-type="${highlight.targetType}">
+            <div class="highlight-card-media">
+              ${mediaUrl ? `<img src="${mediaUrl}" alt="Highlight">` : ''}
+            </div>
+            <div class="highlight-card-body">
+              <div class="highlight-card-meta">
+                <span class="highlight-card-author">${owner.fullName}</span>
+                ${isFeature ? `<span class="highlight-card-badge">${highlight.categoryLabel || 'Featured'}</span>` : ''}
+              </div>
+              <p class="highlight-card-note">${target.note || target.statement || ''}</p>
+            </div>
+            <div class="highlight-card-footer">
+              <button class="social-btn-v2 like-btn ${isLiked ? 'liked' : ''}" data-target-id="${target.id}" data-target-type="${highlight.targetType}" data-owner-id="${highlight.targetOwnerUserId}">
+                ♥ ${target.likeCount || 0}
+              </button>
+              <button class="social-btn-v2 comment-btn" data-target-id="${target.id}">
+                💬 ${target.commentCount || 0}
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      // Add like handlers
+      highlightsGrid.querySelectorAll('.like-btn').forEach(btn => {
+        btn.addEventListener('click', () => toggleLike(btn));
+      });
+    }
+
+    // Toggle like
+    async function toggleLike(btn) {
+      const targetId = btn.dataset.targetId;
+      const targetType = btn.dataset.targetType;
+      const ownerId = btn.dataset.ownerId;
+
+      // Can't like your own work
+      if (ownerId === currentUser.uid) {
+        showToast('Can\'t like your own work', 'error');
+        return;
+      }
+
+      const isLiked = btn.classList.contains('liked');
+
+      try {
+        if (isLiked) {
+          // Unlike
+          const likeId = userLikes[targetId];
+          if (likeId) {
+            await deleteDoc(doc(db, 'likes', likeId));
+            delete userLikes[targetId];
+          }
+          btn.classList.remove('liked');
+
+          // Update count display
+          const count = parseInt(btn.textContent.match(/\d+/)?.[0] || '0');
+          btn.innerHTML = `♥ ${Math.max(0, count - 1)}`;
+        } else {
+          // Like
+          const likeId = `${currentUser.uid}_${targetType}_${targetId}`;
+          await setDoc(doc(db, 'likes', likeId), {
+            likerUserId: currentUser.uid,
+            targetType,
+            targetId,
+            targetOwnerUserId: ownerId,
+            createdAt: serverTimestamp()
+          });
+          userLikes[targetId] = likeId;
+          btn.classList.add('liked');
+
+          // Update count display
+          const count = parseInt(btn.textContent.match(/\d+/)?.[0] || '0');
+          btn.innerHTML = `♥ ${count + 1}`;
+        }
+      } catch (error) {
+        console.error('Error toggling like:', error);
+        showToast('Error. Try again.', 'error');
+      }
+    }
+
+    // Toast helper
+    function showToast(message, type = 'info') {
+      const container = document.getElementById('toast-container');
+      const toast = document.createElement('div');
+      toast.className = `toast ${type}`;
+      toast.textContent = message;
+      container.appendChild(toast);
+
+      setTimeout(() => {
+        toast.remove();
+      }, 4000);
+    }
+  </script>
+</body>
+</html>

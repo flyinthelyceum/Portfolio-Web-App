@@ -1,0 +1,1438 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Home — Studio Log</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=Inter:wght@400;500;600;700;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+  <style>
+    /* ============================================
+       Home Page - Tom Sachs ISRU Style
+       Studio Color Doctrine: #EEF1E6, #030506, #565B21
+       No red, no gray, no gradients, no shadows
+
+       PRIMITIVES (Home-scoped):
+       FrameA - Crisp 4px border (ID Card)
+       FrameB - Heavier 3px border (badges, stat plates)
+       FrameC - Crisp frame + inset keyline (panels, task cards)
+       Stamp  - Applied label mark with offset + underline
+       Patch  - Certification with pin detail
+       ============================================ */
+
+    body.home-page {
+      background-color: #EEF1E6;
+    }
+
+    body.home-page::before {
+      display: none;
+    }
+
+    /* Override base styles - remove width constraints for home page */
+    body.home-page .main-content {
+      max-width: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    body.home-page .nav-container {
+      max-width: none;
+      padding: 0 24px;
+    }
+
+    /* ISRU Nav Hover States */
+    body.home-page .nav-tab {
+      font-family: var(--font-mono);
+      transition: all 0.12s ease;
+    }
+
+    body.home-page .nav-tab:hover {
+      background: #EEF1E6;
+      border-color: #030506;
+    }
+
+    body.home-page .nav-tab.active {
+      background: #030506;
+      color: #FFFFFF;
+      border-color: #030506;
+    }
+
+    body.home-page .nav-gear {
+      border: none;
+      background: transparent;
+      font-size: 36px;
+      width: 48px;
+      height: 48px;
+      transition: all 0.12s ease;
+    }
+
+    body.home-page .nav-gear:hover {
+      background: transparent;
+      color: #565B21;
+      transform: rotate(45deg);
+    }
+
+    /* ============================================
+       PRIMITIVE: FrameA - Crisp Standard
+       ============================================ */
+    .frame-a {
+      background: #FFFFFF;
+      border: 4px solid #030506;
+    }
+
+    /* ============================================
+       PRIMITIVE: FrameB - Heavier Stroke
+       For small items: badges, stat plates
+       ============================================ */
+    .frame-b {
+      background: #FFFFFF;
+      border: 3px solid #030506;
+    }
+
+    /* ============================================
+       PRIMITIVE: FrameC - Inset Keyline
+       Outer 4px + inner 1px keyline inset 4px
+       ============================================ */
+    .frame-c {
+      background: #FFFFFF;
+      border: 4px solid #030506;
+      position: relative;
+    }
+
+    .frame-c::after {
+      content: '';
+      position: absolute;
+      top: 4px;
+      left: 4px;
+      right: 4px;
+      bottom: 4px;
+      border: 1px solid #030506;
+      pointer-events: none;
+    }
+
+    .frame-c-body {
+      padding: 12px;
+      position: relative;
+      height: 100%;
+      box-sizing: border-box;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Make content inside frame-c-body expand */
+    .frame-c-body .recent-work-grid,
+    .frame-c-body #tasks-list {
+      flex: 1;
+    }
+
+    /* ============================================
+       PRIMITIVE: Applied Label (Stamp with offset)
+       Offset -6px, underline mount detail
+       ============================================ */
+    .applied-label {
+      display: inline-block;
+      font-family: var(--font-mono);
+      font-size: 9px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      padding: 3px 8px;
+      background: #030506;
+      color: #FFFFFF;
+      position: relative;
+      transform: translate(-6px, -6px);
+      margin-bottom: 4px;
+    }
+
+    /* Underline mount extending past label */
+    .applied-label::after {
+      content: '';
+      position: absolute;
+      bottom: -3px;
+      left: 0;
+      width: calc(100% + 16px);
+      height: 1px;
+      background: #030506;
+    }
+
+    /* ============================================
+       Category Glyphs - Ink-only SVG icons
+       16px monochrome stamp icons
+       ============================================ */
+    .cat-glyph {
+      width: 16px;
+      height: 16px;
+      flex-shrink: 0;
+      display: inline-block;
+      vertical-align: middle;
+    }
+
+    .cat-glyph svg {
+      width: 100%;
+      height: 100%;
+      fill: #030506;
+    }
+
+    /* ============================================
+       Desktop Gallery Wall Layout (2-column)
+       BASELINE: Optimized for 1440x900 desktop
+       FILLS ENTIRE viewport width and height
+       ============================================ */
+    .gallery-wall {
+      display: block;
+    }
+
+    @media (min-width: 900px) {
+      .gallery-wall {
+        display: grid;
+        /* Fixed left rail, right fills remaining space */
+        grid-template-columns: 320px 1fr;
+        gap: 24px;
+        align-items: start;
+        /* Fill viewport minus nav */
+        min-height: calc(100vh - 80px);
+        width: 100%;
+        padding: 16px 24px;
+        box-sizing: border-box;
+      }
+
+      .gallery-wall-left {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        position: sticky;
+        top: 16px;
+      }
+
+      .gallery-wall-right {
+        display: grid;
+        /* Recent Work gets ~40%, Assignments gets ~60% of viewport height */
+        grid-template-rows: minmax(200px, 40vh) minmax(280px, 1fr);
+        gap: 16px;
+        min-height: calc(100vh - 112px);
+      }
+
+      /* Panels fill their grid cells */
+      .gallery-wall-right .work-panel {
+        display: flex;
+        flex-direction: column;
+      }
+
+      /* Frame fills panel */
+      .gallery-wall-right .work-panel.frame-c {
+        height: 100%;
+      }
+    }
+
+    /* Large desktop (1600px+) */
+    @media (min-width: 1600px) {
+      .gallery-wall {
+        grid-template-columns: 360px 1fr;
+        gap: 32px;
+        padding: 20px 32px;
+      }
+
+      .gallery-wall-left {
+        gap: 14px;
+      }
+
+      .gallery-wall-right {
+        gap: 20px;
+      }
+    }
+
+    /* Ultrawide (2000px+) */
+    @media (min-width: 2000px) {
+      .gallery-wall {
+        grid-template-columns: 400px 1fr;
+        gap: 40px;
+        padding: 24px 48px;
+      }
+    }
+
+    /* ============================================
+       ID Card - FrameA (crisp standard)
+       Fills left rail width on desktop
+       ============================================ */
+    .id-card-v2 {
+      background: #FFFFFF;
+      border: 4px solid #030506;
+      max-width: 100%;
+      margin: 0 0 12px 0;
+      overflow: hidden;
+    }
+
+    @media (min-width: 900px) {
+      .id-card-v2 {
+        margin: 0;
+        width: 100%;
+      }
+    }
+
+    .id-card-top {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      border-bottom: 4px solid #030506;
+    }
+
+    .id-card-photo {
+      aspect-ratio: 1;
+      background: #FFFFFF;
+      border-right: 4px solid #030506;
+      overflow: hidden;
+    }
+
+    .id-card-photo img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .id-card-photo-placeholder {
+      width: calc(100% - 12px);
+      height: calc(100% - 12px);
+      margin: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2.5rem;
+      font-weight: 900;
+      color: #030506;
+      background: #FFFFFF;
+      border: 2px solid #030506;
+    }
+
+    .id-card-branding {
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      background: #FFFFFF;
+    }
+
+    .id-card-logo {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 4px;
+      color: #030506;
+    }
+
+    .id-card-program-badge {
+      display: inline-block;
+      background: #030506;
+      color: #FFFFFF;
+      padding: 3px 10px;
+      font-family: var(--font-mono);
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+    }
+
+    .id-card-points-pill {
+      border: 3px solid #030506;
+      padding: 4px 8px;
+      text-align: center;
+      margin-top: auto;
+      background: #FFFFFF;
+    }
+
+    .id-card-points-label {
+      font-family: var(--font-mono);
+      font-size: 9px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: #030506;
+    }
+
+    .id-card-points-value {
+      font-family: var(--font-mono);
+      font-size: 20px;
+      font-weight: 700;
+      color: #030506;
+    }
+
+    .id-card-slab {
+      background: #565B21;
+      padding: 12px;
+      color: #FFFFFF;
+    }
+
+    .id-card-name {
+      font-family: var(--font-display);
+      font-size: 20px;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: -0.02em;
+      margin-bottom: 2px;
+      color: #FFFFFF;
+    }
+
+    .id-card-meta-row {
+      display: flex;
+      gap: 12px;
+      font-family: var(--font-mono);
+      font-size: 10px;
+      color: rgba(255,255,255,0.8);
+    }
+
+    .id-card-handle {
+      text-decoration: underline;
+    }
+
+    /* ============================================
+       Stat Plates - FrameB (heavier stroke)
+       ============================================ */
+    .id-card-stat-plates {
+      display: flex;
+      gap: 6px;
+      margin-top: 10px;
+    }
+
+    .stat-plate {
+      background: #FFFFFF;
+      border: 3px solid #030506;
+      padding: 3px 8px;
+      text-align: center;
+      flex: 1;
+    }
+
+    .stat-plate-value {
+      font-family: var(--font-mono);
+      font-size: 13px;
+      font-weight: 700;
+      color: #030506;
+    }
+
+    .stat-plate-label {
+      font-family: var(--font-mono);
+      font-size: 8px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: #030506;
+    }
+
+    /* ============================================
+       Rail Modules (Desktop Left Column)
+       ============================================ */
+    .rail-module {
+      display: none;
+    }
+
+    @media (min-width: 900px) {
+      .rail-module {
+        display: block;
+      }
+    }
+
+    /* ============================================
+       Patch Plate - Certification with pin detail
+       Small "pin" square at left edge
+       ============================================ */
+    .patch-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px;
+    }
+
+    .patch-plate {
+      background: #FFFFFF;
+      border: 3px solid #030506;
+      padding: 8px 8px 8px 16px;
+      font-family: var(--font-mono);
+      font-size: 8px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.02em;
+      color: #030506;
+      text-align: center;
+      min-height: 38px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      line-height: 1.2;
+      position: relative;
+    }
+
+    /* Pin detail at left edge */
+    .patch-plate::before {
+      content: '';
+      position: absolute;
+      left: 4px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 6px;
+      height: 6px;
+      background: #030506;
+    }
+
+    .patch-plate--empty {
+      min-height: 38px;
+    }
+
+    .patch-plate--empty::before {
+      background: transparent;
+      border: 1px solid #030506;
+    }
+
+    /* ============================================
+       Signal Stamps - Compact plates
+       ============================================ */
+    .signal-row {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .signal-stamp {
+      background: #FFFFFF;
+      border: 2px solid #030506;
+      padding: 4px 8px;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-family: var(--font-mono);
+    }
+
+    .signal-stamp-label {
+      font-size: 7px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: #030506;
+    }
+
+    .signal-stamp-value {
+      font-size: 12px;
+      font-weight: 700;
+      color: #030506;
+    }
+
+    /* ============================================
+       Right Field - Work Panels with FrameC
+       ============================================ */
+    .work-panel {
+      display: flex;
+      flex-direction: column;
+    }
+
+    @media (min-width: 900px) {
+      .work-panel.frame-c {
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+      }
+
+      .work-panel .frame-c-body {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        overflow-y: auto;
+      }
+
+      /* Content areas fill remaining space */
+      .work-panel .recent-work-grid {
+        flex: 1;
+        align-content: start;
+      }
+
+      .work-panel #tasks-list {
+        flex: 1;
+        overflow-y: auto;
+      }
+    }
+
+    /* Recent Work Grid
+       AUTO-FILL columns based on available width
+       Minimum tile size ~120px, grows to fill space */
+    .recent-work-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+    }
+
+    @media (min-width: 900px) {
+      .recent-work-grid {
+        /* Auto-fill columns, min 100px each for higher density */
+        grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+        gap: 10px;
+      }
+    }
+
+    @media (min-width: 1600px) {
+      .recent-work-grid {
+        grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+        gap: 12px;
+      }
+    }
+
+    @media (min-width: 2000px) {
+      .recent-work-grid {
+        grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+        gap: 14px;
+      }
+    }
+
+    .recent-work-item {
+      aspect-ratio: 1;
+      background: #FFFFFF;
+      border: 2px solid #030506;
+      overflow: hidden;
+    }
+
+    .recent-work-item img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    /* Next Slot Plate - Replaces "+" square */
+    .next-slot-plate {
+      aspect-ratio: 1;
+      background: #FFFFFF;
+      border: 2px solid #030506;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 8px;
+      text-align: center;
+    }
+
+    .next-slot-title {
+      font-family: var(--font-mono);
+      font-size: 8px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: #030506;
+      margin-bottom: 2px;
+    }
+
+    .next-slot-sub {
+      font-family: var(--font-mono);
+      font-size: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: #030506;
+      opacity: 0.6;
+    }
+
+    /* Empty State Plate - Zero items */
+    .empty-state-plate {
+      background: #FFFFFF;
+      border: 2px solid #030506;
+      padding: 20px 12px;
+      text-align: center;
+    }
+
+    .empty-state-plate-text {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: #030506;
+      opacity: 0.6;
+    }
+
+    /* ============================================
+       Task Cards - FrameA + FrameC (physical card)
+       With inset keyline
+       ============================================ */
+    .task-card {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #FFFFFF;
+      border: 2px solid #030506;
+      padding: 8px 10px;
+      margin-bottom: 6px;
+      text-decoration: none;
+      color: #030506;
+      transition: background 0.1s ease;
+      position: relative;
+    }
+
+    /* Inset keyline for physical card feel */
+    .task-card::after {
+      content: '';
+      position: absolute;
+      top: 3px;
+      left: 3px;
+      right: 3px;
+      bottom: 3px;
+      border: 1px solid rgba(3, 5, 6, 0.15);
+      pointer-events: none;
+    }
+
+    .task-card:last-child {
+      margin-bottom: 0;
+    }
+
+    .task-card:hover {
+      background: #565B21;
+      color: #FFFFFF;
+    }
+
+    .task-card:hover::after {
+      border-color: rgba(255, 255, 255, 0.2);
+    }
+
+    .task-card:hover .task-card-points {
+      background: #FFFFFF;
+      color: #030506;
+    }
+
+    .task-card:hover .cat-glyph svg {
+      fill: #FFFFFF;
+    }
+
+    .task-card-left {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex: 1;
+    }
+
+    .task-card-content {
+      flex: 1;
+    }
+
+    .task-card-title {
+      font-family: var(--font-display);
+      font-size: 14px;
+      font-weight: 700;
+      line-height: 1.2;
+    }
+
+    .task-card-category {
+      font-family: var(--font-mono);
+      font-size: 9px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      opacity: 0.7;
+    }
+
+    .task-card-points {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      font-weight: 700;
+      padding: 3px 8px;
+      background: #030506;
+      color: #FFFFFF;
+      transition: all 0.1s ease;
+    }
+
+    .task-card.logged .task-card-points {
+      background: #565B21;
+    }
+
+    /* ============================================
+       Micro-interactions & Polish
+       ============================================ */
+
+    /* Subtle press effect on interactive items */
+    .task-card:active {
+      transform: scale(0.98);
+    }
+
+    /* Signal stamps hover */
+    .signal-stamp {
+      transition: all 0.1s ease;
+    }
+
+    .signal-stamp:hover {
+      background: #030506;
+      color: #FFFFFF;
+    }
+
+    /* Patch plates hover */
+    .patch-plate {
+      transition: all 0.1s ease;
+    }
+
+    .patch-plate:not(.patch-plate--empty):hover {
+      background: #565B21;
+      color: #FFFFFF;
+    }
+
+    .patch-plate:not(.patch-plate--empty):hover::before {
+      background: #FFFFFF;
+    }
+
+    /* Stat plates hover */
+    .stat-plate {
+      transition: all 0.1s ease;
+      cursor: default;
+    }
+
+    /* Recent work items hover */
+    .recent-work-item {
+      transition: all 0.12s ease;
+      cursor: pointer;
+    }
+
+    .recent-work-item:hover {
+      border-color: #565B21;
+      transform: translateY(-2px);
+    }
+
+    /* Next slot plate hover */
+    .next-slot-plate {
+      transition: all 0.12s ease;
+      cursor: pointer;
+    }
+
+    .next-slot-plate:hover {
+      background: #EEF1E6;
+      border-color: #565B21;
+    }
+
+    /* Frame panels subtle shadow on hover */
+    .frame-c {
+      transition: box-shadow 0.15s ease;
+    }
+
+    @media (min-width: 900px) {
+      .frame-c:hover {
+        box-shadow: 4px 4px 0 rgba(3, 5, 6, 0.1);
+      }
+    }
+
+    /* Applied label hover (on parent) */
+    .frame-c:hover .applied-label {
+      background: #565B21;
+    }
+
+    /* ============================================
+       Mobile Layout - iOS Native Feel
+       BASELINE: 375px iPhone width
+       Full-width with safe padding
+       ============================================ */
+    @media (max-width: 899px) {
+      /* Mobile Nav - scrollable tabs */
+      body.home-page .nav-container {
+        padding: 0 12px;
+      }
+
+      body.home-page .nav-tabs {
+        gap: 2px;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+      }
+
+      body.home-page .nav-tabs::-webkit-scrollbar {
+        display: none;
+      }
+
+      body.home-page .nav-tab {
+        padding: 6px 8px;
+        font-size: 9px;
+        white-space: nowrap;
+        flex-shrink: 0;
+      }
+
+      body.home-page .nav-brand {
+        font-size: 14px;
+      }
+
+      body.home-page .nav-gear {
+        width: 42px;
+        height: 42px;
+        font-size: 30px;
+      }
+
+      .gallery-wall {
+        padding: 12px 12px 24px 12px;
+      }
+
+      .gallery-wall-left {
+        width: 100%;
+        max-width: 100%;
+        margin: 0 0 16px 0;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+
+      .gallery-wall-right {
+        width: 100%;
+        max-width: 100%;
+        margin: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+
+      /* Work panels on mobile */
+      .frame-c {
+        margin-bottom: 0;
+      }
+
+      .frame-c-body {
+        padding: 10px;
+      }
+
+      /* Applied label smaller on mobile */
+      .applied-label {
+        font-size: 8px;
+        padding: 2px 6px;
+        transform: translate(-4px, -4px);
+      }
+
+      /* ID card fills width on mobile */
+      .id-card-v2 {
+        max-width: 100%;
+        margin-bottom: 0;
+      }
+
+      .id-card-name {
+        font-size: 18px;
+      }
+
+      .id-card-points-value {
+        font-size: 18px;
+      }
+
+      /* Stat plates tighter on mobile */
+      .stat-plate {
+        padding: 2px 6px;
+      }
+
+      .stat-plate-value {
+        font-size: 12px;
+      }
+
+      .stat-plate-label {
+        font-size: 7px;
+      }
+
+      /* Recent Work grid - 3 columns on mobile */
+      .recent-work-grid {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 6px;
+      }
+
+      /* Task cards tighter */
+      .task-card {
+        padding: 8px;
+      }
+
+      .task-card-title {
+        font-size: 13px;
+      }
+
+      .task-card-points {
+        font-size: 11px;
+        padding: 2px 6px;
+      }
+    }
+
+    /* Small mobile (under 375px) */
+    @media (max-width: 374px) {
+      .gallery-wall {
+        padding: 8px 8px 20px 8px;
+      }
+
+      .recent-work-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    /* Tablet breakpoint - centered with max constraint */
+    @media (min-width: 600px) and (max-width: 899px) {
+      .gallery-wall {
+        padding: 16px 20px;
+        max-width: 600px;
+        margin: 0 auto;
+      }
+
+      .recent-work-grid {
+        grid-template-columns: repeat(4, 1fr);
+      }
+    }
+
+    /* ============================================
+       CTA State
+       ============================================ */
+    .home-cta {
+      text-align: center;
+      padding: 20px;
+      background: #FFFFFF;
+      border: 4px solid #030506;
+    }
+
+    .home-cta p {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      margin-bottom: 10px;
+      color: #030506;
+    }
+
+    .home-cta .btn {
+      background: #030506;
+      color: #FFFFFF;
+      border-color: #030506;
+    }
+
+    .home-cta .btn:hover {
+      background: #565B21;
+      border-color: #565B21;
+    }
+
+    /* Auth Container */
+    .auth-container {
+      max-width: 380px;
+      margin: 0 auto;
+    }
+  </style>
+</head>
+<body class="home-page">
+  <div class="app-shell">
+    <!-- Navigation -->
+    <nav class="nav-bar" style="background: #EEF1E6;">
+      <div class="nav-container">
+        <a href="index.html" class="nav-brand">Studio Log</a>
+        <div class="nav-tabs">
+          <a href="index.html" class="nav-tab active">Home</a>
+          <a href="tasks.html" class="nav-tab">Tasks</a>
+          <a href="highlights.html" class="nav-tab">Highlights</a>
+          <a href="leaderboard.html" class="nav-tab">Leaderboard</a>
+        </div>
+        <button class="nav-gear" id="gear-btn" title="Settings">⚙</button>
+      </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <!-- Loading State -->
+      <div id="loading" class="loading">
+        <div class="loading-spinner"></div>
+      </div>
+
+      <!-- Auth Required State -->
+      <div id="auth-required" class="auth-container empty-state" style="display: none;">
+        <h2 class="empty-state-headline">Log in to continue</h2>
+        <p class="empty-state-body">Sign in to view your portfolio and log work.</p>
+        <a href="login.html" class="btn btn-primary">Log In</a>
+      </div>
+
+      <!-- Gallery Wall -->
+      <div id="home-content" class="gallery-wall" style="display: none;">
+
+        <!-- LEFT RAIL -->
+        <div class="gallery-wall-left">
+
+          <!-- ID Card (FrameA) -->
+          <div class="id-card-v2">
+            <div class="id-card-top">
+              <div class="id-card-photo" id="user-photo">
+                <div class="id-card-photo-placeholder" id="user-initials"></div>
+              </div>
+              <div class="id-card-branding">
+                <div>
+                  <div class="id-card-logo">Working Portfolio</div>
+                  <div class="id-card-program-badge">W.P.</div>
+                </div>
+                <div class="id-card-points-pill">
+                  <div class="id-card-points-label">Points</div>
+                  <div class="id-card-points-value" id="user-points">0</div>
+                </div>
+              </div>
+            </div>
+            <div class="id-card-slab">
+              <div class="id-card-name" id="user-name"></div>
+              <div class="id-card-meta-row">
+                <span id="user-serial">S/N:</span>
+                <span class="id-card-handle" id="user-handle"></span>
+              </div>
+              <div class="id-card-stat-plates">
+                <div class="stat-plate">
+                  <div class="stat-plate-value" id="stat-logs">0</div>
+                  <div class="stat-plate-label">Logs</div>
+                </div>
+                <div class="stat-plate">
+                  <div class="stat-plate-value" id="stat-streak">0</div>
+                  <div class="stat-plate-label">Streak</div>
+                </div>
+                <div class="stat-plate">
+                  <div class="stat-plate-value" id="stat-rank">0</div>
+                  <div class="stat-plate-label">Rank</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Certifications Panel (Desktop Only) - FrameC -->
+          <div class="frame-c rail-module">
+            <div class="frame-c-body">
+              <span class="applied-label">Certifications</span>
+              <div class="patch-grid" id="cert-grid">
+                <div class="patch-plate patch-plate--empty"></div>
+                <div class="patch-plate patch-plate--empty"></div>
+                <div class="patch-plate patch-plate--empty"></div>
+                <div class="patch-plate patch-plate--empty"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Signals Panel (Desktop Only) - FrameC -->
+          <div class="frame-c rail-module">
+            <div class="frame-c-body">
+              <span class="applied-label">Signals</span>
+              <div class="signal-row">
+                <div class="signal-stamp">
+                  <span class="signal-stamp-label">Likes</span>
+                  <span class="signal-stamp-value" id="signal-likes">0</span>
+                </div>
+                <div class="signal-stamp">
+                  <span class="signal-stamp-label">Comments</span>
+                  <span class="signal-stamp-value" id="signal-comments">0</span>
+                </div>
+                <div class="signal-stamp">
+                  <span class="signal-stamp-label">Featured</span>
+                  <span class="signal-stamp-value" id="signal-features">0</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- RIGHT FIELD -->
+        <div class="gallery-wall-right">
+
+          <!-- Recent Work Panel (FrameC with inset) -->
+          <div class="frame-c work-panel">
+            <div class="frame-c-body">
+              <span class="applied-label">Recent Work</span>
+              <div class="recent-work-grid" id="recent-logs">
+                <!-- JS will populate: existing items + NEXT SLOT plate -->
+              </div>
+            </div>
+          </div>
+
+          <!-- Assignments Panel (FrameC with inset) -->
+          <div class="frame-c work-panel">
+            <div class="frame-c-body">
+              <span class="applied-label">Assignments</span>
+              <div id="tasks-list">
+                <!-- JS will populate with task-cards -->
+              </div>
+            </div>
+          </div>
+
+          <!-- CTA if no logs -->
+          <div id="no-logs-cta" class="home-cta" style="display: none;">
+            <p>Start with one Task. Then Log Work.</p>
+            <a href="tasks.html" class="btn">Go to Tasks</a>
+          </div>
+
+        </div>
+
+      </div>
+    </main>
+  </div>
+
+  <!-- Gear Menu -->
+  <div id="gear-menu" class="modal-overlay hidden">
+    <div class="modal" style="max-width: 280px;">
+      <div class="modal-header">
+        <h3 class="modal-title">Menu</h3>
+        <button class="modal-close" id="gear-close">×</button>
+      </div>
+      <div class="modal-body" style="padding: 0;">
+        <a href="portfolio.html" style="display: block; padding: 10px 14px; border-bottom: 1px solid var(--color-border);">Preview Portfolio</a>
+        <a href="settings.html" style="display: block; padding: 10px 14px; border-bottom: 1px solid var(--color-border);">Settings</a>
+        <div id="admin-links" style="display: none;">
+          <a href="admin/setup.html" style="display: block; padding: 10px 14px; border-bottom: 1px solid var(--color-border);">Admin: Setup</a>
+          <a href="admin/tasks.html" style="display: block; padding: 10px 14px; border-bottom: 1px solid var(--color-border);">Admin: Tasks</a>
+          <a href="admin/moderate.html" style="display: block; padding: 10px 14px; border-bottom: 1px solid var(--color-border);">Admin: Moderate</a>
+        </div>
+        <button id="logout-btn" style="display: block; width: 100%; padding: 10px 14px; text-align: left; border: none; background: none; cursor: pointer; color: var(--color-error);">Log Out</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Category Glyph SVGs (inline, hidden) -->
+  <svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+    <!-- NEWS: Megaphone/broadcast -->
+    <symbol id="glyph-news" viewBox="0 0 16 16">
+      <path d="M13 3v9l-5-2V5l5-2zm-6 3v4H5l-1 3H3l1-3V6h3zm7-1v7h-1V5h1z"/>
+    </symbol>
+    <!-- OFFICE HOURS: Clock -->
+    <symbol id="glyph-office-hours" viewBox="0 0 16 16">
+      <path d="M8 2a6 6 0 100 12A6 6 0 008 2zm0 1a5 5 0 110 10A5 5 0 018 3zm-.5 2v3.5l2.5 1.5.5-.87-2-1.2V5h-1z"/>
+    </symbol>
+    <!-- PROJECT: Cube/box -->
+    <symbol id="glyph-project" viewBox="0 0 16 16">
+      <path d="M8 1L2 4v8l6 3 6-3V4L8 1zm0 1.24L12.5 4.5 8 6.76 3.5 4.5 8 2.24zM3 5.35l4.5 2.25v5.05L3 10.4V5.35zm5.5 7.3V7.6L13 5.35v5.05l-4.5 2.25z"/>
+    </symbol>
+    <!-- CHORE: Broom/wrench -->
+    <symbol id="glyph-chore" viewBox="0 0 16 16">
+      <path d="M12.5 2L11 3.5l1.5 1.5 1.5-1.5L12.5 2zM10 4.5L4 10.5V13h2.5l6-6L10 4.5zM5 11v1h1l5-5-1-1-5 5z"/>
+    </symbol>
+    <!-- RITUAL: Flame/candle -->
+    <symbol id="glyph-ritual" viewBox="0 0 16 16">
+      <path d="M8 2c0 2-2 3-2 5a3 3 0 006 0c0-2-2-3-2-5-1 1-2 1-2 0zm0 4c.5.5 1 1 1 2a1 1 0 01-2 0c0-1 .5-1.5 1-2zM6 12h4v2H6v-2z"/>
+    </symbol>
+  </svg>
+
+  <script type="module">
+    import { initAuth, logout, getCurrentUser, getCurrentUserData, isAdmin } from './js/auth.js';
+    import { db, collection, query, where, orderBy, limit, getDocs } from './js/firebase-config.js';
+
+    const loading = document.getElementById('loading');
+    const authRequired = document.getElementById('auth-required');
+    const homeContent = document.getElementById('home-content');
+    const gearBtn = document.getElementById('gear-btn');
+    const gearMenu = document.getElementById('gear-menu');
+    const gearClose = document.getElementById('gear-close');
+    const logoutBtn = document.getElementById('logout-btn');
+    const adminLinks = document.getElementById('admin-links');
+
+    // Category glyph mapping
+    const categoryGlyphs = {
+      'news': 'glyph-news',
+      'office hours': 'glyph-office-hours',
+      'office_hours': 'glyph-office-hours',
+      'project': 'glyph-project',
+      'chore': 'glyph-chore',
+      'ritual': 'glyph-ritual'
+    };
+
+    function getCategoryGlyph(categoryName) {
+      const key = categoryName.toLowerCase().replace(/\s+/g, '_');
+      const glyphId = categoryGlyphs[key] || categoryGlyphs[categoryName.toLowerCase()] || 'glyph-project';
+      return `<span class="cat-glyph"><svg><use href="#${glyphId}"/></svg></span>`;
+    }
+
+    function generateSerial(uid) {
+      const year = new Date().getFullYear();
+      const dayOfYear = Math.floor((new Date() - new Date(year, 0, 0)) / (1000 * 60 * 60 * 24));
+      const uidShort = uid.slice(-5).toUpperCase();
+      return `${year}.${String(dayOfYear).padStart(3, '0')}.${uidShort}`;
+    }
+
+    initAuth(async (user, userData) => {
+      loading.style.display = 'none';
+
+      if (!user) {
+        authRequired.style.display = 'block';
+        homeContent.style.display = 'none';
+        return;
+      }
+
+      authRequired.style.display = 'none';
+      homeContent.style.display = 'grid';
+
+      if (userData.role === 'admin') {
+        adminLinks.style.display = 'block';
+      }
+
+      // Populate ID Card
+      const fullName = userData.fullName || 'Student';
+      document.getElementById('user-name').textContent = fullName.toUpperCase();
+      document.getElementById('user-points').textContent = (userData.pointsTotal || 0).toLocaleString();
+      document.getElementById('stat-streak').textContent = userData.streakLogCurrent || 0;
+      document.getElementById('user-serial').textContent = `S/N: ${generateSerial(user.uid)}`;
+
+      const handle = userData.handle || fullName.toLowerCase().replace(/\s+/g, '');
+      document.getElementById('user-handle').textContent = `@${handle}`;
+
+      // Photo
+      const photoContainer = document.getElementById('user-photo');
+      if (userData.photoUrl) {
+        photoContainer.innerHTML = `<img src="${userData.photoUrl}" alt="Photo">`;
+      } else {
+        const initials = fullName.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase();
+        document.getElementById('user-initials').textContent = initials;
+      }
+
+      // Signals (social stats from user doc)
+      document.getElementById('signal-likes').textContent = userData.pointsSocialTotal || 0;
+      document.getElementById('signal-comments').textContent = 0;
+      document.getElementById('signal-features').textContent = userData.pointsFeatureTotal || 0;
+
+      // Load data
+      await Promise.all([
+        loadBadges(user.uid),
+        loadRecentLogs(user.uid),
+        loadTasks(user.uid)
+      ]);
+    });
+
+    async function loadBadges(userId) {
+      try {
+        const badgesRef = collection(db, 'users', userId, 'badges');
+        const snapshot = await getDocs(badgesRef);
+
+        const badges = [];
+        snapshot.forEach(doc => {
+          badges.push(doc.data().badgeId);
+        });
+
+        const certGrid = document.getElementById('cert-grid');
+        let html = '';
+
+        // Show earned badges as patch plates
+        badges.forEach(badgeId => {
+          const name = badgeId.replace(/^(cert_|log_|iter_)/, '').replace(/_/g, ' ').toUpperCase();
+          html += `<div class="patch-plate">${name}</div>`;
+        });
+
+        // Fill remaining slots (up to 4 total) with empty patch plates
+        const emptyCount = Math.max(0, 4 - badges.length);
+        for (let i = 0; i < emptyCount; i++) {
+          html += `<div class="patch-plate patch-plate--empty"></div>`;
+        }
+
+        certGrid.innerHTML = html;
+      } catch (error) {
+        console.error('Error loading badges:', error);
+      }
+    }
+
+    async function loadRecentLogs(userId) {
+      try {
+        const logsRef = collection(db, 'logs');
+        const q = query(
+          logsRef,
+          where('ownerUserId', '==', userId),
+          orderBy('createdAt', 'desc'),
+          limit(15) // Increased from 8 for higher density
+        );
+        const snapshot = await getDocs(q);
+
+        const recentLogs = document.getElementById('recent-logs');
+        const noLogsCta = document.getElementById('no-logs-cta');
+
+        if (snapshot.empty) {
+          // Zero items: show designed empty state plate
+          document.getElementById('stat-logs').textContent = '0';
+          recentLogs.innerHTML = `
+            <div class="empty-state-plate" style="width: 100%;">
+              <div class="empty-state-plate-text">No work logged yet</div>
+            </div>
+          `;
+          noLogsCta.style.display = 'block';
+          return;
+        }
+
+        noLogsCta.style.display = 'none';
+
+        let html = '';
+        let totalLogs = 0;
+
+        snapshot.forEach(doc => {
+          totalLogs++;
+          const log = doc.data();
+          const mediaUrl = log.media?.[0] || '';
+          if (mediaUrl) {
+            html += `<div class="recent-work-item"><img src="${mediaUrl}" alt="Log"></div>`;
+          }
+        });
+
+        document.getElementById('stat-logs').textContent = totalLogs + (totalLogs >= 15 ? '+' : '');
+
+        // Add ONE NEXT SLOT plate (not "+" symbol)
+        html += `
+          <div class="next-slot-plate">
+            <div class="next-slot-title">Next Slot</div>
+            <div class="next-slot-sub">Log through Tasks</div>
+          </div>
+        `;
+
+        recentLogs.innerHTML = html;
+      } catch (error) {
+        console.error('Error loading logs:', error);
+      }
+    }
+
+    async function loadTasks(userId) {
+      try {
+        const dayKey = new Date().toLocaleDateString('en-CA', { timeZone: 'America/Phoenix' });
+        const logsRef = collection(db, 'logs');
+        const logsQuery = query(
+          logsRef,
+          where('ownerUserId', '==', userId),
+          where('dayKey', '==', dayKey)
+        );
+        const logsSnap = await getDocs(logsQuery);
+        const todaysLogTaskIds = new Set();
+        logsSnap.forEach(doc => todaysLogTaskIds.add(doc.data().taskId));
+
+        const tasksRef = collection(db, 'tasks');
+        const tasksQuery = query(
+          tasksRef,
+          where('status', '==', 'published'),
+          orderBy('updatedAt', 'desc'),
+          limit(8) // Increased from 5 for higher density
+        );
+        const tasksSnap = await getDocs(tasksQuery);
+
+        const catsRef = collection(db, 'taskCategories');
+        const catsSnap = await getDocs(catsRef);
+        const categories = {};
+        catsSnap.forEach(doc => categories[doc.id] = doc.data());
+
+        const tasksList = document.getElementById('tasks-list');
+
+        if (tasksSnap.empty) {
+          tasksList.innerHTML = `
+            <div class="empty-state-plate">
+              <div class="empty-state-plate-text">No assignments posted</div>
+            </div>
+          `;
+          return;
+        }
+
+        let html = '';
+        tasksSnap.forEach(doc => {
+          const task = doc.data();
+          const category = categories[task.categoryId] || {};
+          const categoryName = category.name || 'Task';
+          const points = category.pointsPerLog || 0;
+          const isLogged = todaysLogTaskIds.has(doc.id);
+          const glyph = getCategoryGlyph(categoryName);
+
+          html += `
+            <a href="tasks.html" class="task-card ${isLogged ? 'logged' : ''}">
+              <div class="task-card-left">
+                ${glyph}
+                <div class="task-card-content">
+                  <div class="task-card-title">${task.title}</div>
+                  <div class="task-card-category">${categoryName}</div>
+                </div>
+              </div>
+              <div class="task-card-points">+${points}</div>
+            </a>
+          `;
+        });
+
+        tasksList.innerHTML = html;
+      } catch (error) {
+        console.error('Error loading tasks:', error);
+      }
+    }
+
+    gearBtn.addEventListener('click', () => gearMenu.classList.remove('hidden'));
+    gearClose.addEventListener('click', () => gearMenu.classList.add('hidden'));
+    gearMenu.addEventListener('click', (e) => {
+      if (e.target === gearMenu) gearMenu.classList.add('hidden');
+    });
+
+    logoutBtn.addEventListener('click', async () => {
+      await logout();
+      window.location.href = 'login.html';
+    });
+  </script>
+</body>
+</html>

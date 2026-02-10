@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Setup — Portfolio Admin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/styles.css">
+</head>
+<body>
+  <div class="app-shell">
+    <nav class="nav-bar">
+      <div class="nav-container">
+        <a href="../index.html" class="nav-brand">Portfolio Admin</a>
+      </div>
+    </nav>
+
+    <main class="main-content">
+      <div style="max-width: 600px; margin: 0 auto;">
+        <h1 style="margin-bottom: var(--spacing-md);">Initial Setup</h1>
+
+        <!-- Step 0: Auth Check -->
+        <div id="step-auth" class="empty-state">
+          <h2 class="empty-state-headline">Log in first</h2>
+          <p class="empty-state-body">You need to be logged in to run setup.</p>
+          <a href="../login.html" class="btn btn-primary">Log In</a>
+        </div>
+
+        <!-- Setup Panel (shown when logged in) -->
+        <div id="setup-panel" style="display: none;">
+
+          <!-- Status Display -->
+          <div id="status-display" style="background: white; border: 2px solid var(--color-border); padding: var(--spacing-md); margin-bottom: var(--spacing-md);">
+            <h3 style="margin-bottom: var(--spacing-sm);">Current Status</h3>
+            <div id="status-content">
+              <p>Checking...</p>
+            </div>
+          </div>
+
+          <!-- Step 1: Make yourself admin -->
+          <div class="task-detail" style="margin-bottom: var(--spacing-md);">
+            <div class="task-detail-header">
+              <h3>Step 1: Make yourself admin</h3>
+            </div>
+            <div class="task-detail-body">
+              <p>This will set your user role to "admin" so you can author tasks and moderate content.</p>
+            </div>
+            <div class="task-detail-actions">
+              <button id="btn-make-admin" class="btn btn-primary">Make Me Admin</button>
+              <span id="admin-status" style="margin-left: var(--spacing-sm);"></span>
+            </div>
+          </div>
+
+          <!-- Step 2: Create categories -->
+          <div class="task-detail" style="margin-bottom: var(--spacing-md);">
+            <div class="task-detail-header">
+              <h3>Step 2: Create task categories</h3>
+            </div>
+            <div class="task-detail-body">
+              <p>Creates the 5 default categories with point values from POINTS_MODEL.md:</p>
+              <ul style="margin: var(--spacing-sm) 0; padding-left: var(--spacing-md);">
+                <li>Office Hours (+253 pts)</li>
+                <li>News (+126 pts)</li>
+                <li>Project (+371 pts)</li>
+                <li>Chore (+184 pts)</li>
+                <li>Ritual (+213 pts)</li>
+              </ul>
+            </div>
+            <div class="task-detail-actions">
+              <button id="btn-create-categories" class="btn btn-primary">Create Categories</button>
+              <span id="categories-status" style="margin-left: var(--spacing-sm);"></span>
+            </div>
+          </div>
+
+          <!-- Step 3: Create sample tasks -->
+          <div class="task-detail" style="margin-bottom: var(--spacing-md);">
+            <div class="task-detail-header">
+              <h3>Step 3: Create sample tasks</h3>
+            </div>
+            <div class="task-detail-body">
+              <p>Creates starter tasks so students have something to log against:</p>
+              <ul style="margin: var(--spacing-sm) 0; padding-left: var(--spacing-md);">
+                <li>Daily Documentation (Ritual)</li>
+                <li>Tool Cert: Basic Shop Safety (Office Hours)</li>
+                <li>Build v1: Your First Prototype (Project)</li>
+                <li>Studio Reset (Chore)</li>
+                <li>Welcome to Portfolio v2 (News)</li>
+              </ul>
+            </div>
+            <div class="task-detail-actions">
+              <button id="btn-create-tasks" class="btn btn-primary">Create Sample Tasks</button>
+              <span id="tasks-status" style="margin-left: var(--spacing-sm);"></span>
+            </div>
+          </div>
+
+          <!-- Step 4: Create badge definitions -->
+          <div class="task-detail" style="margin-bottom: var(--spacing-md);">
+            <div class="task-detail-header">
+              <h3>Step 4: Create badge definitions</h3>
+            </div>
+            <div class="task-detail-body">
+              <p>Creates certification and streak badge templates:</p>
+              <ul style="margin: var(--spacing-sm) 0; padding-left: var(--spacing-md);">
+                <li>Shop Safety (certification)</li>
+                <li>Log Streak L1-L3</li>
+                <li>Iteration Streak L1</li>
+              </ul>
+            </div>
+            <div class="task-detail-actions">
+              <button id="btn-create-badges" class="btn btn-primary">Create Badges</button>
+              <span id="badges-status" style="margin-left: var(--spacing-sm);"></span>
+            </div>
+          </div>
+
+          <!-- Step 5: Create scoreboards -->
+          <div class="task-detail" style="margin-bottom: var(--spacing-md);">
+            <div class="task-detail-header">
+              <h3>Step 5: Initialize scoreboards</h3>
+            </div>
+            <div class="task-detail-body">
+              <p>Creates the leaderboard collections for points tracking.</p>
+            </div>
+            <div class="task-detail-actions">
+              <button id="btn-create-scoreboards" class="btn btn-primary">Create Scoreboards</button>
+              <span id="scoreboards-status" style="margin-left: var(--spacing-sm);"></span>
+            </div>
+          </div>
+
+          <!-- All Done -->
+          <div id="all-done" style="display: none; background: var(--color-slab-mint); border: 2px solid var(--color-border); padding: var(--spacing-lg); text-align: center;">
+            <h2>Setup Complete!</h2>
+            <p style="margin: var(--spacing-sm) 0;">Your v2 app is ready to use.</p>
+            <a href="../tasks.html" class="btn btn-primary">Go to Tasks</a>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Toast Container -->
+  <div id="toast-container" class="toast-container"></div>
+
+  <script type="module">
+    import { initAuth, getCurrentUser, getCurrentUserData } from '../js/auth.js';
+    import {
+      db, collection, doc, getDoc, getDocs, setDoc, updateDoc,
+      query, serverTimestamp
+    } from '../js/firebase-config.js';
+
+    // State
+    let currentUser = null;
+    let currentUserData = null;
+
+    // DOM Elements
+    const stepAuth = document.getElementById('step-auth');
+    const setupPanel = document.getElementById('setup-panel');
+    const statusContent = document.getElementById('status-content');
+
+    // Category definitions
+    const categories = [
+      { id: 'office-hours', name: 'Office Hours', pointsPerLog: 253, sortOrder: 1 },
+      { id: 'news', name: 'News', pointsPerLog: 126, sortOrder: 2 },
+      { id: 'project', name: 'Project', pointsPerLog: 371, sortOrder: 3 },
+      { id: 'chore', name: 'Chore', pointsPerLog: 184, sortOrder: 4 },
+      { id: 'ritual', name: 'Ritual', pointsPerLog: 213, sortOrder: 5 }
+    ];
+
+    // Sample tasks
+    const sampleTasks = [
+      {
+        categoryId: 'ritual',
+        title: 'Daily Documentation',
+        subtitle: 'Capture your work every day',
+        body: '<p>Document what you made today. Every day.</p><p><strong>What to log:</strong></p><ul><li>Photo(s) of your work in progress</li><li>What phase you\'re in</li><li>A short note about what changed</li></ul>',
+        status: 'published',
+        isPinned: true
+      },
+      {
+        categoryId: 'office-hours',
+        title: 'Tool Cert: Basic Shop Safety',
+        subtitle: 'Complete the safety walkthrough',
+        body: '<p>Before using any power tools, complete the basic shop safety certification.</p><p><strong>To earn this certification:</strong></p><ol><li>Watch the safety video</li><li>Complete the hands-on walkthrough</li><li>Log your completion with a photo</li></ol>',
+        status: 'published',
+        certificationBadgeId: 'cert_shop_safety'
+      },
+      {
+        categoryId: 'project',
+        title: 'Build v1: Your First Prototype',
+        subtitle: 'From sketch to working model',
+        body: '<p>Build the first working version of your project.</p><p><strong>Requirements:</strong></p><ul><li>A physical or digital prototype</li><li>Document each phase</li><li>Be prepared to iterate</li></ul>',
+        status: 'published'
+      },
+      {
+        categoryId: 'chore',
+        title: 'Studio Reset',
+        subtitle: 'Clean up your workspace',
+        body: '<p>Return tools, clean surfaces, organize materials.</p><p>A clean studio is a thinking studio.</p>',
+        status: 'published'
+      },
+      {
+        categoryId: 'news',
+        title: 'Welcome to Portfolio v2',
+        subtitle: 'How to use the new system',
+        body: '<p>Welcome! This is your Working Portfolio.</p><p><strong>How it works:</strong></p><ol><li>Browse Tasks</li><li>Tap "Log Work"</li><li>Add photos, select phase, write a note</li><li>Earn points!</li></ol>',
+        status: 'published',
+        isPinned: true
+      }
+    ];
+
+    // Badge definitions
+    const badges = [
+      { id: 'cert_shop_safety', family: 'certification', name: 'Shop Safety', icon: '🛡️', sortOrder: 1 },
+      { id: 'log_streak_L1', family: 'streak', name: 'Streak L1', icon: '🔥', sortOrder: 1 },
+      { id: 'log_streak_L2', family: 'streak', name: 'Streak L2', icon: '🔥🔥', sortOrder: 2 },
+      { id: 'log_streak_L3', family: 'streak', name: 'Streak L3', icon: '🔥🔥🔥', sortOrder: 3 },
+      { id: 'iter_streak_L1', family: 'streak', name: 'Iteration L1', icon: '🔄', sortOrder: 4 }
+    ];
+
+    // Scoreboard IDs
+    const scoreboards = [
+      'total_alltime', 'social_alltime', 'feature_alltime',
+      'category_office-hours_alltime', 'category_news_alltime',
+      'category_project_alltime', 'category_chore_alltime', 'category_ritual_alltime',
+      'phase_Sketch_alltime', 'phase_Build_alltime', 'phase_Test_alltime',
+      'phase_Iteration_alltime', 'phase_Reflection_alltime'
+    ];
+
+    // Initialize
+    initAuth(async (user, userData) => {
+      currentUser = user;
+      currentUserData = userData;
+
+      if (!user) {
+        stepAuth.style.display = 'block';
+        setupPanel.style.display = 'none';
+        return;
+      }
+
+      stepAuth.style.display = 'none';
+      setupPanel.style.display = 'block';
+
+      await checkStatus();
+    });
+
+    // Check current status
+    async function checkStatus() {
+      let html = '<ul style="list-style: none; padding: 0;">';
+
+      // Check admin
+      const isAdmin = currentUserData?.role === 'admin';
+      html += `<li>${isAdmin ? '✅' : '⬜'} You are ${isAdmin ? '' : 'not '}admin</li>`;
+
+      // Check categories
+      const catsSnap = await getDocs(collection(db, 'taskCategories'));
+      html += `<li>${catsSnap.size > 0 ? '✅' : '⬜'} ${catsSnap.size} categories</li>`;
+
+      // Check tasks
+      const tasksSnap = await getDocs(collection(db, 'tasks'));
+      html += `<li>${tasksSnap.size > 0 ? '✅' : '⬜'} ${tasksSnap.size} tasks</li>`;
+
+      // Check badges
+      const badgesSnap = await getDocs(collection(db, 'badgeDefs'));
+      html += `<li>${badgesSnap.size > 0 ? '✅' : '⬜'} ${badgesSnap.size} badge definitions</li>`;
+
+      // Check scoreboards
+      const boardsSnap = await getDocs(collection(db, 'scoreboards'));
+      html += `<li>${boardsSnap.size > 0 ? '✅' : '⬜'} ${boardsSnap.size} scoreboards</li>`;
+
+      html += '</ul>';
+      statusContent.innerHTML = html;
+
+      // Show all done if everything is set up
+      if (isAdmin && catsSnap.size >= 5 && tasksSnap.size >= 5 && badgesSnap.size >= 5 && boardsSnap.size >= 10) {
+        document.getElementById('all-done').style.display = 'block';
+      }
+    }
+
+    // Make admin
+    document.getElementById('btn-make-admin').addEventListener('click', async () => {
+      const btn = document.getElementById('btn-make-admin');
+      const status = document.getElementById('admin-status');
+
+      btn.disabled = true;
+      status.textContent = 'Setting...';
+
+      try {
+        await updateDoc(doc(db, 'users', currentUser.uid), {
+          role: 'admin',
+          active: true,
+          updatedAt: serverTimestamp()
+        });
+        status.textContent = '✅ Done!';
+        status.style.color = 'var(--color-success)';
+        currentUserData.role = 'admin';
+        await checkStatus();
+      } catch (error) {
+        console.error(error);
+        status.textContent = '❌ Error: ' + error.message;
+        status.style.color = 'var(--color-error)';
+      }
+
+      btn.disabled = false;
+    });
+
+    // Create categories
+    document.getElementById('btn-create-categories').addEventListener('click', async () => {
+      const btn = document.getElementById('btn-create-categories');
+      const status = document.getElementById('categories-status');
+
+      btn.disabled = true;
+      status.textContent = 'Creating...';
+
+      try {
+        for (const cat of categories) {
+          await setDoc(doc(db, 'taskCategories', cat.id), {
+            name: cat.name,
+            pointsPerLog: cat.pointsPerLog,
+            sortOrder: cat.sortOrder,
+            enabled: true,
+            createdAt: serverTimestamp(),
+            updatedAt: serverTimestamp()
+          });
+        }
+        status.textContent = '✅ Created 5 categories!';
+        status.style.color = 'var(--color-success)';
+        await checkStatus();
+      } catch (error) {
+        console.error(error);
+        status.textContent = '❌ Error: ' + error.message;
+        status.style.color = 'var(--color-error)';
+      }
+
+      btn.disabled = false;
+    });
+
+    // Create tasks
+    document.getElementById('btn-create-tasks').addEventListener('click', async () => {
+      const btn = document.getElementById('btn-create-tasks');
+      const status = document.getElementById('tasks-status');
+
+      btn.disabled = true;
+      status.textContent = 'Creating...';
+
+      try {
+        for (const task of sampleTasks) {
+          const taskRef = doc(collection(db, 'tasks'));
+          await setDoc(taskRef, {
+            ...task,
+            createdByUserId: currentUser.uid,
+            createdAt: serverTimestamp(),
+            updatedAt: serverTimestamp()
+          });
+        }
+        status.textContent = '✅ Created 5 tasks!';
+        status.style.color = 'var(--color-success)';
+        await checkStatus();
+      } catch (error) {
+        console.error(error);
+        status.textContent = '❌ Error: ' + error.message;
+        status.style.color = 'var(--color-error)';
+      }
+
+      btn.disabled = false;
+    });
+
+    // Create badges
+    document.getElementById('btn-create-badges').addEventListener('click', async () => {
+      const btn = document.getElementById('btn-create-badges');
+      const status = document.getElementById('badges-status');
+
+      btn.disabled = true;
+      status.textContent = 'Creating...';
+
+      try {
+        for (const badge of badges) {
+          await setDoc(doc(db, 'badgeDefs', badge.id), {
+            family: badge.family,
+            name: badge.name,
+            icon: badge.icon,
+            sortOrder: badge.sortOrder,
+            createdAt: serverTimestamp(),
+            updatedAt: serverTimestamp()
+          });
+        }
+        status.textContent = '✅ Created 5 badges!';
+        status.style.color = 'var(--color-success)';
+        await checkStatus();
+      } catch (error) {
+        console.error(error);
+        status.textContent = '❌ Error: ' + error.message;
+        status.style.color = 'var(--color-error)';
+      }
+
+      btn.disabled = false;
+    });
+
+    // Create scoreboards
+    document.getElementById('btn-create-scoreboards').addEventListener('click', async () => {
+      const btn = document.getElementById('btn-create-scoreboards');
+      const status = document.getElementById('scoreboards-status');
+
+      btn.disabled = true;
+      status.textContent = 'Creating...';
+
+      try {
+        for (const boardId of scoreboards) {
+          await setDoc(doc(db, 'scoreboards', boardId), {
+            boardId,
+            title: boardId.replace(/_/g, ' '),
+            updatedAt: serverTimestamp()
+          });
+        }
+        status.textContent = '✅ Created ' + scoreboards.length + ' scoreboards!';
+        status.style.color = 'var(--color-success)';
+        await checkStatus();
+      } catch (error) {
+        console.error(error);
+        status.textContent = '❌ Error: ' + error.message;
+        status.style.color = 'var(--color-error)';
+      }
+
+      btn.disabled = false;
+    });
+  </script>
+</body>
+</html>

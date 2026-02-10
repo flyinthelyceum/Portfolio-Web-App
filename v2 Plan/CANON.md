@@ -1,11 +1,9 @@
 # CANON.md
 Portfolio Web App (Working Portfolio)
-Version: v1 (canonical draft)
+Version: v1 (canonical)
 
 This file is the constitution.
 If anything conflicts with CANON.md, CANON wins.
-
----
 
 ## 1) Thesis
 
@@ -20,9 +18,7 @@ The app exists to make practice visible:
 - constraints
 - authorship over time
 
-If the app becomes a résumé tool, a branding exercise, or an anxiety machine, we failed.
-
----
+If the app becomes a résumé tool or a branding exercise, we failed.
 
 ## 2) North Star
 
@@ -31,41 +27,57 @@ Fastest path from “I made something” to “I logged it with clarity.”
 The system should make it easy to:
 - capture evidence quickly
 - name the phase
-- show change over time
-- return to work later and see growth
+- attach the log to a specific Task
+- return later and see growth
 
----
+## 3) Primary Surfaces (ISRU-inspired)
 
-## 3) The Three Surfaces (ISRU-inspired)
+1) Home (ID)
+A single identity artifact that summarizes practice and status.
 
-1) ID (Home)
-A single identity object that summarizes practice and current work.
+2) Tasks
+A running list of teacher-authored Tasks. Logging only happens through a Task.
 
-2) Studio Log
-The chronological working record. This is the default habitat.
+3) Highlights
+Curated social viewing (pins + teacher features).
 
-3) Showcase
-A curated wall. Not the main loop.
-A place where work gets featured, pinned, and seen.
+4) Leaderboard
+Competitive, filterable, points-driven.
 
----
+Preview Portfolio exists, but it is intentionally buried.
 
 ## 4) Canonical Objects
 
-### Log (proof-first)
-The atomic unit.
+### Task
+A teacher-authored unit that gates logging.
+Students cannot create Logs without selecting a Task.
+Tasks are explicitly tied to a Task Category.
+
+Default Task Categories (v1):
+- Office Hours
+- News
+- Project
+- Chore
+- Ritual
+
+### Log
+The atomic unit of documentation.
 Images first, text second.
+A Log always belongs to exactly one Task.
+A Log may optionally also belong to a Project.
 
 Minimum required:
 - media (1+)
-- phase tag (sketch / build / test / iteration / reflection)
+- phase tag (Sketch / Build / Test / Iteration / Reflection)
 - short note (1–3 sentences: what changed and why)
 - timestamp
 - visibility state
-- container (Project OR Daily Practice)
+- taskId (required)
+- projectId (optional)
 
 ### Project
-A coherent arc that can contain many Logs.
+A coherent arc that can collect Logs.
+Projects are optional, but allowed.
 
 Minimum required:
 - title
@@ -73,43 +85,41 @@ Minimum required:
 - statement (short)
 - tags (tools / materials / themes)
 
-### Daily Practice (default container)
-If a Log is not placed in a Project, it goes here by default.
-This prevents loose media and decision fatigue.
+### Feature
+Teacher-curated surfacing into Highlights.
+Features always include a category label.
+Features award bonus points (see Section 8).
 
-### Feature (Showcase item)
-A featured Log or Project shown in Showcase.
+### Pin
+Student-curated surfacing into Highlights.
 
-Feature sources:
-- Student Pin (student chooses “put this on my wall”)
-- Teacher Feature (teacher highlights work for the class)
+### Like / Comment
+Social interaction on Logs and (optionally) Projects, within visibility boundaries.
+Comments are freeform.
 
-Feature is curation, not ranking.
-
----
+### Badge
+Badges display on the ID.
+Badges are organized in two unlabeled columns:
+- Certifications
+- Streaks
 
 ## 5) Core Loop
 
-Make → Log proof → Tag phase → Share to class → Return → Revise → Log again
+Select Task → Do the thing → Log Work → Publish to Class → Return → Revise → Log Work again
 
 Support loops:
 - Onboarding: first Log in under 2 minutes
 - Recovery: drafts never disappear, edits are safe
-- Curation: pins + teacher features create visibility without ranking
-- Search: find work later by project, phase, tag
-
----
+- Social: likes/comments reward attention and engagement
+- Curation: pins + teacher features feed Highlights
+- Competition: points + leaderboards drive ritual consistency
+- Search: find work later by project, phase, tag, task, category
 
 ## 6) Roles and Authority
 
 Roles:
-- Student: create/edit own Logs and Projects, pin items to Showcase, like/comment (within allowed visibility)
-- Instructor/Admin: view all student work, feature items, manage accounts, moderate, export
-
-The app does not rank students.
-No leaderboards. No points. No streak scoreboards.
-
----
+- Student: create/edit own Logs and Projects, like/comment (within visibility), pin work
+- Instructor/Admin: view all student work, author Tasks and Categories, feature work, moderate, manage accounts, export
 
 ## 7) Visibility Defaults (school-safe)
 
@@ -131,31 +141,62 @@ Drafts are sacred:
 - destructive actions require confirmation
 - recovery must exist (draft state at minimum)
 
----
+## 8) Points + Competitive Leaderboards (Canonical)
 
-## 8) Social Interaction (classroom energy, not competition)
+Competition is intentional.
+Leaderboards are first-class.
+
+Point sources:
+1) Logs (primary)
+2) Likes + Comments (social, low weight)
+3) Teacher Features (bonus)
+
+Hard rules:
+- Drafts never earn points
+- One Log per Task per calendar day
+
+Category scoring:
+- pointsPerLog is defined per Task Category
+- pointsPerLog is set by the teacher/admin when creating the category
+- values live in the 100s and weird numbers are encouraged (example: 483)
+
+Social scoring:
+- Likes and Comments award points at 1/10 the value of the Log’s pointsPerLog
+- anti-farming caps apply (defined in POINTS_MODEL.md)
+
+Teacher Feature bonus:
+- a Feature grants a fixed bonus equal to 1/2 the Log’s pointsPerLog
+- one Feature bonus per Log in v1 (unless changed later in the points model)
+
+Leaderboard views (minimum):
+- Total Points
+- This Week
+- This Unit (if units exist)
+- By Task Category
+- By Phase
+- Social Points
+- Feature Points
+
+All scoring rules must be auditable and explainable.
+Exact rules live in POINTS_MODEL.md (canonical).
+
+## 9) Social Interaction (Canonical)
 
 Allowed:
-- Likes (simple signal of attention)
-- Comments (short, human, conversational)
+- Likes
+- Freeform comments
 
 Constraints:
-- Likes/comments are only visible within the same visibility boundary as the content
+- likes/comments respect the same visibility boundary as the content
   - Draft: none
   - Class: class-only
-  - Public: visible on public page (optional switch per post, if needed)
-
-No gamified totals that turn into ranking.
-No “most liked this week.”
-No follower counts.
+  - Public: public page (optional toggle if needed)
 
 Moderation:
-- instructor can remove comments and restrict accounts if needed
+- instructor can remove comments and restrict accounts
 - actions are logged (audit trail)
 
----
-
-## 9) Non-Negotiables
+## 10) Non-Negotiables
 
 1) No student code, no student deployment.
 Students only use the web interface.
@@ -163,101 +204,76 @@ Students only use the web interface.
 2) No build step for the student-facing experience.
 Small libraries via CDN are allowed if they do not introduce a build pipeline.
 
-3) Posting must be fast.
+3) Logging must be fast.
 A Log should be creatable in under 30 seconds once familiar.
 
 4) The system teaches by doing.
 Minimal tutorials. Strong defaults. Clear verbs.
 
 5) Everything has a place.
-No loose media. Every Log belongs to a Project or Daily Practice.
+No loose media.
+Every Log belongs to a Task.
+Projects are optional.
 
 6) Design is a studio tool.
-The UI should feel like a field manual or studio notebook, not a dashboard.
+The UI should feel like a studio manual, not a dashboard.
 
----
+## 11) Language (Canonical)
 
-## 10) Language (canonical nouns and verbs)
+Canonical UI nouns:
+- Task, Log, Project, Highlights, Leaderboard, Points, Feature, Pin, Badge
 
-Nouns:
-- Log, Project, Artifact, Phase, Tag, Draft, Class, Public, Showcase, Pin, Feature
+Canonical UI verbs:
+- Log Work, Tag, Publish, Pin, Feature, Like, Comment, Preview Portfolio
 
-Verbs:
-- Log, Add, Tag, Revise, Pin, Feature, Publish, Archive, Export, Comment, Like
-
-No synonyms in the UI.
-We do not drift into “post” unless we choose it and lock it here.
-
----
-
-## 11) Microcopy Rules (tone)
-
-- concrete verbs
-- one instruction per sentence
-- no motivational fog
-- errors blame the system, not the student
-- empty states teach the next action
-
-Examples:
-- “Add photos.”
-- “Tag the phase.”
-- “Say what changed.”
-- “Saved to Draft.”
-- “Publish to Class.”
-- “Pin to Showcase.”
-
----
+No synonyms in UI.
+Final labels are governed by LEXICON.md.
 
 ## 12) Navigation Constraint
 
-Three tabs max for v1:
-- ID
-- Studio Log
-- Showcase
+Primary nav surfaces for v1:
+- Home
+- Tasks
+- Highlights
+- Leaderboard
 
-Everything else lives behind the gear:
-- settings
-- account
-- exports
-- admin tools
-- moderation tools
+Buried:
+- Preview Portfolio
+- Settings
+- Account
+- Export
 
----
+Preview Portfolio should feel like a dating app profile:
+available, but not the point.
 
 ## 13) Out of Scope (v1)
 
-- leaderboards, rankings, points, streak scores
 - follower/following graphs
 - direct messages
 - algorithmic feeds
 - public-by-default posting
-- complex formatting, longform blogging tools
+- longform blogging tools
 - student-managed hosting or custom domains
 - graded critique tooling inside the app
 
 Critique happens in real space.
-The app supports documentation and social attention, not assessment.
-
----
+The app supports documentation, social attention, and competition.
 
 ## 14) Decision Test
 
 A feature is approved only if:
-- it strengthens the core loop
-- it reduces friction to logging proof
+- it strengthens the core loop (Task → Log Work)
+- it reduces friction to proof logging
 - it increases clarity of process over time
-- it respects school-safe privacy defaults
-- it fits the three-surface model
+- it respects privacy defaults
+- it supports points/competition without becoming arbitrary or opaque
 
-If a feature increases performance anxiety or turns into comparison behavior, reject it or redesign it.
+## 15) Canon Stack (Documents this file governs)
 
----
-
-## 15) Canon Stack (documents this file governs)
-
+Required:
 - PROJECT_CHARTER.md
-- UX_PRINCIPLES.md
 - LEXICON.md
+- POINTS_MODEL.md
 - DATA_MODEL.md
 - VISIBILITY_AND_ROLES.md
 - SECURITY_RULES_PLAN.md

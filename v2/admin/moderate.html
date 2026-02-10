@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Moderate — Portfolio Admin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/styles.css">
+  <style>
+    .comment-tile {
+      display: flex;
+      gap: var(--spacing-md);
+      padding: var(--spacing-sm);
+      background: white;
+      border: 2px solid var(--color-border);
+      margin-bottom: var(--spacing-xs);
+    }
+    .comment-tile.removed {
+      opacity: 0.5;
+      background: #ffeaea;
+    }
+    .user-tile {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: var(--spacing-sm) var(--spacing-md);
+      background: white;
+      border: 2px solid var(--color-border);
+      margin-bottom: var(--spacing-xs);
+    }
+  </style>
+</head>
+<body>
+  <div class="app-shell">
+    <nav class="nav-bar">
+      <div class="nav-container">
+        <a href="../index.html" class="nav-brand">Portfolio Admin</a>
+        <div class="nav-tabs">
+          <a href="tasks.html" class="nav-tab">Tasks</a>
+          <a href="categories.html" class="nav-tab">Categories</a>
+          <a href="moderate.html" class="nav-tab active">Moderate</a>
+        </div>
+        <a href="../index.html" class="btn btn-small btn-secondary">← Back to App</a>
+      </div>
+    </nav>
+
+    <main class="main-content">
+      <div id="loading" class="loading">
+        <div class="loading-spinner"></div>
+      </div>
+
+      <div id="not-admin" class="empty-state" style="display: none;">
+        <h2 class="empty-state-headline">Admin access required</h2>
+        <a href="../index.html" class="btn btn-primary">Go Home</a>
+      </div>
+
+      <div id="admin-content" style="display: none;">
+        <h1 style="margin-bottom: var(--spacing-md);">Moderation</h1>
+
+        <!-- Tabs -->
+        <div style="display: flex; gap: var(--spacing-xs); margin-bottom: var(--spacing-md);">
+          <button class="btn btn-secondary mod-tab active" data-tab="comments">Comments</button>
+          <button class="btn btn-secondary mod-tab" data-tab="users">Users</button>
+          <button class="btn btn-secondary mod-tab" data-tab="export">Export</button>
+        </div>
+
+        <!-- Comments Tab -->
+        <div id="tab-comments" class="tab-content">
+          <h3 style="margin-bottom: var(--spacing-sm);">Recent Comments</h3>
+          <div id="comments-list"></div>
+        </div>
+
+        <!-- Users Tab -->
+        <div id="tab-users" class="tab-content" style="display: none;">
+          <h3 style="margin-bottom: var(--spacing-sm);">All Users</h3>
+          <div id="users-list"></div>
+        </div>
+
+        <!-- Export Tab -->
+        <div id="tab-export" class="tab-content" style="display: none;">
+          <h3 style="margin-bottom: var(--spacing-sm);">Export Data</h3>
+          <p style="margin-bottom: var(--spacing-md); color: var(--color-text-light);">
+            Download a JSON snapshot of all data for records or backup.
+          </p>
+          <button id="btn-export" class="btn btn-primary">Download Export</button>
+          <div id="export-status" style="margin-top: var(--spacing-sm);"></div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <div id="toast-container" class="toast-container"></div>
+
+  <script type="module">
+    import { initAuth, getCurrentUser } from '../js/auth.js';
+    import {
+      db, collection, doc, getDoc, getDocs, updateDoc, query, orderBy, limit, serverTimestamp
+    } from '../js/firebase-config.js';
+
+    let currentUser = null;
+
+    const loading = document.getElementById('loading');
+    const notAdmin = document.getElementById('not-admin');
+    const adminContent = document.getElementById('admin-content');
+
+    initAuth(async (user, userData) => {
+      currentUser = user;
+      loading.style.display = 'none';
+
+      if (!user || userData?.role !== 'admin') {
+        notAdmin.style.display = 'block';
+        return;
+      }
+
+      adminContent.style.display = 'block';
+      await loadComments();
+      await loadUsers();
+    });
+
+    // Tab switching
+    document.querySelectorAll('.mod-tab').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.mod-tab').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(t => t.style.display = 'none');
+        btn.classList.add('active');
+        document.getElementById('tab-' + btn.dataset.tab).style.display = 'block';
+      });
+    });
+
+    // Comments
+    async function loadComments() {
+      const commentsList = document.getElementById('comments-list');
+      try {
+        const snap = await getDocs(query(collection(db, 'comments'), orderBy('createdAt', 'desc'), limit(50)));
+
+        if (snap.empty) {
+          commentsList.innerHTML = '<p style="color: var(--color-text-muted);">No comments yet.</p>';
+          return;
+        }
+
+        // Get user names
+        const userIds = new Set();
+        snap.forEach(doc => userIds.add(doc.data().authorUserId));
+
+        const userNames = {};
+        for (const uid of userIds) {
+          const userDoc = await getDoc(doc(db, 'users', uid));
+          if (userDoc.exists()) userNames[uid] = userDoc.data().fullName || 'Student';
+        }
+
+        commentsList.innerHTML = snap.docs.map(docSnap => {
+          const c = docSnap.data();
+          const isRemoved = !!c.removedAt;
+          const date = c.createdAt?.toDate?.()?.toLocaleDateString() || '';
+
+          return `
+            <div class="comment-tile ${isRemoved ? 'removed' : ''}">
+              <div style="flex: 1;">
+                <strong>${userNames[c.authorUserId] || 'Unknown'}</strong>
+                <span style="color: var(--color-text-muted); font-size: var(--text-xs);"> · ${date}</span>
+                <p style="margin-top: var(--spacing-xs);">${c.body || ''}</p>
+                ${isRemoved ? '<span style="color: var(--color-error); font-size: var(--text-xs);">REMOVED</span>' : ''}
+              </div>
+              ${!isRemoved ? `<button class="btn btn-small btn-secondary remove-comment" data-id="${docSnap.id}">Remove</button>` : ''}
+            </div>
+          `;
+        }).join('');
+
+        // Remove handlers
+        commentsList.querySelectorAll('.remove-comment').forEach(btn => {
+          btn.addEventListener('click', async () => {
+            if (!confirm('Remove this comment? This will also remove any points earned.')) return;
+
+            await updateDoc(doc(db, 'comments', btn.dataset.id), {
+              removedAt: serverTimestamp(),
+              removedByUserId: currentUser.uid
+            });
+
+            showToast('Comment removed', 'success');
+            await loadComments();
+          });
+        });
+      } catch (error) {
+        console.error(error);
+        commentsList.innerHTML = '<p style="color: var(--color-error);">Error loading comments.</p>';
+      }
+    }
+
+    // Users
+    async function loadUsers() {
+      const usersList = document.getElementById('users-list');
+      try {
+        const snap = await getDocs(query(collection(db, 'users'), orderBy('pointsTotal', 'desc')));
+
+        usersList.innerHTML = snap.docs.map(docSnap => {
+          const u = docSnap.data();
+          return `
+            <div class="user-tile">
+              <div>
+                <strong>${u.fullName || 'Student'}</strong>
+                <span style="margin-left: var(--spacing-sm); font-size: var(--text-xs); color: ${u.role === 'admin' ? 'var(--color-accent)' : 'var(--color-text-muted)'};">
+                  ${u.role || 'student'}
+                </span>
+                <span style="margin-left: var(--spacing-sm); font-size: var(--text-xs); color: ${u.active !== false ? 'var(--color-success)' : 'var(--color-error)'};">
+                  ${u.active !== false ? '● Active' : '○ Inactive'}
+                </span>
+              </div>
+              <div style="display: flex; align-items: center; gap: var(--spacing-md);">
+                <span style="font-family: var(--font-mono);">${(u.pointsTotal || 0).toLocaleString()} pts</span>
+                <button class="btn btn-small btn-secondary toggle-active" data-id="${docSnap.id}" data-active="${u.active !== false}">
+                  ${u.active !== false ? 'Deactivate' : 'Activate'}
+                </button>
+              </div>
+            </div>
+          `;
+        }).join('');
+
+        // Toggle active handlers
+        usersList.querySelectorAll('.toggle-active').forEach(btn => {
+          btn.addEventListener('click', async () => {
+            const isActive = btn.dataset.active === 'true';
+            const newActive = !isActive;
+
+            if (!confirm(`${newActive ? 'Activate' : 'Deactivate'} this user?`)) return;
+
+            await updateDoc(doc(db, 'users', btn.dataset.id), {
+              active: newActive,
+              updatedAt: serverTimestamp()
+            });
+
+            showToast(`User ${newActive ? 'activated' : 'deactivated'}`, 'success');
+            await loadUsers();
+          });
+        });
+      } catch (error) {
+        console.error(error);
+        usersList.innerHTML = '<p style="color: var(--color-error);">Error loading users.</p>';
+      }
+    }
+
+    // Export
+    document.getElementById('btn-export').addEventListener('click', async () => {
+      const btn = document.getElementById('btn-export');
+      const status = document.getElementById('export-status');
+
+      btn.disabled = true;
+      status.textContent = 'Generating export...';
+
+      try {
+        const exportData = {
+          exportedAt: new Date().toISOString(),
+          exportedBy: currentUser.uid
+        };
+
+        // Collect all data
+        const collections = ['users', 'taskCategories', 'tasks', 'logs', 'projects', 'comments', 'likes', 'highlights', 'badgeDefs'];
+
+        for (const collName of collections) {
+          const snap = await getDocs(collection(db, collName));
+          exportData[collName] = {};
+          snap.forEach(doc => {
+            exportData[collName][doc.id] = doc.data();
+          });
+          status.textContent = `Exporting ${collName}...`;
+        }
+
+        // Download as JSON
+        const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `portfolio-export-${new Date().toISOString().split('T')[0]}.json`;
+        a.click();
+        URL.revokeObjectURL(url);
+
+        status.textContent = '✅ Export complete!';
+        status.style.color = 'var(--color-success)';
+      } catch (error) {
+        console.error(error);
+        status.textContent = '❌ Error: ' + error.message;
+        status.style.color = 'var(--color-error)';
+      }
+
+      btn.disabled = false;
+    });
+
+    function showToast(message, type = 'info') {
+      const container = document.getElementById('toast-container');
+      const toast = document.createElement('div');
+      toast.className = `toast ${type}`;
+      toast.textContent = message;
+      container.appendChild(toast);
+      setTimeout(() => toast.remove(), 4000);
+    }
+  </script>
+</body>
+</html>

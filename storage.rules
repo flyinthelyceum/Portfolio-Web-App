@@ -2,33 +2,35 @@ rules_version = '2';
 
 service firebase.storage {
   match /b/{bucket}/o {
-    
+
     // Helper function: Check if user is authenticated
     function isSignedIn() {
       return request.auth != null;
     }
-    
+
     // Helper function: Check if file size is acceptable
     function isValidSize() {
       return request.resource.size < 5 * 1024 * 1024; // 5MB limit
     }
-    
+
     // Helper function: Check if file is an image
     function isImage() {
       return request.resource.contentType.matches('image/.*');
     }
-    
-    // User-specific folders for images
+
+    // Generic rule for user-owned folders
+    // Pattern: /{folderType}/{userId}/...
+    // Covers: users/, logs/, avatars/, projects/, etc.
     // Read: Public (for portfolio viewing)
     // Write: Only the folder owner, and only images under 5MB
-    match /users/{userId}/{allPaths=**} {
+    match /{folderType}/{userId}/{allPaths=**} {
       allow read: if true;
-      allow write: if isSignedIn() && 
+      allow write: if isSignedIn() &&
                      request.auth.uid == userId &&
                      isValidSize() &&
                      isImage();
     }
-    
+
     // Fallback: Deny all other access
     match /{allPaths=**} {
       allow read, write: if false;
