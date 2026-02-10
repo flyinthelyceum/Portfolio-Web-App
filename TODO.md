@@ -2,7 +2,7 @@
 
 **Project Purpose:** Multi-tenant portfolio platform for Art & Technology course
 **Canonical Reference:** See [PROJECT_CHARTER.md](PROJECT_CHARTER.md)
-**Last Updated:** February 5, 2026
+**Last Updated:** February 10, 2026
 
 ---
 
@@ -10,57 +10,63 @@
 
 This repository has completed its pivot to a **single multi-tenant Firebase architecture**. 
 
-**Status: Phase 1-7 Complete ✅** 
+**Status: Phase 1-8 Complete ✅ · Phase 9 (Cargo Design System) Complete ✅** 
 
-Fully functional, production-ready portfolio platform ready for classroom deployment.
+Fully functional, production-ready portfolio platform deployed at https://portfolio-web-app-26.web.app
 - Firebase Authentication (email/password + Google SSO)
 - Firestore Database (multi-tenant with security rules)
 - Firebase Storage (image uploads)
 - Single web app serving all student portfolios via URL routing
+- Unified cargo.site-inspired design system across all pages
+- Editor redesigned with cargo layout (sidebar nav, gutter, content column)
 
 ---
 
 ## 📋 CURRENT STATE
 
-### ✅ Completed (Phases 1-7 + Full Deployment + UI/UX Polish)
+### ✅ Completed (Phases 1-9)
 - Firebase project created (portfolio-web-app-26)
 - Authentication (email/password + Google SSO), Firestore, and Storage configured
 - Security rules deployed (public read, owner write, admin access)
 - firebase-config.js created with CDN imports (v12.8.0)
 - **Complete authentication UI**: login.html, signup.html (email + Google SSO)
+- **Login/signup JS extracted** to separate files (login.js, signup.js)
 - editor.html + editor.js for content creation (+ Log, + Project buttons)
 - index.html converted from GitHub API to Firestore queries
-- app.js converted to Firebase (getDoc, getDocs, where, orderBy)
-- Firestore composite index created (userId + createdAt)
-- UI redesigned for consistency (all pages match brutalist design system)
+- app.js converted to Firebase (getDoc, getDocs, where)
+- **Client-side post filtering** (avoids Firestore composite index requirement)
+- UI redesigned to **cargo.site Template L384** aesthetic (all pages unified)
 - **Profile editor built** (profile.html + profile.js) with username + email support
-- **Cleaner URLs enabled** (?user=username lookup in addition to ?user=userId)
-- **Old code removed**: Deleted admin/, posts/, projects/ folders (GitHub Pages-era files)
-- **Bulk import script** (Node.js + Firebase Admin SDK) for onboarding 20+ students at once
-- **Complete documentation**:
-  - README.md (technical overview, quick start)
-  - STUDENT_GUIDE.md (student onboarding, how to add content)
-  - INSTRUCTOR_GUIDE.md (setup, management, troubleshooting, semester workflow)
-- **Deployed to Firebase Hosting** (test.aaand.space, app.aaand.space ready)
-- **UI/UX Polish Complete**:
-  - Auth nav link updates (Sign In → Editor when logged in)
-  - Email field added to profile (displays in portfolio footer)
-  - Separate filter dropdown with sort icon (decoupled from nav)
-  - Unified card structure (logs + projects consistent hierarchy and images)
-  - Fixed date formatting (handles both date strings and Firestore timestamps)
-  - Markdown parsing enabled
-  - Card sorting by date (newest first)
-  - Simplified navigation (removed redundant Projects section)
-  - Projects visible via filter, not separate nav section
-
-### ⏳ Remaining Work (Phase 8 - Optional → In Progress)
-- **Instructor Dashboard** ✅ (view all students, stats, activity, JSON export)
+- **Cleaner URLs enabled** (?user=username lookup)
+- **Bulk import script** (Node.js + Firebase Admin SDK)
+- **Complete documentation**: README.md, STUDENT_GUIDE.md, INSTRUCTOR_GUIDE.md
+- **Deployed to Firebase Hosting** (portfolio-web-app-26.web.app)
+- **Instructor Dashboard** ✅ (view all students, stats, activity, CSV/JSON export)
 - **Moderation Tools** ✅ (delete posts, restore posts, ban/unban students)
 - **CSV Export** ✅ (students.csv, posts.csv)
 - **Student Analytics** ✅ (engagement metrics, posts last 7 days, avg posts/week)
-- **Barcode Attendance** ✅ (student ID field, barcode generation, print-ready page)
-- Advanced features (comments, scheduling, PDF export)
+- **Barcode Attendance** ✅ (student ID field, barcode generation, print-ready, 200% enlarged)
+
+### ✅ Phase 9: Cargo Design System (Complete)
+- **Unified all pages** to cargo.site-inspired aesthetic (no colored pills, alerts, borders)
+- **Portfolio page**: narrow left index (260px), large central gutter, right content column
+- **Post numbers** float far left into gutter with period (01., 02.) matching Template L384
+- **Images** in black containers with object-fit: contain, horizontal scroll carousel
+- **Profile header** moved to upper-right content column (avatar + tagline + description)
+- **Date format** simplified to mm/dd across portfolio and sidebar index
+- **Editor redesigned** to match portfolio: sidebar nav (left), gutter, post list (right)
+- **+ Log Entry / + Project** buttons sticky at top of editor content column
+- **Share Portfolio button removed** (dead feature, URL sharing via View Portfolio)
+- **Portfolio navigation** added: Editor, Profile, My Portfolio links in sidebar footer
+- **Old files deleted**: styles-old.css, index-old.html, app-old.js
+- **Firebase composite index errors fixed** (client-side filtering in both app.js and editor.js)
+
+### ⏳ Future Work
+- Edit post functionality (currently shows "coming soon" alert)
 - Activity charts/timeline visualization
+- Comments system
+- PDF export
+- Scheduling / draft posts
 
 ---
 
@@ -79,50 +85,24 @@ That file contains the complete roadmap with:
 
 ---
 
-## 🎯 NEXT PRIORITIES
+## 💾 ACTIVE FILES
 
-**Option A: Deploy to Production** ⭐ Complete
-- ✅ Deployed to Firebase Hosting
-- ✅ Testing at: https://test.aaand.space (temporary testing domain)
-- ✅ Production domain: app.aaand.space (ready when finalized)
-- Next: Test with real shareable links, validate Firebase, share with test students
-
-**Option B: Build Instructor Dashboard**
-- View all student portfolios from single interface
-- Export data for assessment
-- Add/remove students
-
-**Option C: Bulk Student Import Script**
-- Create Node.js script for CSV import
-- Auto-generate student credentials
-- Email delivery template
-
----
-
-## 💾 FILES TO KEEP
-
-These files are actively used in the Firebase architecture:
-
-- **index.html** - Public portfolio viewer (converted to Firebase)
-- **app.js** - Portfolio rendering logic (converted to Firebase)
-- **styles.css** - Brutalist design system (CSS variables, typography)
-- **login.html** - Authentication UI
-- **editor.html** - Content creation interface
-- **editor.js** - CRUD operations for logs/projects
+- **index.html** - Public portfolio viewer (cargo template layout)
+- **app.js** - Portfolio rendering (Firestore queries, sidebar, lightbox)
+- **styles.css** - Unified cargo.site design system (~750 lines)
+- **login.html / login.js** - Authentication UI
+- **signup.html / signup.js** - Registration UI
+- **editor.html / editor.js** - Content creation (cargo layout, sidebar nav)
+- **profile.html / profile.js** - Profile editor
+- **admin.html / admin.js** - Instructor dashboard
+- **moderation.html / moderation.js** - Content moderation
+- **attendance.html / attendance.js** - Barcode attendance
 - **firebase-config.js** - Firebase initialization
+- **firestore.rules / storage.rules** - Security rules
 - **PROJECT_CHARTER.md** - Project vision and constraints
 - **STUDENT_GUIDE.md** - Student documentation
+- **INSTRUCTOR_GUIDE.md** - Instructor documentation
 - **README.md** - Repository overview
-- **TODO-FIREBASE.md** - Detailed task tracking
-
-## 🗑️ FILES TO REMOVE (When Ready)
-
-These files are no longer used:
-
-- **admin/** folder - Decap CMS (replaced by Firebase)
-- **posts/** folder - Markdown logs (now in Firestore)
-- **projects/** folder - Markdown projects (now in Firestore)
-- **manifest.json** - Manual content list (replaced by Firestore queries)
 
 ---
 

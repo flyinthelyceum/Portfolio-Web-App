@@ -4,256 +4,34 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Log In — Portfolio Web-App</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz@9..144&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
   <link rel="icon" href="data:,">
-  <style>
-    .login-page {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      min-height: 100vh;
-      padding: var(--spacing-lg);
-      position: relative;
-      z-index: 1;
-    }
-
-    .login-card {
-      background-color: var(--color-bg);
-      border: var(--border-thin) solid var(--color-border);
-      padding: var(--spacing-3xl);
-      max-width: 600px;
-      width: 100%;
-      box-shadow: var(--shadow-lg);
-    }
-
-    .login-card h1 {
-      font-size: var(--text-4xl);
-      margin-bottom: var(--spacing-lg);
-      font-weight: 700;
-    }
-
-    .login-card p {
-      font-size: var(--text-base);
-      color: var(--color-text-light);
-      margin-bottom: var(--spacing-2xl);
-    }
-
-    .form-group {
-      margin-bottom: var(--spacing-lg);
-    }
-
-    .form-group label {
-      display: block;
-      font-size: var(--text-sm);
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      margin-bottom: var(--spacing-sm);
-      color: var(--color-text);
-    }
-
-    .form-group input[type="email"],
-    .form-group input[type="password"] {
-      width: 100%;
-      padding: var(--spacing-md);
-      border: var(--border-medium) solid var(--color-border);
-      background-color: var(--color-bg);
-      font-family: inherit;
-      font-size: var(--text-base);
-      transition: all 0.2s;
-    }
-
-    .form-group input[type="email"]:focus,
-    .form-group input[type="password"]:focus {
-      outline: none;
-      border: var(--border-thick) solid var(--color-border);
-      box-shadow: var(--shadow-md);
-    }
-
-    .btn-submit {
-      width: 100%;
-      padding: var(--spacing-md);
-      background-color: var(--color-text);
-      color: var(--color-bg);
-      border: var(--border-thin) solid var(--color-border);
-      font-family: inherit;
-      font-size: var(--text-base);
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      cursor: pointer;
-      transition: all 0.2s;
-      margin-bottom: var(--spacing-lg);
-    }
-
-    .btn-submit:hover {
-      transform: translate(-2px, -2px);
-      box-shadow: var(--shadow-md);
-    }
-
-    .btn-submit:active {
-      transform: translate(0, 0);
-    }
-
-    .btn-submit:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-      transform: none;
-    }
-
-    .error-message {
-      background-color: var(--color-slab-yellow);
-      border: var(--border-medium) solid var(--color-border);
-      color: var(--color-text);
-      padding: var(--spacing-md);
-      margin-bottom: var(--spacing-lg);
-      font-size: var(--text-sm);
-      display: none;
-    }
-
-    .error-message.visible {
-      display: block;
-    }
-
-    .error-message.success {
-      background-color: var(--color-slab-mint);
-    }
-
-    .reset-link {
-      text-align: center;
-      margin-top: var(--spacing-lg);
-    }
-
-    .reset-link a {
-      color: var(--color-accent);
-      border-bottom: 1px solid var(--color-accent);
-      font-size: var(--text-sm);
-      transition: opacity 0.2s;
-    }
-
-    .reset-link a:hover {
-      opacity: 0.7;
-    }
-
-    .divider {
-      display: flex;
-      align-items: center;
-      margin: var(--spacing-2xl) 0;
-      gap: var(--spacing-md);
-    }
-
-    .divider::before,
-    .divider::after {
-      content: '';
-      flex: 1;
-      height: 1px;
-      background-color: var(--color-border);
-    }
-
-    .divider span {
-      font-size: var(--text-xs);
-      color: var(--color-text-light);
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-    }
-
-    .btn-google {
-      width: 100%;
-      padding: var(--spacing-md);
-      background-color: white;
-      color: var(--color-text);
-      border: var(--border-medium) solid var(--color-border);
-      font-family: inherit;
-      font-size: var(--text-base);
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      cursor: pointer;
-      transition: all 0.2s;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: var(--spacing-md);
-    }
-
-    .btn-google:hover {
-      transform: translate(-2px, -2px);
-      box-shadow: var(--shadow-md);
-      background-color: #f9f9f9;
-    }
-
-    .btn-google:active {
-      transform: translate(0, 0);
-    }
-
-    .btn-google svg {
-      width: 20px;
-      height: 20px;
-    }
-
-    .btn-google:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-      transform: none;
-    }
-
-    .loading {
-      display: inline-block;
-      width: 16px;
-      height: 16px;
-      border: 2px solid var(--color-bg);
-      border-radius: 50%;
-      border-top-color: transparent;
-      animation: spinner 0.6s linear infinite;
-    }
-
-    @keyframes spinner {
-      to { transform: rotate(360deg); }
-    }
-  </style>
 </head>
-<body class="login-page">
-  <div class="login-page">
-    <div class="login-card">
+<body>
+  <div class="center-page">
+    <div class="center-card">
       <h1>Log In</h1>
       <p>Enter your credentials to access your portfolio editor.</p>
 
-      <div class="error-message" id="error-message"></div>
+      <div class="alert alert--error" id="error-message"></div>
 
       <form id="login-form">
         <div class="form-group">
           <label for="email">Email Address</label>
-          <input 
-            type="email" 
-            id="email" 
-            name="email" 
-            required 
-            autocomplete="email"
-          >
+          <input type="email" id="email" name="email" required autocomplete="email">
         </div>
 
         <div class="form-group">
           <label for="password">Password</label>
-          <input 
-            type="password" 
-            id="password" 
-            name="password" 
-            required 
-            autocomplete="current-password"
-          >
+          <input type="password" id="password" name="password" required autocomplete="current-password">
         </div>
 
-        <button type="submit" class="btn-submit" id="login-btn">
+        <button type="submit" class="btn btn--primary btn--full" id="login-btn">
           <span id="btn-text">Log In</span>
         </button>
       </form>
 
-      <div class="divider">
-        <span>Or</span>
-      </div>
+      <div class="divider"><span>Or</span></div>
 
       <button type="button" class="btn-google" id="google-btn">
         <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -265,159 +43,16 @@
         Sign in with Google
       </button>
 
-      <div class="reset-link">
-        <a href="#" id="reset-link">Forgot password?</a>
+      <div style="text-align: center; margin-top: 20px;">
+        <a href="#" id="reset-link" style="font-size: 11px; color: #666;">Forgot password?</a>
       </div>
 
-      <div style="text-align: center; margin-top: var(--spacing-lg); font-size: var(--text-sm);">
-        Don't have an account? <a href="signup.html" style="color: var(--color-accent); border-bottom: 1px solid var(--color-accent);">Create one</a>
+      <div style="text-align: center; margin-top: 15px; font-size: 13px;">
+        Don't have an account? <a href="signup.html">Create one</a>
       </div>
     </div>
   </div>
 
-  <script type="module">
-    import { auth, db } from './firebase-config.js';
-    import { 
-      signInWithEmailAndPassword,
-      sendPasswordResetEmail,
-      signInWithPopup,
-      GoogleAuthProvider,
-      onAuthStateChanged
-    } from 'https://www.gstatic.com/firebasejs/12.8.0/firebase-auth.js';
-    import { doc, getDoc, setDoc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/12.8.0/firebase-firestore.js';
-
-    const form = document.getElementById('login-form');
-    const emailInput = document.getElementById('email');
-    const passwordInput = document.getElementById('password');
-    const loginBtn = document.getElementById('login-btn');
-    const btnText = document.getElementById('btn-text');
-    const errorMessage = document.getElementById('error-message');
-    const resetLink = document.getElementById('reset-link');
-
-    // Check if already logged in
-    onAuthStateChanged(auth, (user) => {
-      if (user) {
-        window.location.href = 'editor.html';
-      }
-    });
-
-    // Handle login
-    form.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      
-      const email = emailInput.value.trim();
-      const password = passwordInput.value;
-
-      // Disable form
-      loginBtn.disabled = true;
-      btnText.innerHTML = '<span class="loading"></span>';
-      errorMessage.classList.remove('visible');
-
-      try {
-        await signInWithEmailAndPassword(auth, email, password);
-        // Redirect happens via onAuthStateChanged
-      } catch (error) {
-        console.error('Login error:', error);
-        
-        let message = 'Login failed. Please check your credentials.';
-        
-        if (error.code === 'auth/invalid-credential') {
-          message = 'Invalid email or password.';
-        } else if (error.code === 'auth/user-not-found') {
-          message = 'No account found with this email.';
-        } else if (error.code === 'auth/wrong-password') {
-          message = 'Incorrect password.';
-        } else if (error.code === 'auth/too-many-requests') {
-          message = 'Too many failed attempts. Try again later.';
-        } else if (error.code === 'auth/network-request-failed') {
-          message = 'Network error. Check your connection.';
-        }
-
-        errorMessage.textContent = message;
-        errorMessage.classList.add('visible');
-
-        // Re-enable form
-        loginBtn.disabled = false;
-        btnText.textContent = 'Log In';
-      }
-    });
-
-    // Handle Google Sign-In
-    const googleBtn = document.getElementById('google-btn');
-    googleBtn.addEventListener('click', async () => {
-      googleBtn.disabled = true;
-      const originalText = googleBtn.innerHTML;
-      googleBtn.innerHTML = '<span class="loading"></span> Signing in...';
-      errorMessage.classList.remove('visible');
-
-      try {
-        const provider = new GoogleAuthProvider();
-        const result = await signInWithPopup(auth, provider);
-        const user = result.user;
-
-        // Check if user profile exists in Firestore
-        const userDoc = await getDoc(doc(db, 'users', user.uid));
-        if (!userDoc.exists()) {
-          // First time Google login - create profile and redirect to profile editor
-          await setDoc(doc(db, 'users', user.uid), {
-            displayName: user.displayName || user.email.split('@')[0],
-            email: user.email,
-            username: '',
-            bio: '',
-            avatarUrl: user.photoURL || '',
-            createdAt: serverTimestamp(),
-            updatedAt: serverTimestamp()
-          });
-          window.location.href = 'profile.html';
-        } else {
-          // Returning user - go to editor
-          window.location.href = 'editor.html';
-        }
-      } catch (error) {
-        console.error('Google sign-in error:', error);
-        
-        let message = 'Sign in with Google failed.';
-        if (error.code === 'auth/popup-closed-by-user') {
-          message = 'Sign-in popup was closed.';
-        } else if (error.code === 'auth/network-request-failed') {
-          message = 'Network error. Check your connection.';
-        }
-        
-        errorMessage.textContent = message;
-        errorMessage.classList.add('visible');
-        
-        googleBtn.disabled = false;
-        googleBtn.innerHTML = originalText;
-      }
-    });
-
-    // Handle password reset
-    resetLink.addEventListener('click', async (e) => {
-      e.preventDefault();
-      
-      const email = emailInput.value.trim();
-      
-      if (!email) {
-        errorMessage.textContent = 'Enter your email address first.';
-        errorMessage.classList.add('visible');
-        emailInput.focus();
-        return;
-      }
-
-      try {
-        await sendPasswordResetEmail(auth, email);
-        errorMessage.textContent = 'Password reset email sent! Check your inbox.';
-        errorMessage.style.background = '#efe';
-        errorMessage.style.borderColor = '#cfc';
-        errorMessage.style.color = '#363';
-        errorMessage.classList.add('visible');
-      } catch (error) {
-        console.error('Reset error:', error);
-        errorMessage.textContent = 'Could not send reset email. Check the email address.';
-        errorMessage.classList.add('visible');
-      }
-    });
-  </script>
-  </div>
+  <script type="module" src="login.js"></script>
 </body>
 </html>

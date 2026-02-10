@@ -4,491 +4,59 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Editor — Portfolio Web-App</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz@9..144&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
-  <style>
-    /* Editor Header */
-    .editor-header {
-      background-color: var(--color-bg);
-      border-bottom: var(--border-medium) solid var(--color-border);
-      padding: var(--spacing-lg) var(--spacing-2xl);
-      position: sticky;
-      top: 0;
-      z-index: 100;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .editor-header__left {
-      display: flex;
-      align-items: baseline;
-      gap: var(--spacing-lg);
-    }
-
-    .editor-header__title {
-      font-size: var(--text-2xl);
-      font-weight: 700;
-      margin: 0;
-    }
-
-    .editor-header__user {
-      font-size: var(--text-sm);
-      color: var(--color-text-light);
-      font-style: italic;
-    }
-
-    .editor-header__right {
-      display: flex;
-      align-items: center;
-      gap: var(--spacing-md);
-    }
-
-    .editor-btn {
-      padding: var(--spacing-sm) var(--spacing-md);
-      border: var(--border-thin) solid var(--color-border);
-      background-color: var(--color-bg);
-      font-family: inherit;
-      font-size: var(--text-sm);
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-
-    .editor-btn:hover {
-      transform: translate(-1px, -1px);
-      box-shadow: var(--shadow-sm);
-    }
-
-    .editor-btn:active {
-      transform: translate(0, 0);
-    }
-
-    .editor-btn--primary {
-      background-color: var(--color-text);
-      color: var(--color-bg);
-      border-color: var(--color-text);
-    }
-
-    .editor-btn--primary:hover {
-      box-shadow: var(--shadow-md);
-    }
-
-    /* Main Content */
-    .editor-main {
-      max-width: 1400px;
-      margin: 0 auto;
-      padding: var(--spacing-2xl);
-      position: relative;
-      z-index: 1;
-    }
-
-    .editor-actions {
-      display: flex;
-      gap: var(--spacing-md);
-      margin-bottom: var(--spacing-2xl);
-    }
-
-    .editor-filter {
-      display: flex;
-      gap: var(--spacing-sm);
-      margin-bottom: var(--spacing-2xl);
-      border-bottom: var(--border-thin) solid var(--color-border);
-      padding-bottom: var(--spacing-md);
-    }
-
-    .filter-chip {
-      padding: var(--spacing-sm) var(--spacing-md);
-      background-color: transparent;
-      border: none;
-      border-bottom: var(--border-medium) solid transparent;
-      font-family: inherit;
-      font-size: var(--text-sm);
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      cursor: pointer;
-      transition: all 0.2s;
-      color: var(--color-text-light);
-    }
-
-    .filter-chip:hover {
-      color: var(--color-text);
-    }
-
-    .filter-chip--active {
-      color: var(--color-text);
-      border-bottom-color: var(--color-text);
-    }
-
-    /* Posts Grid */
-    .posts-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
-      gap: var(--spacing-lg);
-    }
-
-    .post-card {
-      background-color: var(--color-bg);
-      border: var(--border-thin) solid var(--color-border);
-      padding: var(--spacing-lg);
-      transition: all 0.2s;
-      cursor: pointer;
-    }
-
-    .post-card:hover {
-      transform: translate(-2px, -4px);
-      box-shadow: var(--shadow-md);
-    }
-
-    .post-card__image {
-      width: calc(100% + 2 * var(--spacing-lg));
-      margin: calc(-1 * var(--spacing-lg)) calc(-1 * var(--spacing-lg)) var(--spacing-lg) calc(-1 * var(--spacing-lg));
-      aspect-ratio: 4/3;
-      object-fit: cover;
-      background: var(--color-grid);
-    }
-
-    .post-card__meta {
-      display: flex;
-      gap: var(--spacing-sm);
-      margin-bottom: var(--spacing-sm);
-      font-size: var(--text-xs);
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      font-weight: 600;
-    }
-
-    .post-card__type {
-      color: var(--color-text-light);
-    }
-
-    .post-card__date {
-      color: var(--color-text-light);
-    }
-
-    .post-card__title {
-      font-size: var(--text-lg);
-      font-weight: 700;
-      margin-bottom: var(--spacing-md);
-      line-height: var(--leading-snug);
-    }
-
-    .post-card__excerpt {
-      font-size: var(--text-sm);
-      color: var(--color-text-light);
-      line-height: var(--leading-normal);
-      margin-bottom: var(--spacing-lg);
-    }
-
-    .post-card__actions {
-      display: flex;
-      gap: var(--spacing-sm);
-      padding-top: var(--spacing-md);
-      border-top: var(--border-thin) solid var(--color-border);
-    }
-
-    .post-card__btn {
-      flex: 1;
-      padding: var(--spacing-sm);
-      border: var(--border-thin) solid var(--color-border);
-      background-color: var(--color-bg);
-      font-family: inherit;
-      font-size: var(--text-xs);
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-
-    .post-card__btn:hover {
-      transform: translate(-1px, -1px);
-      box-shadow: var(--shadow-sm);
-    }
-
-    .post-card__btn--delete {
-      color: var(--color-accent);
-      border-color: var(--color-accent);
-    }
-
-    /* Modal */
-    .modal {
-      display: none;
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(10, 10, 10, 0.7);
-      z-index: 2000;
-      overflow-y: auto;
-    }
-
-    .modal--visible {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: var(--spacing-lg);
-    }
-
-    .modal__content {
-      background-color: var(--color-bg);
-      border: var(--border-medium) solid var(--color-border);
-      max-width: 700px;
-      width: 100%;
-      max-height: 90vh;
-      overflow-y: auto;
-      box-shadow: var(--shadow-lg);
-    }
-
-    .modal__header {
-      padding: var(--spacing-2xl);
-      border-bottom: var(--border-medium) solid var(--color-border);
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-    }
-
-    .modal__title {
-      font-size: var(--text-2xl);
-      font-weight: 700;
-      margin: 0;
-    }
-
-    .modal__close {
-      background: none;
-      border: none;
-      font-size: 2rem;
-      cursor: pointer;
-      color: var(--color-text);
-      padding: 0;
-      width: 40px;
-      height: 40px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: all 0.2s;
-      margin: -8px -8px 0 0;
-    }
-
-    .modal__close:hover {
-      transform: scale(1.1);
-    }
-
-    .modal__body {
-      padding: var(--spacing-2xl);
-    }
-
-    .form-group {
-      margin-bottom: var(--spacing-lg);
-    }
-
-    .form-group label {
-      display: block;
-      font-size: var(--text-sm);
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      margin-bottom: var(--spacing-sm);
-      color: var(--color-text);
-    }
-
-    .form-group input[type="text"],
-    .form-group input[type="date"],
-    .form-group textarea {
-      width: 100%;
-      padding: var(--spacing-md);
-      border: var(--border-medium) solid var(--color-border);
-      background-color: var(--color-bg);
-      font-family: inherit;
-      font-size: var(--text-base);
-      transition: all 0.2s;
-    }
-
-    .form-group textarea {
-      min-height: 150px;
-      resize: vertical;
-    }
-
-    .form-group input:focus,
-    .form-group textarea:focus {
-      outline: none;
-      border: var(--border-thick) solid var(--color-border);
-      box-shadow: var(--shadow-sm);
-    }
-
-    .image-upload {
-      border: var(--border-thick) dashed var(--color-border);
-      background-color: rgba(212, 70, 31, 0.04);
-      padding: var(--spacing-2xl);
-      text-align: center;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-
-    .image-upload:hover {
-      border-color: var(--color-accent);
-      background-color: rgba(212, 70, 31, 0.08);
-    }
-
-    .image-upload__text {
-      font-size: var(--text-sm);
-      color: var(--color-text-light);
-    }
-
-    .image-preview {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-      gap: var(--spacing-sm);
-      margin-top: var(--spacing-md);
-    }
-
-    .image-preview__item {
-      position: relative;
-      aspect-ratio: 1;
-      border: var(--border-thin) solid var(--color-border);
-      background: var(--color-grid);
-    }
-
-    .image-preview__img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
-
-    .image-preview__remove {
-      position: absolute;
-      top: 2px;
-      right: 2px;
-      background: var(--color-text);
-      color: var(--color-bg);
-      border: none;
-      width: 28px;
-      height: 28px;
-      cursor: pointer;
-      font-size: 1.2rem;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: all 0.2s;
-    }
-
-    .image-preview__remove:hover {
-      transform: scale(1.1);
-    }
-
-    .modal__footer {
-      padding: var(--spacing-2xl);
-      border-top: var(--border-medium) solid var(--color-border);
-      display: flex;
-      gap: var(--spacing-md);
-      justify-content: flex-end;
-    }
-
-    .modal__btn {
-      padding: var(--spacing-md) var(--spacing-lg);
-      border: var(--border-thin) solid var(--color-border);
-      background-color: var(--color-bg);
-      font-family: inherit;
-      font-size: var(--text-sm);
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-
-    .modal__btn:hover {
-      transform: translate(-1px, -1px);
-      box-shadow: var(--shadow-sm);
-    }
-
-    .modal__btn--primary {
-      background-color: var(--color-text);
-      color: var(--color-bg);
-      border-color: var(--color-text);
-    }
-
-    .modal__btn--primary:hover {
-      box-shadow: var(--shadow-md);
-    }
-
-    .empty-state {
-      text-align: center;
-      padding: var(--spacing-3xl) var(--spacing-2xl);
-      color: var(--color-text-light);
-      grid-column: 1 / -1;
-    }
-
-    .empty-state__icon {
-      font-size: 4rem;
-      margin-bottom: var(--spacing-lg);
-    }
-
-    .empty-state__text {
-      font-size: var(--text-lg);
-      font-weight: 600;
-      margin-bottom: var(--spacing-sm);
-    }
-
-    .empty-state__subtext {
-      font-size: var(--text-sm);
-    }
-  </style>
+  <link rel="icon" href="data:,">
 </head>
 <body>
-  <div class="container">
-    <!-- Header -->
-    <header class="editor-header">
-      <div class="editor-header__left">
-        <h1 class="editor-header__title">Studio</h1>
-        <span class="editor-header__user" id="user-display">Loading…</span>
-      </div>
-      <div class="editor-header__right">
-        <button class="editor-btn" id="attendance-btn">Attendance</button>
-        <button class="editor-btn" id="share-btn">Share Portfolio</button>
-        <button class="editor-btn" id="view-portfolio-btn">View Portfolio</button>
-        <button class="editor-btn" id="edit-profile-btn">Edit Profile</button>
-        <button class="editor-btn" id="admin-btn" style="display: none;">Admin</button>
-        <button class="editor-btn" id="logout-btn">Log Out</button>
-      </div>
-    </header>
+  <header class="nav">
+    <div class="nav__left">
+      <h1 class="nav__title">Studio</h1>
+      <span class="nav__user" id="user-display">Loading…</span>
+    </div>
+    <div class="nav__right"></div>
+  </header>
 
-    <!-- Main Content -->
-    <main class="editor-main">
-      <!-- Action Buttons -->
-      <div class="editor-actions">
-        <button class="editor-btn editor-btn--primary" id="add-log-btn">+ Log Entry</button>
-        <button class="editor-btn editor-btn--primary" id="add-project-btn">+ Project</button>
+  <div class="editor-layout">
+    <aside class="editor-sidebar">
+      <div class="editor-sidebar__header">
+        <span class="nav__user" id="user-display-sidebar"></span>
+      </div>
+      <nav class="editor-sidebar__nav">
+        <a href="#" id="view-portfolio-btn">View Portfolio</a>
+        <a href="profile.html" id="edit-profile-btn">Edit Profile</a>
+        <a href="attendance.html" id="attendance-btn">Attendance</a>
+        <a href="admin.html" id="admin-btn" style="display: none;">Admin</a>
+      </nav>
+      <div class="editor-sidebar__filters">
+        <div class="editor-sidebar__label">Filter</div>
+        <button class="filter active" data-filter="all">All</button>
+        <button class="filter" data-filter="log">Logs</button>
+        <button class="filter" data-filter="project">Projects</button>
+      </div>
+      <div class="editor-sidebar__footer">
+        <a href="#" id="logout-btn">Log Out</a>
+      </div>
+    </aside>
+
+    <main class="editor-content">
+      <div class="editor-content__actions">
+        <button class="btn btn--primary" id="add-log-btn">+ Log Entry</button>
+        <button class="btn btn--primary" id="add-project-btn">+ Project</button>
       </div>
 
-      <!-- Filter -->
-      <div class="editor-filter">
-        <button class="filter-chip filter-chip--active" data-filter="all">All</button>
-        <button class="filter-chip" data-filter="log">Logs</button>
-        <button class="filter-chip" data-filter="project">Projects</button>
-      </div>
-
-      <!-- Posts Grid -->
-      <div class="posts-grid" id="posts-grid">
-        <!-- Posts will be rendered here -->
-        <div class="empty-state">
-          <div class="empty-state__icon">📝</div>
-          <div class="empty-state__text">No entries yet</div>
-          <div class="empty-state__subtext">Click "+ Log Entry" or "+ Project" to begin</div>
+      <div class="grid" id="posts-grid">
+        <div class="empty">
+          <div style="font-size: 32px; margin-bottom: 12px;">📝</div>
+          <div style="font-weight: 500; margin-bottom: 4px;">No entries yet</div>
+          <div>Click "+ Log Entry" or "+ Project" to begin</div>
         </div>
       </div>
     </main>
   </div>
 
-  <!-- Add Log Modal -->
+  <!-- Log Modal -->
   <div class="modal" id="log-modal">
-    <div class="modal__content">
+    <div class="modal__box">
       <div class="modal__header">
         <h2 class="modal__title">Add Log Entry</h2>
         <button class="modal__close" data-close="log-modal">&times;</button>
@@ -499,42 +67,35 @@
             <label for="log-title">Title</label>
             <input type="text" id="log-title" name="title" required placeholder="What did you work on?">
           </div>
-
           <div class="form-group">
             <label for="log-date">Date</label>
             <input type="date" id="log-date" name="date" required>
           </div>
-
           <div class="form-group">
             <label>Images (up to 3)</label>
-            <div class="image-upload" id="log-image-upload">
+            <div class="upload-zone" id="log-image-upload">
               <input type="file" id="log-images" accept="image/*" multiple style="display: none;">
-              <div class="image-upload__text">
-                Click to upload or drag images here<br>
-                <small>Max 3 images, 5MB each</small>
-              </div>
+              Click to upload or drag images here<br>
+              <small>Max 3 images, 5MB each</small>
             </div>
-            <div class="image-preview" id="log-image-preview"></div>
+            <div class="upload-preview" id="log-image-preview"></div>
           </div>
-
           <div class="form-group">
             <label for="log-body">Notes</label>
             <textarea id="log-body" name="body" placeholder="What happened? What's next?&#10;&#10;Markdown supported."></textarea>
           </div>
         </div>
-
-
         <div class="modal__footer">
-          <button type="button" class="modal__btn" data-close="log-modal">Cancel</button>
-          <button type="submit" class="modal__btn modal__btn--primary">Save Log</button>
+          <button type="button" class="btn" data-close="log-modal">Cancel</button>
+          <button type="submit" class="btn btn--primary">Save Log</button>
         </div>
       </form>
     </div>
   </div>
 
-  <!-- Add Project Modal -->
+  <!-- Project Modal -->
   <div class="modal" id="project-modal">
-    <div class="modal__content">
+    <div class="modal__box">
       <div class="modal__header">
         <h2 class="modal__title">Add Project</h2>
         <button class="modal__close" data-close="project-modal">&times;</button>
@@ -545,38 +106,32 @@
             <label for="project-title">Title</label>
             <input type="text" id="project-title" name="title" required placeholder="Project name">
           </div>
-
           <div class="form-group">
             <label>Hero Image</label>
-            <div class="image-upload" id="project-image-upload">
+            <div class="upload-zone" id="project-image-upload">
               <input type="file" id="project-image" accept="image/*" style="display: none;">
-              <div class="image-upload__text">
-                Click to upload hero image<br>
-                <small>Max 5MB</small>
-              </div>
+              Click to upload hero image<br>
+              <small>Max 5MB</small>
             </div>
-            <div class="image-preview" id="project-image-preview"></div>
+            <div class="upload-preview" id="project-image-preview"></div>
           </div>
-
           <div class="form-group">
             <label for="project-summary">Summary (1-2 sentences)</label>
             <textarea id="project-summary" name="summary" rows="3" placeholder="Brief overview"></textarea>
           </div>
-
           <div class="form-group">
             <label for="project-body">Description</label>
             <textarea id="project-body" name="body" placeholder="Full project description&#10;&#10;Markdown supported."></textarea>
           </div>
         </div>
-
         <div class="modal__footer">
-          <button type="button" class="modal__btn" data-close="project-modal">Cancel</button>
-          <button type="submit" class="modal__btn modal__btn--primary">Save Project</button>
+          <button type="button" class="btn" data-close="project-modal">Cancel</button>
+          <button type="submit" class="btn btn--primary">Save Project</button>
         </div>
       </form>
     </div>
   </div>
 
-  <script type="module" src="editor.js?v=20260205"></script>
+  <script type="module" src="editor.js?v=20260206"></script>
 </body>
 </html>

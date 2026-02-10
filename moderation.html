@@ -4,224 +4,51 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Moderation — Portfolio Web-App</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz@9..144&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
   <link rel="icon" href="data:,">
-  <style>
-    .mod-header {
-      background-color: var(--color-bg);
-      border-bottom: var(--border-medium) solid var(--color-border);
-      padding: var(--spacing-lg) var(--spacing-2xl);
-      position: sticky;
-      top: 0;
-      z-index: 100;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .mod-header__title {
-      font-size: var(--text-2xl);
-      font-weight: 700;
-      margin: 0;
-    }
-
-    .mod-header__right {
-      display: flex;
-      align-items: center;
-      gap: var(--spacing-md);
-    }
-
-    .mod-btn {
-      padding: var(--spacing-sm) var(--spacing-md);
-      border: var(--border-thin) solid var(--color-border);
-      background-color: var(--color-bg);
-      font-family: inherit;
-      font-size: var(--text-sm);
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-
-    .mod-btn:hover {
-      transform: translate(-1px, -1px);
-      box-shadow: var(--shadow-sm);
-    }
-
-    .mod-btn:active {
-      transform: translate(0, 0);
-    }
-
-    .mod-btn--danger {
-      color: #c92a2a;
-      border-color: #c92a2a;
-    }
-
-    .mod-btn--danger:hover {
-      background-color: #fff5f5;
-    }
-
-    .mod-main {
-      max-width: 1400px;
-      margin: 0 auto;
-      padding: var(--spacing-2xl);
-    }
-
-    .mod-section {
-      margin-bottom: var(--spacing-2xl);
-    }
-
-    .mod-section__title {
-      font-size: var(--text-lg);
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      margin-bottom: var(--spacing-md);
-    }
-
-    .mod-table {
-      width: 100%;
-      border-collapse: collapse;
-      border: var(--border-thin) solid var(--color-border);
-    }
-
-    .mod-table th,
-    .mod-table td {
-      text-align: left;
-      padding: var(--spacing-sm) var(--spacing-md);
-      border-bottom: var(--border-thin) solid var(--color-border);
-      font-size: var(--text-sm);
-    }
-
-    .mod-table th {
-      text-transform: uppercase;
-      letter-spacing: 0.06em;
-      color: var(--color-text-light);
-      background: #f8f8f8;
-    }
-
-    .mod-table tr:hover td {
-      background: #fdfdfd;
-    }
-
-    .mod-status {
-      display: inline-block;
-      padding: 2px 8px;
-      border: var(--border-thin) solid var(--color-border);
-      font-size: var(--text-xs);
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-    }
-
-    .mod-status--hidden {
-      background: #fff3cd;
-      border-color: #ffc107;
-    }
-
-    .mod-status--active {
-      background: #d4edda;
-      border-color: #28a745;
-    }
-
-    .mod-status--banned {
-      background: #f8d7da;
-      border-color: #dc3545;
-    }
-
-    .mod-actions {
-      display: flex;
-      gap: var(--spacing-sm);
-      flex-wrap: wrap;
-    }
-
-    .mod-empty {
-      border: var(--border-thin) dashed var(--color-border);
-      padding: var(--spacing-lg);
-      color: var(--color-text-light);
-      font-size: var(--text-sm);
-    }
-
-    .mod-modal {
-      display: none;
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0, 0, 0, 0.5);
-      z-index: 1000;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .mod-modal.active {
-      display: flex;
-    }
-
-    .mod-modal__content {
-      background: var(--color-bg);
-      border: var(--border-medium) solid var(--color-border);
-      padding: var(--spacing-2xl);
-      max-width: 500px;
-      box-shadow: var(--shadow-lg);
-    }
-
-    .mod-modal__title {
-      font-size: var(--text-lg);
-      font-weight: 700;
-      margin-bottom: var(--spacing-lg);
-    }
-
-    .mod-modal__text {
-      margin-bottom: var(--spacing-lg);
-      line-height: 1.6;
-    }
-
-    .mod-modal__actions {
-      display: flex;
-      gap: var(--spacing-md);
-      justify-content: flex-end;
-    }
-  </style>
 </head>
 <body>
-  <header class="mod-header">
-    <h1 class="mod-header__title">Moderation</h1>
-    <div class="mod-header__right">
-      <button class="mod-btn" id="back-btn">Back to Admin</button>
+  <header class="nav">
+    <div class="nav__left">
+      <h1 class="nav__title">Moderation</h1>
+    </div>
+    <div class="nav__right">
+      <button class="btn" id="back-btn">Back to Admin</button>
     </div>
   </header>
 
-  <main class="mod-main">
-    <section class="mod-section">
-      <div class="mod-section__title">Posts</div>
+  <main class="page">
+    <section class="section">
+      <div class="section__title">Posts</div>
       <div id="posts-container">
-        <div class="mod-empty">Loading posts…</div>
+        <div class="empty">Loading posts…</div>
       </div>
     </section>
 
-    <section class="mod-section">
-      <div class="mod-section__title">Banned Students</div>
+    <section class="section">
+      <div class="section__title">Banned Students</div>
       <div id="banned-container">
-        <div class="mod-empty">Loading students…</div>
+        <div class="empty">Loading students…</div>
       </div>
     </section>
   </main>
 
-  <div class="mod-modal" id="confirm-modal">
-    <div class="mod-modal__content">
-      <div class="mod-modal__title" id="confirm-title">Confirm Action</div>
-      <div class="mod-modal__text" id="confirm-text"></div>
-      <div class="mod-modal__actions">
-        <button class="mod-btn" id="confirm-cancel">Cancel</button>
-        <button class="mod-btn mod-btn--danger" id="confirm-ok">Confirm</button>
+  <!-- Confirm Modal -->
+  <div class="modal" id="confirm-modal">
+    <div class="modal__box" style="max-width: 480px;">
+      <div class="modal__header">
+        <h2 class="modal__title" id="confirm-title">Confirm Action</h2>
+      </div>
+      <div class="modal__body">
+        <p id="confirm-text"></p>
+      </div>
+      <div class="modal__footer">
+        <button class="btn" id="confirm-cancel">Cancel</button>
+        <button class="btn btn--danger" id="confirm-ok">Confirm</button>
       </div>
     </div>
   </div>
 
-  <script type="module" src="moderation.js?v=20260204"></script>
+  <script type="module" src="moderation.js?v=20260206"></script>
 </body>
 </html>

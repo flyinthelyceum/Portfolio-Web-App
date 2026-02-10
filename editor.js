@@ -10,9 +10,6 @@ import {
   updateDoc,
   deleteDoc,
   doc,
-  query,
-  where,
-  orderBy,
   getDocs,
   getDoc,
   serverTimestamp
@@ -63,25 +60,34 @@ async function loadUserProfile() {
   if (userDoc.exists()) {
     userProfile = userDoc.data();
     document.getElementById('user-display').textContent = userProfile.displayName || currentUser.email;
+    const sidebarUser = document.getElementById('user-display-sidebar');
+    if (sidebarUser) sidebarUser.textContent = userProfile.displayName || currentUser.email;
   } else {
     userProfile = { displayName: currentUser.email };
     document.getElementById('user-display').textContent = currentUser.email;
+    const sidebarUser = document.getElementById('user-display-sidebar');
+    if (sidebarUser) sidebarUser.textContent = currentUser.email;
   }
 }
 
 // Load posts
 async function loadPosts() {
-  const q = query(
-    collection(db, 'posts'),
-    where('userId', '==', currentUser.uid),
-    orderBy('createdAt', 'desc')
-  );
+  const postsRef = collection(db, 'posts');
+  const postsSnap = await getDocs(postsRef);
+  posts = [];
+  postsSnap.forEach(d => {
+    const data = d.data();
+    if (data.userId === currentUser.uid) {
+      posts.push({ id: d.id, ...data });
+    }
+  });
 
-  const querySnapshot = await getDocs(q);
-  posts = querySnapshot.docs.map(doc => ({
-    id: doc.id,
-    ...doc.data()
-  }));
+  // Sort by createdAt descending (client-side)
+  posts.sort((a, b) => {
+    const dateA = a.createdAt?.toDate?.() || new Date(a.createdAt || 0);
+    const dateB = b.createdAt?.toDate?.() || new Date(b.createdAt || 0);
+    return dateB - dateA;
+  });
 
   renderPosts();
 }
@@ -96,10 +102,10 @@ function renderPosts() {
 
   if (filteredPosts.length === 0) {
     grid.innerHTML = `
-      <div class="empty-state">
-        <div class="empty-state__icon">📝</div>
-        <div class="empty-state__text">No ${currentFilter === 'all' ? 'posts' : currentFilter + 's'} yet</div>
-        <div class="empty-state__subtext">Click "+ ${currentFilter === 'all' ? 'Log" or "+ Project' : currentFilter.charAt(0).toUpperCase() + currentFilter.slice(1)}" to get started</div>
+      <div class="empty">
+        <div style="font-size:32px;margin-bottom:8px;">📝</div>
+        <div style="font-weight:500;margin-bottom:4px;">No ${currentFilter === 'all' ? 'posts' : currentFilter + 's'} yet</div>
+        <div>Click "+ ${currentFilter === 'all' ? 'Log" or "+ Project' : currentFilter.charAt(0).toUpperCase() + currentFilter.slice(1)}" to get started</div>
       </div>
     `;
     return;
@@ -118,8 +124,8 @@ function renderPosts() {
         <h3 class="post-card__title">${escapeHtml(post.title)}</h3>
         <p class="post-card__excerpt">${escapeHtml(truncate(post.body || post.summary || '', 120))}</p>
         <div class="post-card__actions">
-          <button class="btn btn--secondary post-card__btn" onclick="editPost('${post.id}')">Edit</button>
-          <button class="btn btn--ghost post-card__btn" onclick="deletePost('${post.id}')">Delete</button>
+          <button class="post-card__btn" onclick="editPost('${post.id}')">Edit</button>
+          <button class="post-card__btn post-card__btn--delete" onclick="deletePost('${post.id}')">Delete</button>
         </div>
       </div>
     </div>
@@ -129,7 +135,8 @@ function renderPosts() {
 // Setup event listeners
 function setupEventListeners() {
   // Logout
-  document.getElementById('logout-btn').addEventListener('click', async () => {
+  document.getElementById('logout-btn').addEventListener('click', async (e) => {
+    e.preventDefault();
     await signOut(auth);
     window.location.href = 'index.html';
   });
@@ -141,42 +148,11 @@ function setupEventListeners() {
     });
   }
 
-  // Share portfolio
-  document.getElementById('share-btn').addEventListener('click', () => {
-    const urlParam = userProfile?.username || currentUser.uid;
-    // Use relative URL (same as View Portfolio)
-    const shareUrl = `${window.location.origin}${window.location.pathname.split('editor.html')[0]}index.html?user=${urlParam}`;
-    
-    // Copy to clipboard
-    navigator.clipboard.writeText(shareUrl).then(() => {
-      const btn = document.getElementById('share-btn');
-      const originalText = btn.textContent;
-      btn.textContent = 'Copied!';
-      btn.style.opacity = '0.7';
-      
-      setTimeout(() => {
-        btn.textContent = originalText;
-        btn.style.opacity = '1';
-      }, 2000);
-    }).catch(err => {
-      alert('Portfolio URL:\n\n' + shareUrl);
-    });
-  });
-
   // View portfolio
-  document.getElementById('view-portfolio-btn').addEventListener('click', () => {
+  document.getElementById('view-portfolio-btn').addEventListener('click', (e) => {
+    e.preventDefault();
     const urlParam = userProfile?.username || currentUser.uid;
     window.open('index.html?user=' + urlParam, '_blank');
-  });
-
-  // Edit profile
-  document.getElementById('edit-profile-btn').addEventListener('click', () => {
-    window.location.href = 'profile.html';
-  });
-
-  // Attendance barcode
-  document.getElementById('attendance-btn').addEventListener('click', () => {
-    window.location.href = 'attendance.html';
   });
 
   // Add log button
@@ -192,10 +168,10 @@ function setupEventListeners() {
   });
 
   // Filter buttons
-  document.querySelectorAll('.filter-chip').forEach(chip => {
+  document.querySelectorAll('.filter').forEach(chip => {
     chip.addEventListener('click', (e) => {
-      document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('filter-chip--active'));
-      e.target.classList.add('filter-chip--active');
+      document.querySelectorAll('.filter').forEach(c => c.classList.remove('active'));
+      e.target.classList.add('active');
       currentFilter = e.target.dataset.filter;
       renderPosts();
     });
@@ -259,9 +235,9 @@ function renderLogImagePreviews() {
   }
 
   preview.innerHTML = selectedLogImages.map((file, index) => `
-    <div class="image-preview__item">
-      <img src="${URL.createObjectURL(file)}" class="image-preview__img" alt="Preview ${index + 1}">
-      <button type="button" class="image-preview__remove" onclick="removeLogImage(${index})">×</button>
+    <div class="upload-preview__item">
+      <img src="${URL.createObjectURL(file)}" class="upload-preview__img" alt="Preview ${index + 1}">
+      <button type="button" class="upload-preview__remove" onclick="removeLogImage(${index})">×</button>
     </div>
   `).join('');
 }
@@ -291,9 +267,9 @@ function renderProjectImagePreview() {
   }
 
   preview.innerHTML = `
-    <div class="image-preview__item">
-      <img src="${URL.createObjectURL(selectedProjectImage)}" class="image-preview__img" alt="Preview">
-      <button type="button" class="image-preview__remove" onclick="removeProjectImage()">×</button>
+    <div class="upload-preview__item">
+      <img src="${URL.createObjectURL(selectedProjectImage)}" class="upload-preview__img" alt="Preview">
+      <button type="button" class="upload-preview__remove" onclick="removeProjectImage()">×</button>
     </div>
   `;
 }
@@ -431,11 +407,11 @@ window.editPost = function(postId) {
 
 // Modal helpers
 function openModal(modalId) {
-  document.getElementById(modalId).classList.add('modal--visible');
+  document.getElementById(modalId).classList.add('visible');
 }
 
 function closeModal(modalId) {
-  document.getElementById(modalId).classList.remove('modal--visible');
+  document.getElementById(modalId).classList.remove('visible');
 }
 
 // Utility functions

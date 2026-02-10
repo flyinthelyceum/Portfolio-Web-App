@@ -55,7 +55,7 @@ async function loadData() {
 
 function renderPosts() {
   if (posts.length === 0) {
-    postsContainer.innerHTML = '<div class="mod-empty">No posts found.</div>';
+    postsContainer.innerHTML = '<div class="empty">No posts found.</div>';
     return;
   }
 
@@ -66,7 +66,7 @@ function renderPosts() {
     const isDeleted = post.deletedAt !== undefined;
     const title = post.title || post.summary || 'Untitled';
     const createdAt = formatDate(parseDate(post.createdAt || post.date));
-    const statusClass = isDeleted ? 'mod-status--hidden' : 'mod-status--active';
+    const statusClass = isDeleted ? 'pill--hidden' : 'pill--active';
     const statusText = isDeleted ? 'Deleted' : 'Active';
 
     return `
@@ -75,13 +75,13 @@ function renderPosts() {
         <td>${escapeHtml(owner)}</td>
         <td>${escapeHtml(post.type || 'post')}</td>
         <td>${createdAt}</td>
-        <td><span class="mod-status ${statusClass}">${statusText}</span></td>
+        <td><span class="pill ${statusClass}">${statusText}</span></td>
         <td>
-          <div class="mod-actions">
+          <div class="actions">
             ${!isDeleted ? `
-              <button class="mod-btn mod-btn--danger" onclick="confirmDeletePost('${post.id}')">Delete</button>
+              <button class="btn btn--danger" onclick="confirmDeletePost('${post.id}')">Delete</button>
             ` : `
-              <button class="mod-btn" onclick="confirmRestorePost('${post.id}')">Restore</button>
+              <button class="btn" onclick="confirmRestorePost('${post.id}')">Restore</button>
             `}
           </div>
         </td>
@@ -90,7 +90,7 @@ function renderPosts() {
   }).join('');
 
   postsContainer.innerHTML = `
-    <table class="mod-table">
+    <table class="table">
       <thead>
         <tr>
           <th>Title</th>
@@ -112,7 +112,7 @@ function renderBanned() {
   const bannedUsers = users.filter(u => u.banned === true);
 
   if (bannedUsers.length === 0) {
-    bannedContainer.innerHTML = '<div class="mod-empty">No banned students.</div>';
+    bannedContainer.innerHTML = '<div class="empty">No banned students.</div>';
     return;
   }
 
@@ -126,8 +126,8 @@ function renderBanned() {
         <td>${escapeHtml(email)}</td>
         <td>${bannedAt}</td>
         <td>
-          <div class="mod-actions">
-            <button class="mod-btn" onclick="confirmUnbanStudent('${user.id}')">Unban</button>
+          <div class="actions">
+            <button class="btn" onclick="confirmUnbanStudent('${user.id}')">Unban</button>
           </div>
         </td>
       </tr>
@@ -135,7 +135,7 @@ function renderBanned() {
   }).join('');
 
   bannedContainer.innerHTML = `
-    <table class="mod-table">
+    <table class="table">
       <thead>
         <tr>
           <th>Name</th>
@@ -173,11 +173,11 @@ function openConfirmModal(title, text, action) {
   confirmTitle.textContent = title;
   confirmText.textContent = text;
   pendingAction = action;
-  confirmModal.classList.add('active');
+  confirmModal.classList.add('visible');
 }
 
 function closeConfirmModal() {
-  confirmModal.classList.remove('active');
+  confirmModal.classList.remove('visible');
   pendingAction = null;
 }
 

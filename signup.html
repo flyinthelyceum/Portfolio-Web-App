@@ -4,278 +4,27 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Create Account — Portfolio Web-App</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz@9..144&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
-  <style>
-    .signup-page {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      min-height: 100vh;
-      padding: var(--spacing-lg);
-      position: relative;
-      z-index: 1;
-    }
-
-    .signup-card {
-      background-color: var(--color-bg);
-      border: var(--border-thin) solid var(--color-border);
-      padding: var(--spacing-3xl);
-      max-width: 600px;
-      width: 100%;
-      box-shadow: var(--shadow-lg);
-    }
-
-    .signup-card h1 {
-      font-size: var(--text-4xl);
-      margin-bottom: var(--spacing-md);
-      font-weight: 700;
-    }
-
-    .signup-card p {
-      font-size: var(--text-base);
-      color: var(--color-text-light);
-      margin-bottom: var(--spacing-2xl);
-    }
-
-    .form-group {
-      margin-bottom: var(--spacing-lg);
-    }
-
-    .form-group label {
-      display: block;
-      font-size: var(--text-sm);
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      margin-bottom: var(--spacing-sm);
-      color: var(--color-text);
-    }
-
-    .form-group input[type="email"],
-    .form-group input[type="password"] {
-      width: 100%;
-      padding: var(--spacing-md);
-      border: var(--border-medium) solid var(--color-border);
-      background-color: var(--color-bg);
-      font-family: inherit;
-      font-size: var(--text-base);
-      transition: all 0.2s;
-    }
-
-    .form-group input[type="email"]:focus,
-    .form-group input[type="password"]:focus {
-      outline: none;
-      border: var(--border-thick) solid var(--color-border);
-      box-shadow: var(--shadow-md);
-    }
-
-    .password-requirements {
-      font-size: var(--text-xs);
-      color: var(--color-text-light);
-      margin-top: var(--spacing-sm);
-      padding: var(--spacing-md);
-      background-color: rgba(0, 0, 0, 0.02);
-      border: var(--border-thin) solid var(--color-border);
-    }
-
-    .password-requirements ul {
-      margin: 0;
-      padding-left: var(--spacing-lg);
-      list-style: none;
-    }
-
-    .password-requirements li {
-      padding: 4px 0;
-      position: relative;
-      padding-left: var(--spacing-md);
-    }
-
-    .password-requirements li:before {
-      content: "→";
-      position: absolute;
-      left: 0;
-      color: var(--color-text-light);
-    }
-
-    .btn-submit {
-      width: 100%;
-      padding: var(--spacing-md);
-      background-color: var(--color-text);
-      color: var(--color-bg);
-      border: var(--border-thin) solid var(--color-border);
-      font-family: inherit;
-      font-size: var(--text-base);
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      cursor: pointer;
-      transition: all 0.2s;
-      margin-bottom: var(--spacing-lg);
-    }
-
-    .btn-submit:hover {
-      transform: translate(-2px, -2px);
-      box-shadow: var(--shadow-md);
-    }
-
-    .btn-submit:active {
-      transform: translate(0, 0);
-    }
-
-    .btn-submit:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-      transform: none;
-    }
-
-    .error-message {
-      background-color: var(--color-slab-yellow);
-      border: var(--border-medium) solid var(--color-border);
-      color: var(--color-text);
-      padding: var(--spacing-md);
-      margin-bottom: var(--spacing-lg);
-      font-size: var(--text-sm);
-      display: none;
-    }
-
-    .error-message.visible {
-      display: block;
-    }
-
-    .error-message.success {
-      background-color: var(--color-slab-mint);
-    }
-
-    .login-link {
-      text-align: center;
-      margin-top: var(--spacing-lg);
-      font-size: var(--text-sm);
-    }
-
-    .login-link a {
-      color: var(--color-accent);
-      border-bottom: 1px solid var(--color-accent);
-      transition: opacity 0.2s;
-    }
-
-    .login-link a:hover {
-      opacity: 0.7;
-    }
-
-    .divider {
-      display: flex;
-      align-items: center;
-      margin: var(--spacing-2xl) 0;
-      gap: var(--spacing-md);
-    }
-
-    .divider::before,
-    .divider::after {
-      content: '';
-      flex: 1;
-      height: 1px;
-      background-color: var(--color-border);
-    }
-
-    .divider span {
-      font-size: var(--text-xs);
-      color: var(--color-text-light);
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-    }
-
-    .btn-google {
-      width: 100%;
-      padding: var(--spacing-md);
-      background-color: white;
-      color: var(--color-text);
-      border: var(--border-medium) solid var(--color-border);
-      font-family: inherit;
-      font-size: var(--text-base);
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      cursor: pointer;
-      transition: all 0.2s;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: var(--spacing-md);
-    }
-
-    .btn-google:hover {
-      transform: translate(-2px, -2px);
-      box-shadow: var(--shadow-md);
-      background-color: #f9f9f9;
-    }
-
-    .btn-google:active {
-      transform: translate(0, 0);
-    }
-
-    .btn-google svg {
-      width: 20px;
-      height: 20px;
-    }
-
-    .btn-google:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-      transform: none;
-    }
-
-    .loading {
-      display: inline-block;
-      width: 16px;
-      height: 16px;
-      border: 2px solid var(--color-bg);
-      border-radius: 50%;
-      border-top-color: transparent;
-      animation: spinner 0.6s linear infinite;
-    }
-
-    @keyframes spinner {
-      to {
-        transform: rotate(360deg);
-      }
-    }
-  </style>
+  <link rel="icon" href="data:,">
 </head>
 <body>
-  <div class="signup-page">
-    <div class="signup-card">
+  <div class="center-page">
+    <div class="center-card">
       <h1>Create Account</h1>
       <p>Join and start building your portfolio</p>
 
-      <form id="signup-form">
-        <div class="error-message" id="error-message"></div>
+      <div class="alert alert--error" id="error-message"></div>
 
+      <form id="signup-form">
         <div class="form-group">
           <label for="email">Email</label>
-          <input
-            type="email"
-            id="email"
-            name="email"
-            placeholder="you@example.com"
-            required
-            autocomplete="email"
-          />
+          <input type="email" id="email" name="email" placeholder="you@example.com" required autocomplete="email">
         </div>
 
         <div class="form-group">
           <label for="password">Password</label>
-          <input
-            type="password"
-            id="password"
-            name="password"
-            placeholder="••••••••"
-            required
-            autocomplete="new-password"
-          />
-          <div class="password-requirements">
+          <input type="password" id="password" name="password" placeholder="••••••••" required autocomplete="new-password">
+          <div class="pw-reqs">
             <strong>Password requirements:</strong>
             <ul>
               <li>At least 8 characters</li>
@@ -286,24 +35,13 @@
 
         <div class="form-group">
           <label for="confirm-password">Confirm Password</label>
-          <input
-            type="password"
-            id="confirm-password"
-            name="confirm-password"
-            placeholder="••••••••"
-            required
-            autocomplete="new-password"
-          />
+          <input type="password" id="confirm-password" name="confirm-password" placeholder="••••••••" required autocomplete="new-password">
         </div>
 
-        <button type="submit" class="btn-submit" id="submit-btn">
-          Create Account
-        </button>
+        <button type="submit" class="btn btn--primary btn--full" id="submit-btn">Create Account</button>
       </form>
 
-      <div class="divider">
-        <span>Or</span>
-      </div>
+      <div class="divider"><span>Or</span></div>
 
       <button type="button" class="btn-google" id="google-btn">
         <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -315,191 +53,12 @@
         Sign up with Google
       </button>
 
-      <div class="login-link">
+      <div style="text-align: center; margin-top: 20px; font-size: 13px;">
         Already have an account? <a href="login.html">Log in</a>
       </div>
     </div>
   </div>
 
-  <script type="module">
-    import { auth, db } from './firebase-config.js';
-    import { 
-      createUserWithEmailAndPassword, 
-      updateProfile,
-      signInWithPopup,
-      GoogleAuthProvider,
-      onAuthStateChanged
-    } from 'https://www.gstatic.com/firebasejs/12.8.0/firebase-auth.js';
-    import { doc, setDoc, getDoc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/12.8.0/firebase-firestore.js';
-
-    const form = document.getElementById('signup-form');
-    const emailInput = document.getElementById('email');
-    const passwordInput = document.getElementById('password');
-    const confirmPasswordInput = document.getElementById('confirm-password');
-    const submitBtn = document.getElementById('submit-btn');
-    const errorMessage = document.getElementById('error-message');
-
-    // Validate password strength
-    function validatePassword(password) {
-      const hasMinLength = password.length >= 8;
-      const hasNumbers = /\d/.test(password);
-      const hasSymbols = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password);
-      const hasLetters = /[a-zA-Z]/.test(password);
-
-      return {
-        isValid: hasMinLength && hasNumbers && hasSymbols && hasLetters,
-        hasMinLength,
-        hasNumbers,
-        hasSymbols,
-        hasLetters
-      };
-    }
-
-    function showError(message, isSuccess = false) {
-      errorMessage.textContent = message;
-      errorMessage.classList.add('visible');
-      if (isSuccess) {
-        errorMessage.classList.add('success');
-      } else {
-        errorMessage.classList.remove('success');
-      }
-    }
-
-    function hideError() {
-      errorMessage.classList.remove('visible');
-    }
-
-    // Handle Google Sign-Up
-    const googleBtn = document.getElementById('google-btn');
-    googleBtn.addEventListener('click', async () => {
-      googleBtn.disabled = true;
-      const originalText = googleBtn.innerHTML;
-      googleBtn.innerHTML = '<span class="loading"></span> Signing up...';
-      hideError();
-
-      try {
-        const provider = new GoogleAuthProvider();
-        const result = await signInWithPopup(auth, provider);
-        const user = result.user;
-
-        // Create Firestore profile
-        await setDoc(doc(db, 'users', user.uid), {
-          displayName: user.displayName || user.email.split('@')[0],
-          email: user.email,
-          username: '',
-          bio: '',
-          avatarUrl: user.photoURL || '',
-          createdAt: serverTimestamp(),
-          updatedAt: serverTimestamp()
-        });
-
-        showError('Account created! Redirecting to profile setup...', true);
-
-        // Redirect to profile editor
-        setTimeout(() => {
-          window.location.href = 'profile.html';
-        }, 1000);
-      } catch (error) {
-        console.error('Google sign-up error:', error);
-
-        let message = 'Sign up with Google failed.';
-        if (error.code === 'auth/popup-closed-by-user') {
-          message = 'Sign-up popup was closed.';
-        } else if (error.code === 'auth/account-exists-with-different-credential') {
-          message = 'This Google account is already linked to another method.';
-        } else if (error.code === 'auth/network-request-failed') {
-          message = 'Network error. Check your connection.';
-        }
-
-        showError(message);
-
-        googleBtn.disabled = false;
-        googleBtn.innerHTML = originalText;
-      }
-    });
-
-    form.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      hideError();
-
-      const email = emailInput.value.trim();
-      const password = passwordInput.value;
-      const confirmPassword = confirmPasswordInput.value;
-
-      // Validation
-      if (!email) {
-        showError('Please enter an email address');
-        return;
-      }
-
-      if (!password) {
-        showError('Please enter a password');
-        return;
-      }
-
-      if (password !== confirmPassword) {
-        showError('Passwords do not match');
-        return;
-      }
-
-      const passwordValidation = validatePassword(password);
-      if (!passwordValidation.isValid) {
-        showError('Password must be at least 8 characters with letters, numbers, and symbols');
-        return;
-      }
-
-      // Disable submit button
-      submitBtn.disabled = true;
-      const originalText = submitBtn.textContent;
-      submitBtn.innerHTML = '<span class="loading"></span> Creating account...';
-
-      try {
-        // Create Firebase Auth user
-        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-        const user = userCredential.user;
-
-        // Update profile with email as initial display name
-        await updateProfile(user, {
-          displayName: email.split('@')[0] // Use email prefix as initial display name
-        });
-
-        // Create Firestore profile
-        await setDoc(doc(db, 'users', user.uid), {
-          displayName: email.split('@')[0],
-          email: email,
-          username: '',
-          bio: '',
-          avatarUrl: '',
-          createdAt: serverTimestamp(),
-          updatedAt: serverTimestamp()
-        });
-
-        showError('Account created! Redirecting to profile setup...', true);
-
-        // Redirect to profile editor after 1 second
-        setTimeout(() => {
-          window.location.href = 'profile.html';
-        }, 1000);
-
-      } catch (error) {
-        console.error('Signup error:', error);
-
-        // Handle specific Firebase errors
-        if (error.code === 'auth/email-already-in-use') {
-          showError('This email is already registered. Try logging in instead.');
-        } else if (error.code === 'auth/invalid-email') {
-          showError('Please enter a valid email address');
-        } else if (error.code === 'auth/weak-password') {
-          showError('Password is too weak. Use letters, numbers, and symbols.');
-        } else {
-          showError(`Error: ${error.message}`);
-        }
-
-        // Re-enable submit button
-        submitBtn.disabled = false;
-        submitBtn.textContent = originalText;
-      }
-    });
-  </script>
+  <script type="module" src="signup.js"></script>
 </body>
 </html>

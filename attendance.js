@@ -84,5 +84,5 @@ function setupEventListeners() {
 
 function showError(message) {
   errorMessage.textContent = message;
-  errorMessage.style.display = 'block';
+  errorMessage.classList.add('visible');
 }

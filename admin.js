@@ -102,7 +102,7 @@ function calculateEngagementStatus(postsLast7Days, averagePerWeek) {
 
 function renderStudents(postsByUser) {
   if (users.length === 0) {
-    studentsContainer.innerHTML = '<div class="admin-empty">No students found.</div>';
+    studentsContainer.innerHTML = '<div class="empty">No students found.</div>';
     return;
   }
 
@@ -136,7 +136,7 @@ function renderStudents(postsByUser) {
       }
 
       const engagement = calculateEngagementStatus(postsLast7Days, averagePerWeek);
-      const engagementClass = engagement === 'Active' ? 'status-active' : engagement === 'Somewhat Active' ? 'status-medium' : 'status-inactive';
+      const engagementClass = engagement === 'Active' ? 'pill--active' : engagement === 'Somewhat Active' ? 'pill--warning' : 'pill--danger';
 
       return `
         <tr>
@@ -145,7 +145,7 @@ function renderStudents(postsByUser) {
           <td>${escapeHtml(email)}</td>
           <td>${userPosts.length}</td>
           <td>${postsLast7Days}</td>
-          <td><span class="admin-pill ${engagementClass}">${engagement}</span></td>
+          <td><span class="pill ${engagementClass}">${engagement}</span></td>
           <td>${averagePerWeek.toFixed(2)}</td>
           <td>${lastPostDate}</td>
           <td><a href="${profileLink}" target="_blank">View</a></td>
@@ -155,7 +155,7 @@ function renderStudents(postsByUser) {
     .join('');
 
   studentsContainer.innerHTML = `
-    <table class="admin-table">
+    <table class="table">
       <thead>
         <tr>
           <th>Name</th>
@@ -178,7 +178,7 @@ function renderStudents(postsByUser) {
 
 function renderActivity() {
   if (posts.length === 0) {
-    activityContainer.innerHTML = '<div class="admin-empty">No posts yet.</div>';
+    activityContainer.innerHTML = '<div class="empty">No posts yet.</div>';
     return;
   }
 
@@ -191,7 +191,7 @@ function renderActivity() {
 
     return `
       <tr>
-        <td><span class="admin-pill">${escapeHtml(typeLabel)}</span></td>
+        <td><span class="pill">${escapeHtml(typeLabel)}</span></td>
         <td>${escapeHtml(title)}</td>
         <td>${escapeHtml(owner)}</td>
         <td>${createdAt}</td>
@@ -201,7 +201,7 @@ function renderActivity() {
   }).join('');
 
   activityContainer.innerHTML = `
-    <table class="admin-table">
+    <table class="table">
       <thead>
         <tr>
           <th>Type</th>

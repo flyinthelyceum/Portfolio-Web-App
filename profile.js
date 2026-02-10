@@ -190,17 +190,17 @@ cancelBtn.addEventListener('click', () => {
 // Message helpers
 function showError(message) {
   errorMessage.textContent = message;
-  errorMessage.style.display = 'block';
-  successMessage.style.display = 'none';
+  errorMessage.classList.add('visible');
+  successMessage.classList.remove('visible');
 }
 
 function showSuccess(message) {
   successMessage.textContent = message;
-  successMessage.style.display = 'block';
-  errorMessage.style.display = 'none';
+  successMessage.classList.add('visible');
+  errorMessage.classList.remove('visible');
 }
 
 function hideMessages() {
-  errorMessage.style.display = 'none';
-  successMessage.style.display = 'none';
+  errorMessage.classList.remove('visible');
+  successMessage.classList.remove('visible');
 }
