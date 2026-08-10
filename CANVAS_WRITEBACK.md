@@ -106,3 +106,98 @@ The labnode repo `~/projects/canvas-integration` has the proven write path in
 rule, and the batch validation. Read that before writing new Canvas code. Note in
 particular that assignments carry `post_to_sis: true`, which makes Canvas reject a
 blank `due_at`; that cost real debugging time today.
+
+---
+
+# The stack, decided 2026-08-10
+
+Jared's requirement, verbatim: *"a student posts to the app and that is relatively
+immediately documented as a portfolio grade in canvas. That is the only way to
+ensure it is a tool that is being used rather than only being recommended."*
+
+**This requirement is easier than the one above, and it dissolves the hard part.**
+He wants a *grade*, not a *submission*. Grading is exactly what a teacher token can
+do. Masquerade, LTI, developer keys, admin: all of it drops out of scope.
+
+## The shape
+
+**One Canvas assignment. One grade. Updated in place on every post.**
+
+Not one Canvas assignment per portfolio entry. That produces gradebook churn and
+125 students' worth of noise, and it makes the gradebook a log instead of a signal.
+Instead the Working Artist Portfolio assignment holds a single running score that
+answers one question at a glance: *is this student actually using the thing.*
+
+```
+entries in Firestore   →   score posted
+        0                     none (Canvas shows missing at 50%, which is the nudge)
+        1                     60%   "you started"
+        3                     85%   "this is a practice"
+        5+                    100%  "this is a habit"
+```
+
+Thresholds are Jared's call; the mechanism is the point. Every post recomputes and
+re-PUTs one number. The submission comment carries the permalink to the newest
+entry, so SpeedGrader becomes a click-through to the actual work.
+
+## The parts
+
+| layer | what | change needed |
+|---|---|---|
+| Front door | Firebase Hosting, static | **none** |
+| Data | Firestore `posts`, `users` | **none** |
+| Media | Firebase Storage | **none** |
+| **Bridge** | **one Cloud Function, Firestore `onDocumentCreated('posts/{id}')`** | **new, ~80 lines** |
+| Identity | new Firestore `roster` collection, seeded once | new, one-time import |
+| Canvas | `PUT /courses/:c/assignments/:a/submissions/:u` | verified working, HTTP 200 |
+
+Everything except the bridge already exists. That is the whole build.
+
+## The bridge, concretely
+
+On `posts/{id}` create:
+1. Read `posts[id].authorEmail` (or resolve the author UID through `users`).
+2. Look up `roster/{email}` → `{ canvas_user_id, course_id, assignment_id }`.
+   **If it misses, write a `canvas_sync_errors` doc and stop.** Never guess a user
+   id; a wrong guess posts one student's work onto another student's grade.
+3. Count that author's posts.
+4. `PUT` the mapped score plus a comment carrying the entry title and permalink.
+5. Write the Canvas response back onto the post (`canvasSyncedAt`, `canvasScore`)
+   so the app can show the student their own grade landed. That closes the loop
+   visibly, which is most of why the tool gets used.
+
+Token lives in Functions config (`CANVAS_API_TOKEN`), never in client code, never
+in Firestore.
+
+## Seeding the roster
+
+All 125 students with Canvas user ids, emails, course and section, current as of
+2026-08-10:
+`https://docs.google.com/spreadsheets/d/18V-mVi7IQH9AR2PPTupdmdLGYtnYm8MgRQ8UpSvPpnw`
+
+Export to CSV, import once with the Admin SDK, keyed by lowercase email. Re-run at
+term boundaries; Canvas user ids are stable within a term but course and assignment
+ids are not.
+
+## If Cloud Functions are not available
+
+Firestore triggers need the Blaze plan. If billing is a blocker, the fallback keeps
+every other part identical: the always-on Mac mini polls Firestore on a five-minute
+launchd timer with a service account and posts the same grade through
+`~/projects/canvas-integration`, which already has the working Canvas write path.
+Slower and one more moving part, but zero new hosting and the token stays where it
+already lives.
+
+Prefer the Cloud Function. Event-driven, self-contained, and the app owns its own
+write-back instead of depending on another machine being awake.
+
+## Gotchas that will cost time if ignored
+
+- **Points, not percent.** `posted_grade` is sent verbatim. On a 10-point assignment,
+  85% is `8.5`. Sending `85` posts 85 out of 10.
+- **`post_to_sis: true`** on these assignments makes Canvas reject a blank `due_at`.
+  Do not clear dates from a script.
+- **The 50% missing deduction is deliberate policy.** Do not disable it, and do not
+  treat an existing 50 as a bug. It is the nudge that makes a student notice.
+- **Rate limit.** Debounce. One PUT per post, never per keystroke or autosave.
+- **Canvas assignment ids move.** Keep them in `roster`/config, never hard-coded.
