@@ -161,13 +161,14 @@ profileForm.addEventListener('submit', async (e) => {
       photoURL: avatarUrl
     });
     
-    // The private record keeps email and studentId. It is readable by signed-in
-    // users only.
+    // The private record keeps studentId and is readable by signed-in users
+    // only. `email` is deliberately not written here. It is the identity key
+    // the Canvas write-back resolves against the roster, so it is set once from
+    // the verified sign-in address and is rejected by rules on update.
     await setDoc(doc(db, 'users', currentUser.uid), {
       displayName,
       username,
       bio,
-      email: (emailInput.value || currentUser.email || '').toLowerCase(),
       studentId,
       avatarUrl,
       updatedAt: new Date()

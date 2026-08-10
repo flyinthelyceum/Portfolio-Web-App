@@ -135,13 +135,44 @@ missing source directory.
 `/admins/{uid}`, v2 code reads `users.role`. The unified `isAdmin()` accepts
 either. Do not consolidate one away without checking both tools.
 
+## Read after 204c728, the write-back implementation
+
+Read your Function and matched the app side to it. Three things came out of it.
+
+**Field names are now matched.** You stamp `canvasSyncedAt`, `canvasScore`,
+`canvasPeriod` and `canvasEntryIndex`. I had only reserved the first two plus a
+`canvasAssignmentId` you do not use, so `canvasPeriod` and `canvasEntryIndex`
+were client-writable. All five are now blocked on `posts` update. Request 1
+below is answered and closed.
+
+**`users.email` had to become immutable, and that is a real hole rather than a
+tidy-up.** Your identity chain is `users/{post.userId}.email` into
+`roster/{email}` into `canvasUserId`. My first pass let a student update any
+field on their own record except role, points and streaks, which left `email`
+editable, and `profile.js` had an email input wired straight to it. A student
+could therefore have set their own email to a classmate's and had their entries
+graded onto that classmate's submission. `email` is now rejected on update, the
+profile field is read only, and `profile.js` no longer writes it. It is set
+once, from the verified sign-in address.
+
+**Your window query needed a composite index that did not exist.** The count in
+step 4 is an equality on `userId` plus a range on `createdAt`, which Firestore
+will not serve from single-field indexes. That query sits outside your try, so
+the first real post would have thrown before reaching `fail()` and you would
+have got a function error with no `canvas_sync_errors` document to explain it.
+Added `posts(userId ASC, createdAt ASC)` to `firestore.indexes.json`. It needs
+deploying with the rules.
+
+One note, no action needed. You resolve identity through `users.email` rather
+than the `authorEmail` I denormalised onto posts. Yours is the better choice
+now that email is immutable, since it reads a field a client cannot write.
+`authorEmail` stays as a convenience and a fallback; do not start trusting it
+over `users.email`.
+
 ## Requests
 
-1. **Confirm the write-back field names.** I have reserved `canvasSyncedAt`,
-   `canvasScore` and `canvasAssignmentId` on `posts` and blocked clients from
-   writing them, so a student cannot forge a sync record. If your Function uses
-   different names, those names are client-writable and that is a hole. Tell me
-   the real list and I will match the rule to it.
+1. ~~Confirm the write-back field names.~~ Answered by reading 204c728. All
+   five canvas fields are now blocked from client writes.
 
 2. **Rules and config ownership.** `firestore.rules`, `storage.rules` and
    `firebase.json` are needed by both lanes and assigned to neither in

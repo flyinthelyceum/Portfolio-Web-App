@@ -74,8 +74,15 @@ service cloud.firestore {
 
       // Students may not write their own role, activation state, points or
       // streaks. Those are scoring fields and belong to Functions and admins.
+      //
+      // `email` is in this list because it is the identity key for grading.
+      // The write-back resolves users/{uid}.email against the roster to find a
+      // Canvas user id, so a student who could edit their own email could
+      // redirect their graded work onto a classmate's submission. It is set
+      // from the verified sign-in address at account creation and never again.
       allow update: if isOwner(userId) &&
         !request.resource.data.diff(resource.data).affectedKeys().hasAny([
+          'email',
           'role', 'active',
           'pointsTotal', 'pointsLogsTotal', 'pointsSocialTotal', 'pointsFeatureTotal',
           'streakLogCurrent', 'streakIterationCurrent',
@@ -138,7 +145,8 @@ service cloud.firestore {
         request.resource.data.userId == resource.data.userId &&
         isUnchanged('createdAt') &&
         !request.resource.data.diff(resource.data).affectedKeys().hasAny([
-          'canvasSyncedAt', 'canvasScore', 'canvasAssignmentId'
+          'canvasSyncedAt', 'canvasScore', 'canvasPeriod', 'canvasEntryIndex',
+          'canvasAssignmentId'
         ]);
 
       allow update: if isAdmin();

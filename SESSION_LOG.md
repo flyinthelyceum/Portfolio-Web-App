@@ -38,6 +38,17 @@ It carries what the app now guarantees to the bridge, what it does not, the
 hazards that will cost the Canvas work time, and four open requests. `CLAUDE.md`
 points at it.
 
+**Matched the app side to labnode's write-back** (`204c728`, landed mid-session).
+Reading their Function turned up two things worth knowing:
+
+- `users.email` is the identity key for grading, and it was editable by the
+  student. A student could have pointed their own email at a classmate and had
+  their entries graded onto that classmate's submission. Now immutable in rules,
+  read only in the profile form.
+- Their window query is an equality plus a range and had no composite index, and
+  it sits outside their try block. The first real post would have thrown with no
+  error document written. Index added.
+
 ### State of play
 
 Fourteen findings from the audit. F-01 is closed by the recovery. F-02, F-03,
