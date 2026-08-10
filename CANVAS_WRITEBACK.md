@@ -279,3 +279,55 @@ on posts/{id} create:
 The `periods` collection is seeded from the same generation pass that creates the
 Canvas assignments, so window boundaries and assignment ids arrive together and
 cannot drift apart.
+
+---
+
+# Correction: there is no qualitative grade, 2026-08-10
+
+Jared: *"Qualitative analysis for me is never grading. Qualitative feedback happens
+in crits and is completely disconnected from quantitative evaluation of a student.
+My rule is quality feedback happens in conversation. That never gets truncated to a
+quantity."*
+
+**The cadence-versus-quality split above is wrong and is superseded by this
+section.** The real axis is **verifiable versus conversational**.
+
+Points attach only to what can be checked without judgment:
+
+- it exists
+- it arrived inside the window
+- it has the required parts
+- you were in the room for crit
+- you could answer for it when asked
+
+Everything requiring judgment lives in conversation and is never compressed to a
+number. So **the "human-graded portfolio review at milestones" proposed earlier
+does not exist.** A milestone is still completion: did you install for the showing,
+yes or no. The crit at that showing is the conversation, and it carries no score.
+
+This is already stated in Jared's own grading doc, which reads *"Grades are
+supportive, not evaluative. The commentary does the teaching."* It was there before
+this conversation.
+
+## Hard rules for this app
+
+1. **Never score quality.** No rubric scoring, no AI evaluation of student work, no
+   quality signal surfaced to the student as a number, a rank, or a badge.
+2. **The automated comment is a receipt, not a judgment.** This is the live trap:
+   the natural thing for a bot comment to say is "Nice work," and a machine
+   congratulating a student on work it cannot see is precisely the truncation being
+   refused. Post the record and nothing else:
+
+   > `Entry 3, week of Sep 8. <permalink>`
+
+3. **Written teaching is not ranking, and the distinction matters.** A comment from
+   Jared can be specific and instructional; that is the commentary doing the
+   teaching. What never happens is compressing the work to a merit number. The
+   function does neither. It records.
+
+## Where the app actually helps quality
+
+Upstream of the gradebook entirely. It puts the work on a screen so crit has
+something to look at, and it can record *that* a crit happened without touching
+*what was said*. Attendance to the conversation is verifiable. The content of the
+conversation stays out of Canvas.
