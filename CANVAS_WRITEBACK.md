@@ -201,3 +201,81 @@ write-back instead of depending on another machine being awake.
   treat an existing 50 as a bug. It is the nudge that makes a student notice.
 - **Rate limit.** Debounce. One PUT per post, never per keystroke or autosave.
 - **Canvas assignment ids move.** Keep them in `roster`/config, never hard-coded.
+
+---
+
+# Revision: iterative cadence, decided 2026-08-10
+
+Jared: *"How will that work when we need to track submissions iteratively? We need
+daily/weekly postings to the portfolio?"*
+
+Correct objection. **A single lifetime counter cannot see a missed week.** It gives
+full marks to a student who posts five entries in September and then disappears.
+The unit has to change, and one number cannot carry both things being measured.
+
+## Separate the two measurements
+
+They have opposite shapes, and conflating them is what makes portfolio grading
+collapse into either busywork or vibes.
+
+| | cadence | body of work |
+|---|---|---|
+| question | did you post this period | is any of it good |
+| grader | the function, perfectly | Jared, only |
+| shape | nearly binary | judged |
+| when | every period | at milestones |
+| points | small, many | large, few |
+
+## Structure
+
+**One `Portfolio` assignment per period, generated across the term**, each dated to
+a real class meeting. The function scores each from entries whose **server
+timestamp** falls inside that window.
+
+Every course runs **45 meetings across 20 instructional weeks**, Aug 6 to Dec 18.
+So weekly is 20 rows at 5 points (100 points of cadence), biweekly is 10 rows if
+that reads lighter. Then one or two human-graded portfolio reviews at existing
+milestones carry the real weight. 3D2 already has those milestones built: First
+Light, Mid-Term Showing, FAE.
+
+## Three properties worth building for
+
+1. **The 20 assignments are generated, not authored.** `~/projects/canvas-integration`
+   emits them from `schedule.json` in one pass, dated to real meeting days. This is
+   the same mechanism that repinned 26 3D1 assignments on 2026-08-10. Cost is a
+   script run.
+
+2. **A missed week needs no teacher action.** The assignment comes due, nobody
+   submitted, and the 50% missing deduction fires on its own. That policy is already
+   enabled on all five courses and is deliberate (see
+   `feedback_missing_deduction_stays_on`). It becomes the weekly accountability
+   engine for free.
+
+3. **Window membership goes by entry `createdAt`, server-side, not by sync time.**
+   A student cannot backfill four posts in December and retroactively earn
+   September. That property *is* the accountability.
+
+## The one open policy question
+
+Property 3 collides with the standing rule that there is no penalty for late work.
+Reading offered, Jared decides: that rule protects **work**, and cadence is not
+work, it is attendance to a practice. A missed week stays missed. If he overrules
+it, the function re-scores past windows on backfill and the mechanism weakens
+accordingly.
+
+## What changes in the function
+
+Barely anything. Same trigger, same identity lookup, same PUT.
+
+```
+on posts/{id} create:
+  entry   = posts[id]                      // createdAt is server timestamp
+  window  = periodContaining(entry.createdAt)   // from a periods collection
+  target  = roster[email].assignments[window.id]
+  count   = posts where author == entry.author and createdAt in window
+  PUT score = scoreFor(count) to target
+```
+
+The `periods` collection is seeded from the same generation pass that creates the
+Canvas assignments, so window boundaries and assignment ids arrive together and
+cannot drift apart.
