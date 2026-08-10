@@ -3,6 +3,7 @@ import { onAuthStateChanged, updateProfile } from 'https://www.gstatic.com/fireb
 import { doc, getDoc, setDoc, collection, query, where, getDocs } from 'https://www.gstatic.com/firebasejs/12.8.0/firebase-firestore.js';
 import { ref, uploadBytes, getDownloadURL } from 'https://www.gstatic.com/firebasejs/12.8.0/firebase-storage.js';
 import { initErrorReporting, reportError } from './error-reporting.js';
+import { buildPublicProfile, publicProfileRef } from './identity.js';
 
 // DOM Elements
 const profileForm = document.getElementById('profile-form');
@@ -160,16 +161,26 @@ profileForm.addEventListener('submit', async (e) => {
       photoURL: avatarUrl
     });
     
-    // Update Firestore user document
+    // The private record keeps email and studentId. It is readable by signed-in
+    // users only.
     await setDoc(doc(db, 'users', currentUser.uid), {
       displayName,
       username,
       bio,
-      email: emailInput.value || currentUser.email,
+      email: (emailInput.value || currentUser.email || '').toLowerCase(),
       studentId,
       avatarUrl,
       updatedAt: new Date()
     }, { merge: true });
+
+    // The public projection is what an unauthenticated visitor reads when they
+    // open a shared portfolio link. Email and studentId must never land here.
+    await setDoc(publicProfileRef(db, currentUser.uid), buildPublicProfile({
+      username,
+      displayName,
+      bio,
+      avatarUrl
+    }), { merge: true });
     
     showSuccess('Profile updated successfully!');
     

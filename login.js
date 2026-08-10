@@ -6,7 +6,16 @@ import {
   GoogleAuthProvider,
   onAuthStateChanged
 } from 'https://www.gstatic.com/firebasejs/12.8.0/firebase-auth.js';
-import { doc, getDoc, setDoc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/12.8.0/firebase-firestore.js';
+import { doc, getDoc, setDoc } from 'https://www.gstatic.com/firebasejs/12.8.0/firebase-firestore.js';
+import {
+  buildPublicProfile,
+  buildUserRecord,
+  displayNameFromEmail,
+  publicProfileRef,
+  uniqueUsername,
+  userRef,
+  usernameFromEmail
+} from './identity.js';
 
 const form = document.getElementById('login-form');
 const emailInput = document.getElementById('email');
@@ -75,23 +84,30 @@ googleBtn.addEventListener('click', async () => {
     const result = await signInWithPopup(auth, provider);
     const user = result.user;
 
-    // Check if user profile exists in Firestore
+    // First sign-in creates the profile complete, with a school email for the
+    // Canvas write-back and a username so the share link works right away.
+    // There is no setup detour; the student lands in the editor either way.
     const userDoc = await getDoc(doc(db, 'users', user.uid));
     if (!userDoc.exists()) {
-      // First time Google login - create profile and redirect to profile editor
-      await setDoc(doc(db, 'users', user.uid), {
-        displayName: user.displayName || user.email.split('@')[0],
+      const displayName = user.displayName || displayNameFromEmail(user.email);
+      const avatarUrl = user.photoURL || '';
+      const username = await uniqueUsername(db, usernameFromEmail(user.email), user.uid);
+
+      await setDoc(userRef(db, user.uid), buildUserRecord({
         email: user.email,
-        username: '',
-        bio: '',
-        avatarUrl: user.photoURL || '',
-        createdAt: serverTimestamp(),
-        updatedAt: serverTimestamp()
-      });
-      window.location.href = 'profile.html';
-    } else {
-      window.location.href = 'editor.html';
+        displayName,
+        username,
+        avatarUrl
+      }));
+
+      await setDoc(publicProfileRef(db, user.uid), buildPublicProfile({
+        username,
+        displayName,
+        avatarUrl
+      }));
     }
+
+    window.location.href = 'editor.html';
   } catch (error) {
     console.error('Google sign-in error:', error);
 

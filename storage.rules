@@ -1,35 +1,42 @@
 rules_version = '2';
 
+// Both tools share this bucket. Live prefixes are:
+//   users/{uid}/...        v1 post images
+//   avatars/{uid}/...      profile pictures
+//   logs/{uid}/...         v2 log media
+//   shop-resets/{uid}/...  v2 shop reset photos
+//
+// The previous version on main covered only users/, so deploying it would have
+// blocked every v2 upload. The folderType wildcard covers all four and any
+// future prefix that keeps the {prefix}/{uid}/ shape.
+
 service firebase.storage {
   match /b/{bucket}/o {
-    
-    // Helper function: Check if user is authenticated
+
     function isSignedIn() {
       return request.auth != null;
     }
-    
-    // Helper function: Check if file size is acceptable
-    function isValidSize() {
-      return request.resource.size < 5 * 1024 * 1024; // 5MB limit
-    }
-    
-    // Helper function: Check if file is an image
+
     function isImage() {
       return request.resource.contentType.matches('image/.*');
     }
-    
-    // User-specific folders for images
-    // Read: Public (for portfolio viewing)
-    // Write: Only the folder owner, and only images under 5MB
-    match /users/{userId}/{allPaths=**} {
+
+    // 5 MB. Client-side resizing lands well under this; the cap is a backstop
+    // against an unresized original, not the primary control.
+    function isValidSize() {
+      return request.resource.size < 5 * 1024 * 1024;
+    }
+
+    match /{folderType}/{userId}/{allPaths=**} {
+      // Public read so shared portfolio links work without signing in.
       allow read: if true;
-      allow write: if isSignedIn() && 
+
+      allow write: if isSignedIn() &&
                      request.auth.uid == userId &&
                      isValidSize() &&
                      isImage();
     }
-    
-    // Fallback: Deny all other access
+
     match /{allPaths=**} {
       allow read, write: if false;
     }

@@ -28,6 +28,8 @@ More than one agent touches this repo. As of 2026-08-10:
 
 **`CANVAS_WRITEBACK.md`** is the design record, written against live API tests rather than docs. It carries the tested constraints (no CORS, no masquerade, no admin), the architecture, and three rounds of Jared's corrections. Do not redesign the write-back without reading it; the obvious approaches are all already ruled out with HTTP codes attached.
 
+**`INTERLOCKS.md`** is the seam between the two lanes, written from the app side. It carries what the app now guarantees to the bridge (post ownership, server timestamps, `authorEmail`), what it does not yet guarantee, the hazards that will cost the Canvas work time, and open requests in both directions. Read it before seeding a roster or enabling the Firestore trigger.
+
 ## Jared's rules that bind this repo
 
 - **Quality never becomes a number.** The Canvas score runs on mechanical checks only: does it exist, did it arrive in the window, does it have the parts. Commentary can carry real evaluation and should, but it must never contain a number, rank, letter, or score-shaped phrase. Two channels, fully decoupled.

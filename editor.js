@@ -305,8 +305,12 @@ async function handleLogSubmit(e) {
     const imageUrls = await uploadImages(selectedLogImages, 'logs');
 
     // Create post
+    // authorEmail is denormalised so the Canvas write-back can resolve the
+    // student against the roster without a second read. createdAt must stay a
+    // server timestamp: it decides which grading window the entry falls in.
     await addDoc(collection(db, 'posts'), {
       userId: currentUser.uid,
+      authorEmail: (currentUser.email || '').toLowerCase(),
       type: 'log',
       title: formData.get('title'),
       date: formData.get('date'),
@@ -353,6 +357,7 @@ async function handleProjectSubmit(e) {
     // Create post
     await addDoc(collection(db, 'posts'), {
       userId: currentUser.uid,
+      authorEmail: (currentUser.email || '').toLowerCase(),
       type: 'project',
       title: formData.get('title'),
       summary: formData.get('summary'),

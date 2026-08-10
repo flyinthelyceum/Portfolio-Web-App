@@ -71,37 +71,36 @@ async function loadPortfolio() {
       return;
     }
 
-    // Get user
+    // Public portfolios read publicProfiles, which carries display-safe fields
+    // only. The private users record holds email and studentId and is no longer
+    // readable without signing in.
     let userId;
-    const usersRef = collection(db, 'users');
-    const q = query(usersRef, where('username', '==', urlUser));
-    const querySnapshot = await getDocs(q);
+    const matches = await getDocs(
+      query(collection(db, 'publicProfiles'), where('username', '==', urlUser))
+    );
 
-    if (!querySnapshot.empty) {
-      userId = querySnapshot.docs[0].id;
-      userData = querySnapshot.docs[0].data();
+    if (!matches.empty) {
+      userId = matches.docs[0].id;
+      userData = matches.docs[0].data();
     } else {
-      const userDoc = await getDoc(doc(db, 'users', urlUser));
-      if (userDoc.exists()) {
+      const profileDoc = await getDoc(doc(db, 'publicProfiles', urlUser));
+      if (profileDoc.exists()) {
         userId = urlUser;
-        userData = userDoc.data();
+        userData = profileDoc.data();
       } else {
         const postsEl = document.querySelector('.posts');
-        if (postsEl) postsEl.innerHTML = '<p>User not found</p>';
+        if (postsEl) postsEl.innerHTML = '<p>Portfolio not found</p>';
         return;
       }
     }
 
     // Get posts
-    const postsRef = collection(db, 'posts');
-    const postsSnap = await getDocs(postsRef);
-    const allPosts = [];
-    postsSnap.forEach(d => {
-      const data = d.data();
-      if (data.userId === userId) {
-        allPosts.push({ id: d.id, ...data });
-      }
-    });
+    // Filter server side. Reading every post in the project to render one
+    // student's portfolio does not scale past a single class.
+    const postsSnap = await getDocs(
+      query(collection(db, 'posts'), where('userId', '==', userId))
+    );
+    const allPosts = postsSnap.docs.map(d => ({ id: d.id, ...d.data() }));
 
     // Sort by date, newest first
     allPosts.sort((a, b) => {
@@ -112,7 +111,7 @@ async function loadPortfolio() {
 
     posts = allPosts;
 
-    // Populate sidebar index (narrow left column — titles + dates only)
+    // Populate sidebar index (narrow left column, titles and dates only)
     const index = document.querySelector('.index');
     if (index) {
       let sb = '<div class="index__header">';
@@ -131,11 +130,9 @@ async function loadPortfolio() {
 
       sb += '<nav class="index__nav" id="index-nav"></nav>';
 
-      sb += '<div class="index__footer">';
-      if (userData.email) {
-        sb += `<a href="mailto:${escapeHtml(userData.email)}">${escapeHtml(userData.email)}</a>`;
-      }
-      sb += '</div>';
+      // No contact details on this page. The students are minors and this view
+      // is served to anyone with the link.
+      sb += '<div class="index__footer"></div>';
 
       index.innerHTML = sb;
 
@@ -155,7 +152,7 @@ async function loadPortfolio() {
       if (userData.bio) {
         ph += `<div class="profile__tagline">${escapeHtml(userData.bio)}</div>`;
       }
-      ph += `<div class="profile__description">A daily practice of documenting work as storytelling — capturing process, reflection, and creative progress over time.</div>`;
+      ph += `<div class="profile__description">A daily practice of documenting work as storytelling, capturing process, reflection, and creative progress over time.</div>`;
       ph += '</div>';
       profile.innerHTML = ph;
     }

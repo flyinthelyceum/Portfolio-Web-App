@@ -1,52 +1,316 @@
 rules_version = '2';
 
+// Unified rules for both tools on this project.
+//
+// v1 Portfolio (test.aaand.space) uses: posts, users, publicProfiles, admins.
+// Studio Log v2 (portfolio-v2-log.web.app) uses: tasks, taskCategories, logs,
+// projects, likes, comments, highlights, badgeDefs, pointsEvents, scoreboards,
+// shopResets.
+// Canvas write-back uses: roster, periods, canvas_sync_errors.
+//
+// Both tools share this file. Deploying a version that covers only one of them
+// locks the other class out of their tool, which is what the previous split
+// between main and studio-log-redesign would have done.
+//
+// Cloud Functions use the Admin SDK and bypass these rules entirely. Collections
+// written only by Functions are therefore set to `allow write: if false`, which
+// blocks clients without blocking the Function.
+
 service cloud.firestore {
   match /databases/{database}/documents {
-    
-    // Helper function: Check if user is authenticated
+
+    // ========================================================================
+    // HELPERS
+    // ========================================================================
+
     function isSignedIn() {
       return request.auth != null;
     }
-    
-    // Helper function: Check if user owns the resource
+
     function isOwner(userId) {
       return isSignedIn() && request.auth.uid == userId;
     }
-    
-    // Helper function: Check if user is an admin
+
+    function userDoc() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
+    }
+
+    // Two admin mechanisms exist in production and both are load bearing.
+    // v1 code reads /admins/{uid}. v2 code reads users.role. Support both so
+    // neither tool loses admin access.
     function isAdmin() {
-      return isSignedIn() && 
-        exists(/databases/$(database)/documents/admins/$(request.auth.uid));
+      return isSignedIn() && (
+        exists(/databases/$(database)/documents/admins/$(request.auth.uid)) ||
+        userDoc().role == 'admin'
+      );
     }
-    
-    // User profiles
-    // Read: Public (for portfolio viewing)
-    // Write: Only the user themselves
+
+    // A client cannot choose its own creation time. This matters because the
+    // Canvas write-back assigns a post to a grading window by createdAt, so a
+    // client-supplied timestamp would let a student backfill a missed period.
+    function hasServerTimestamp() {
+      return request.resource.data.createdAt == request.time;
+    }
+
+    function isUnchanged(field) {
+      return !(field in request.resource.data.diff(resource.data).affectedKeys());
+    }
+
+    // ========================================================================
+    // SHARED IDENTITY
+    // ========================================================================
+
+    // Private member record. Carries email, studentId and fullName, so it is
+    // readable by signed-in users only. It was previously world readable, which
+    // exposed the roster of 100 minors to anonymous callers.
+    //
+    // Residual: a signed-in classmate can still read another student's email
+    // and studentId. Closing that means moving those fields to a private
+    // subcollection, which both tools would need updating for. Tracked in
+    // INTERLOCKS.md rather than done silently here.
     match /users/{userId} {
-      allow read: if true;
+      allow read: if isSignedIn();
       allow create: if isOwner(userId);
-      allow update, delete: if isOwner(userId) || isAdmin();
+
+      // Students may not write their own role, activation state, points or
+      // streaks. Those are scoring fields and belong to Functions and admins.
+      allow update: if isOwner(userId) &&
+        !request.resource.data.diff(resource.data).affectedKeys().hasAny([
+          'role', 'active',
+          'pointsTotal', 'pointsLogsTotal', 'pointsSocialTotal', 'pointsFeatureTotal',
+          'streakLogCurrent', 'streakIterationCurrent',
+          'canvasUserId', 'canvasCourseId'
+        ]);
+
+      allow update: if isAdmin();
+      allow delete: if isAdmin();
+
+      match /badges/{badgeId} {
+        allow read: if isSignedIn();
+        allow write: if false;
+      }
     }
-    
-    // Posts (logs and projects)
-    // Read: Public (for portfolio viewing)
-    // Create: Any authenticated user
-    // Update/Delete: Only the post owner or admin
-    match /posts/{postId} {
+
+    // Public-safe projection of a profile. This is what an unauthenticated
+    // visitor reads when they open a shared portfolio link. It must never
+    // carry email, studentId or fullName.
+    match /publicProfiles/{userId} {
       allow read: if true;
-      allow create: if isSignedIn();
-      allow update, delete: if isSignedIn() && 
-        (resource.data.userId == request.auth.uid || isAdmin());
+
+      allow create: if isOwner(userId) &&
+        !request.resource.data.keys().hasAny(['email', 'studentId', 'fullName']);
+
+      allow update: if isOwner(userId) &&
+        !request.resource.data.keys().hasAny(['email', 'studentId', 'fullName']) &&
+        isUnchanged('publicEnabled');
+
+      allow update: if isAdmin();
+      allow delete: if isAdmin();
     }
-    
-    // Admin collection
-    // Only admins can read/write
+
+    // v1 admin marker. Self-read is allowed so a student's client can ask
+    // "am I an admin" and get false rather than a permission error.
     match /admins/{adminId} {
-      allow read: if isSignedIn() && request.auth.uid == adminId;
+      allow read: if isOwner(adminId) || isAdmin();
       allow write: if isAdmin();
     }
-    
-    // Fallback: Deny all other access
+
+    // ========================================================================
+    // V1 PORTFOLIO
+    // ========================================================================
+
+    match /posts/{postId} {
+      // Public portfolios are readable without signing in.
+      allow read: if true;
+
+      // Ownership is enforced on create. Without this any signed-in student
+      // could write a post carrying a classmate's userId, which once the
+      // Canvas trigger is live would move that classmate's grade.
+      allow create: if isSignedIn() &&
+        request.resource.data.userId == request.auth.uid &&
+        hasServerTimestamp();
+
+      // The owner may edit content but may not reassign the post to someone
+      // else, move it into a different grading window, or write the fields the
+      // write-back stamps back onto it.
+      allow update: if isSignedIn() &&
+        resource.data.userId == request.auth.uid &&
+        request.resource.data.userId == resource.data.userId &&
+        isUnchanged('createdAt') &&
+        !request.resource.data.diff(resource.data).affectedKeys().hasAny([
+          'canvasSyncedAt', 'canvasScore', 'canvasAssignmentId'
+        ]);
+
+      allow update: if isAdmin();
+      allow delete: if isSignedIn() && resource.data.userId == request.auth.uid;
+      allow delete: if isAdmin();
+    }
+
+    // ========================================================================
+    // STUDIO LOG V2
+    // ========================================================================
+
+    match /taskCategories/{categoryId} {
+      allow read: if isSignedIn();
+      allow write: if isAdmin();
+    }
+
+    match /tasks/{taskId} {
+      allow read: if isSignedIn();
+      allow write: if isAdmin();
+    }
+
+    match /projects/{projectId} {
+      allow read: if resource.data.visibility == 'public' ||
+                    (isSignedIn() && resource.data.visibility == 'class') ||
+                    isOwner(resource.data.ownerUserId) ||
+                    isAdmin();
+
+      allow create: if isSignedIn() &&
+        request.resource.data.ownerUserId == request.auth.uid;
+
+      allow update: if isOwner(resource.data.ownerUserId) &&
+        !request.resource.data.diff(resource.data).affectedKeys().hasAny([
+          'basePoints', 'likeCount', 'commentCount',
+          'featureBonusAwarded', 'featureBonusValue'
+        ]);
+
+      allow update: if isAdmin();
+      allow delete: if false;
+    }
+
+    match /logs/{logId} {
+      allow read: if resource.data.visibility == 'public' ||
+                    (isSignedIn() && resource.data.visibility == 'class') ||
+                    isOwner(resource.data.ownerUserId) ||
+                    isAdmin();
+
+      // Publishing runs through the publishLog Function. Clients create drafts.
+      allow create: if isSignedIn() &&
+        request.resource.data.ownerUserId == request.auth.uid &&
+        request.resource.data.visibility == 'draft';
+
+      allow update: if isOwner(resource.data.ownerUserId) &&
+        resource.data.visibility == 'draft' &&
+        request.resource.data.visibility == 'draft' &&
+        !request.resource.data.diff(resource.data).affectedKeys().hasAny([
+          'basePoints', 'dayKey', 'weekKey', 'eligibleForPoints',
+          'featureBonusAwarded', 'featureBonusValue', 'likeCount', 'commentCount'
+        ]);
+
+      allow update: if isAdmin();
+      allow delete: if false;
+    }
+
+    match /likes/{likeId} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn() &&
+        request.resource.data.likerUserId == request.auth.uid;
+      allow delete: if isOwner(resource.data.likerUserId);
+      allow update: if false;
+    }
+
+    match /comments/{commentId} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn() &&
+        request.resource.data.authorUserId == request.auth.uid;
+
+      allow update: if isOwner(resource.data.authorUserId) &&
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['removedAt']);
+
+      allow update: if isAdmin();
+      allow delete: if false;
+    }
+
+    match /highlights/{highlightId} {
+      allow read: if isSignedIn();
+
+      allow create: if isSignedIn() &&
+        request.resource.data.type == 'pin' &&
+        request.resource.data.targetOwnerUserId == request.auth.uid &&
+        request.resource.data.createdByUserId == request.auth.uid;
+
+      allow create: if isAdmin() && request.resource.data.type == 'feature';
+      allow update: if isAdmin();
+      allow delete: if isAdmin();
+    }
+
+    match /badgeDefs/{badgeId} {
+      allow read: if isSignedIn();
+      allow write: if isAdmin();
+    }
+
+    // Shop reset checklist. In active use through May and the most used feature
+    // of either tool, but absent from every previous version of this file.
+    match /shopResets/{resetId} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn() &&
+        request.resource.data.userId == request.auth.uid &&
+        hasServerTimestamp();
+      allow update: if isSignedIn() && resource.data.userId == request.auth.uid;
+      allow update, delete: if isAdmin();
+    }
+
+    match /pointsEvents/{eventId} {
+      allow read: if isAdmin();
+      allow write: if false;
+    }
+
+    match /scoreboards/{boardId} {
+      allow read: if isSignedIn();
+      allow write: if isAdmin();
+
+      match /entries/{userId} {
+        allow read: if isSignedIn();
+        allow write: if false;
+      }
+    }
+
+    // ========================================================================
+    // CANVAS WRITE-BACK
+    //
+    // Seeded and written by the Admin SDK, which bypasses these rules. Clients
+    // are blocked from writing so a student cannot edit their own mapping or
+    // erase a sync error.
+    // ========================================================================
+
+    // email -> { canvasUserId, courseId, assignmentId, section }
+    match /roster/{email} {
+      allow read: if isAdmin();
+      allow write: if false;
+    }
+
+    // Grading windows. Students may read so the app can show the current period.
+    match /periods/{periodId} {
+      allow read: if isSignedIn();
+      allow write: if false;
+    }
+
+    // Written when an identity does not resolve and the write-back refuses.
+    // Without a rule here the deny-all fallback would swallow the refusal and
+    // the safety property would leave no trace.
+    match /canvas_sync_errors/{errorId} {
+      allow read: if isAdmin();
+      allow write: if false;
+    }
+
+    // ========================================================================
+    // CLIENT ERROR REPORTING
+    //
+    // error-reporting.js has been writing here since February and every write
+    // has been denied by the fallback below, so no report ever landed.
+    // ========================================================================
+
+    match /client_errors/{errorId} {
+      allow create: if isSignedIn();
+      allow read: if isAdmin();
+      allow update, delete: if false;
+    }
+
+    // ========================================================================
+    // FALLBACK
+    // ========================================================================
+
     match /{document=**} {
       allow read, write: if false;
     }

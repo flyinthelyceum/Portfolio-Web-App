@@ -6,7 +6,16 @@ import {
   GoogleAuthProvider,
   onAuthStateChanged
 } from 'https://www.gstatic.com/firebasejs/12.8.0/firebase-auth.js';
-import { doc, setDoc, getDoc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/12.8.0/firebase-firestore.js';
+import { setDoc } from 'https://www.gstatic.com/firebasejs/12.8.0/firebase-firestore.js';
+import {
+  buildPublicProfile,
+  buildUserRecord,
+  displayNameFromEmail,
+  publicProfileRef,
+  uniqueUsername,
+  userRef,
+  usernameFromEmail
+} from './identity.js';
 
 const form = document.getElementById('signup-form');
 const emailInput = document.getElementById('email');
@@ -59,20 +68,27 @@ googleBtn.addEventListener('click', async () => {
     const result = await signInWithPopup(auth, provider);
     const user = result.user;
 
-    await setDoc(doc(db, 'users', user.uid), {
-      displayName: user.displayName || user.email.split('@')[0],
-      email: user.email,
-      username: '',
-      bio: '',
-      avatarUrl: user.photoURL || '',
-      createdAt: serverTimestamp(),
-      updatedAt: serverTimestamp()
-    });
+    const displayName = user.displayName || displayNameFromEmail(user.email);
+    const avatarUrl = user.photoURL || '';
+    const username = await uniqueUsername(db, usernameFromEmail(user.email), user.uid);
 
-    showError('Account created! Redirecting to profile setup...', true);
+    await setDoc(userRef(db, user.uid), buildUserRecord({
+      email: user.email,
+      displayName,
+      username,
+      avatarUrl
+    }));
+
+    await setDoc(publicProfileRef(db, user.uid), buildPublicProfile({
+      username,
+      displayName,
+      avatarUrl
+    }));
+
+    showError('Account created. Taking you to your studio...', true);
 
     setTimeout(() => {
-      window.location.href = 'profile.html';
+      window.location.href = 'editor.html';
     }, 1000);
   } catch (error) {
     console.error('Google sign-up error:', error);
@@ -122,20 +138,26 @@ form.addEventListener('submit', async (e) => {
       displayName: email.split('@')[0]
     });
 
-    await setDoc(doc(db, 'users', user.uid), {
-      displayName: email.split('@')[0],
-      email: email,
-      username: '',
-      bio: '',
-      avatarUrl: '',
-      createdAt: serverTimestamp(),
-      updatedAt: serverTimestamp()
-    });
+    const displayName = displayNameFromEmail(email);
+    const username = await uniqueUsername(db, usernameFromEmail(email), user.uid);
 
-    showError('Account created! Redirecting to profile setup...', true);
+    await setDoc(userRef(db, user.uid), buildUserRecord({
+      email,
+      displayName,
+      username,
+      avatarUrl: ''
+    }));
+
+    await setDoc(publicProfileRef(db, user.uid), buildPublicProfile({
+      username,
+      displayName,
+      avatarUrl: ''
+    }));
+
+    showError('Account created. Taking you to your studio...', true);
 
     setTimeout(() => {
-      window.location.href = 'profile.html';
+      window.location.href = 'editor.html';
     }, 1000);
   } catch (error) {
     console.error('Signup error:', error);
