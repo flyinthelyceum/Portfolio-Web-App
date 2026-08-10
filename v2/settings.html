@@ -6,10 +6,219 @@
   <title>Settings — Studio Log</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=Inter:wght@400;500;600;700;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/styles.css">
+  <style>
+    body.settings-page {
+      background-color: #EEF1E6;
+    }
+
+    body.settings-page::before {
+      display: none;
+    }
+
+    body.settings-page .main-content {
+      max-width: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    body.settings-page .nav-bar {
+      background: #EEF1E6;
+    }
+
+    body.settings-page .nav-container {
+      max-width: none;
+      padding: 0 24px;
+    }
+
+    .settings-layout {
+      padding: 16px 24px;
+      min-height: calc(100vh - 80px);
+      box-sizing: border-box;
+    }
+
+    .settings-shell {
+      max-width: 760px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    .page-header {
+      margin-bottom: 20px;
+    }
+
+    .page-title-label {
+      display: inline-block;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      padding: 4px 12px;
+      background: #030506;
+      color: #FFFFFF;
+      margin-bottom: 8px;
+    }
+
+    .settings-page .task-detail {
+      background: #FFFFFF;
+      border: 4px solid #030506;
+      padding: 12px;
+      position: relative;
+      margin-bottom: 20px;
+    }
+
+    .settings-page .task-detail::after {
+      content: '';
+      position: absolute;
+      top: 4px;
+      left: 4px;
+      right: 4px;
+      bottom: 4px;
+      border: 1px solid #030506;
+      pointer-events: none;
+    }
+
+    .settings-page .task-detail-header {
+      margin-bottom: 10px;
+      padding-bottom: 8px;
+      border-bottom: 2px solid #030506;
+      position: relative;
+      z-index: 1;
+    }
+
+    .settings-page .task-detail-header h3 {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin: 0;
+    }
+
+    .settings-page .task-detail-body {
+      position: relative;
+      z-index: 1;
+      font-size: 13px;
+      line-height: 1.5;
+      margin-bottom: 0;
+    }
+
+    .settings-page .form-label {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .settings-page .form-input,
+    .settings-page .form-textarea {
+      border: 2px solid #030506;
+      background: #FFFFFF;
+      font-size: 13px;
+    }
+
+    .settings-page #public-url-section {
+      background: #EEF1E6 !important;
+      border: 2px solid #030506 !important;
+    }
+
+    .settings-active-gear {
+      color: #565B21;
+    }
+
+    .is-hidden {
+      display: none;
+    }
+
+    .settings-avatar-row {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-md);
+    }
+
+    .settings-avatar-preview {
+      width: 80px;
+      height: 80px;
+      border: 2px solid var(--color-border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: var(--text-2xl);
+      font-weight: 700;
+      background: var(--color-grid);
+    }
+
+    .settings-avatar-preview img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .settings-file-input {
+      display: none;
+    }
+
+    .settings-hint-top {
+      margin-top: var(--spacing-xs);
+    }
+
+    .settings-toggle-row {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-xs);
+      cursor: pointer;
+    }
+
+    .settings-public-url {
+      margin-top: var(--spacing-md);
+      padding: var(--spacing-sm);
+    }
+
+    .settings-public-url-label {
+      font-size: var(--text-sm);
+      margin-bottom: var(--spacing-xs);
+    }
+
+    .settings-public-url-code {
+      font-family: var(--font-mono);
+      font-size: var(--text-sm);
+      word-break: break-all;
+    }
+
+    .settings-copy-btn {
+      margin-top: var(--spacing-xs);
+    }
+
+    .settings-preview-btn {
+      margin-top: var(--spacing-md);
+    }
+
+    .settings-account-email {
+      color: var(--color-text-muted);
+      margin-bottom: var(--spacing-sm);
+    }
+
+    .settings-account-role {
+      color: var(--color-text-muted);
+      margin-bottom: var(--spacing-md);
+    }
+
+    .settings-logout-btn {
+      color: var(--color-error);
+      border-color: var(--color-error);
+    }
+
+    @media (min-width: 900px) {
+      .settings-layout {
+        padding: 20px 32px;
+      }
+    }
+  </style>
 </head>
-<body>
+<body class="settings-page">
   <div class="app-shell">
     <nav class="nav-bar">
       <div class="nav-container">
@@ -20,13 +229,16 @@
           <a href="highlights.html" class="nav-tab">Highlights</a>
           <a href="leaderboard.html" class="nav-tab">Leaderboard</a>
         </div>
-        <button class="nav-gear" title="Settings" style="background: var(--color-text); color: var(--color-bg);">⚙</button>
+        <span class="nav-gear settings-active-gear" id="gear-icon" title="Settings"></span>
       </div>
     </nav>
 
     <main class="main-content">
-      <div style="max-width: 600px;">
-        <h1 style="margin-bottom: var(--spacing-md);">Settings</h1>
+      <div class="settings-layout">
+        <div class="settings-shell">
+          <div class="page-header">
+            <div class="page-title-label">Settings</div>
+          </div>
 
         <!-- Loading -->
         <div id="loading" class="loading">
@@ -34,16 +246,16 @@
         </div>
 
         <!-- Not logged in -->
-        <div id="auth-required" class="empty-state" style="display: none;">
+        <div id="auth-required" class="empty-state is-hidden">
           <h2 class="empty-state-headline">Log in to continue</h2>
           <a href="login.html" class="btn btn-primary">Log In</a>
         </div>
 
         <!-- Settings Form -->
-        <div id="settings-content" style="display: none;">
+        <div id="settings-content" class="is-hidden">
 
           <!-- Profile Section -->
-          <div class="task-detail" style="margin-bottom: var(--spacing-md);">
+          <div class="task-detail">
             <div class="task-detail-header">
               <h3>Profile</h3>
             </div>
@@ -52,14 +264,14 @@
                 <!-- Avatar -->
                 <div class="form-group">
                   <label class="form-label">Photo</label>
-                  <div style="display: flex; align-items: center; gap: var(--spacing-md);">
-                    <div id="avatar-preview" style="width: 80px; height: 80px; border: 2px solid var(--color-border); display: flex; align-items: center; justify-content: center; font-size: var(--text-2xl); font-weight: 700; background: var(--color-grid);">
+                  <div class="settings-avatar-row">
+                    <div id="avatar-preview" class="settings-avatar-preview">
                       ?
                     </div>
                     <div>
-                      <input type="file" id="avatar-input" accept="image/*" style="display: none;">
+                      <input type="file" id="avatar-input" class="settings-file-input" accept="image/*">
                       <button type="button" id="avatar-btn" class="btn btn-small btn-secondary">Change Photo</button>
-                      <p class="form-hint" style="margin-top: var(--spacing-xs);">Max 2MB. Square images work best.</p>
+                      <p class="form-hint settings-hint-top">Max 2MB. Square images work best.</p>
                     </div>
                   </div>
                 </div>
@@ -95,26 +307,26 @@
           </div>
 
           <!-- Public Portfolio Section -->
-          <div class="task-detail" style="margin-bottom: var(--spacing-md);">
+          <div class="task-detail">
             <div class="task-detail-header">
               <h3>Public Portfolio</h3>
             </div>
             <div class="task-detail-body">
               <div class="form-group">
-                <label style="display: flex; align-items: center; gap: var(--spacing-xs); cursor: pointer;">
+                <label class="settings-toggle-row">
                   <input type="checkbox" id="public-enabled">
                   <span>Enable public portfolio</span>
                 </label>
                 <p class="form-hint">When enabled, your public work is visible to anyone with the link.</p>
               </div>
 
-              <div id="public-url-section" style="display: none; margin-top: var(--spacing-md); padding: var(--spacing-sm); background: var(--color-slab-mint); border: 1px solid var(--color-border);">
-                <p style="font-size: var(--text-sm); margin-bottom: var(--spacing-xs);">Your public portfolio URL:</p>
-                <code id="public-url" style="font-family: var(--font-mono); font-size: var(--text-sm); word-break: break-all;"></code>
-                <button id="copy-url" class="btn btn-small btn-secondary" style="margin-top: var(--spacing-xs);">Copy Link</button>
+              <div id="public-url-section" class="settings-public-url is-hidden">
+                <p class="settings-public-url-label">Your public portfolio URL:</p>
+                <code id="public-url" class="settings-public-url-code"></code>
+                <button id="copy-url" class="btn btn-small btn-secondary settings-copy-btn">Copy Link</button>
               </div>
 
-              <a href="portfolio.html" class="btn btn-secondary" style="margin-top: var(--spacing-md);">Preview Portfolio →</a>
+              <a href="portfolio.html" class="btn btn-secondary settings-preview-btn">Preview Portfolio →</a>
             </div>
           </div>
 
@@ -124,13 +336,13 @@
               <h3>Account</h3>
             </div>
             <div class="task-detail-body">
-              <p style="color: var(--color-text-muted); margin-bottom: var(--spacing-sm);">
+              <p class="settings-account-email">
                 Email: <span id="user-email"></span>
               </p>
-              <p style="color: var(--color-text-muted); margin-bottom: var(--spacing-md);">
+              <p class="settings-account-role">
                 Role: <span id="user-role"></span>
               </p>
-              <button id="logout-btn" class="btn btn-secondary" style="color: var(--color-error); border-color: var(--color-error);">Log Out</button>
+              <button id="logout-btn" class="btn btn-secondary settings-logout-btn">Log Out</button>
             </div>
           </div>
 
@@ -147,6 +359,10 @@
       db, storage, doc, getDoc, updateDoc, serverTimestamp,
       ref, uploadBytes, getDownloadURL
     } from './js/firebase-config.js';
+    import { insertIcon } from './js/icon.js';
+
+    // Insert settings icon
+    insertIcon(document.getElementById('gear-icon'), 'settings', 24);
 
     let currentUser = null;
     let currentUserData = null;
@@ -173,7 +389,7 @@
       // Avatar
       const avatarPreview = document.getElementById('avatar-preview');
       if (userData.photoUrl) {
-        avatarPreview.innerHTML = `<img src="${userData.photoUrl}" style="width: 100%; height: 100%; object-fit: cover;">`;
+        avatarPreview.innerHTML = `<img src="${userData.photoUrl}">`;
       } else {
         const initials = (userData.fullName || 'S').split(' ').map(n => n[0]).join('').slice(0, 2);
         avatarPreview.textContent = initials;
@@ -235,7 +451,7 @@
           updatedAt: serverTimestamp()
         });
 
-        document.getElementById('avatar-preview').innerHTML = `<img src="${url}" style="width: 100%; height: 100%; object-fit: cover;">`;
+        document.getElementById('avatar-preview').innerHTML = `<img src="${url}">`;
         showToast('Photo updated!', 'success');
       } catch (error) {
         console.error(error);

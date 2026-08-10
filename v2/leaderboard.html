@@ -352,7 +352,7 @@
           <a href="highlights.html" class="nav-tab">Highlights</a>
           <a href="leaderboard.html" class="nav-tab active">Leaderboard</a>
         </div>
-        <button class="nav-gear" id="gear-btn" title="Settings">⚙</button>
+        <button class="nav-gear" id="gear-btn" title="Settings" onclick="navigateToSettings()"></button>
       </div>
     </nav>
 
@@ -408,9 +408,24 @@
     </main>
   </div>
 
+  <!-- Global handler for gear button -->
+  <script>
+    window.navigateToSettings = function() {
+      window.location.href = 'settings.html';
+    };
+  </script>
+
   <script type="module">
     import { initAuth, getCurrentUser } from './js/auth.js';
     import { db, collection, doc, getDoc, getDocs, query, where, orderBy, limit } from './js/firebase-config.js';
+    import { insertIcon } from './js/icon.js';
+
+    // Insert settings icon
+    const gearBtn = document.getElementById('gear-btn');
+    if (gearBtn) {
+      insertIcon(gearBtn, 'settings', 24);
+      gearBtn.style.cursor = 'pointer';
+    }
 
     // State
     let currentUser = null;

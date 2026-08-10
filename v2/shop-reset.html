@@ -1,0 +1,968 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Shop Area Reset — Studio Log</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=Inter:wght@400;500;600;700;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+  <style>
+    body {
+      background-color: #EEF1E6;
+    }
+    body::before { display: none; }
+
+    .reset-container {
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 24px;
+    }
+
+    .reset-header {
+      text-align: center;
+      margin-bottom: 24px;
+    }
+
+    .reset-title {
+      font-family: var(--font-mono);
+      font-size: 14px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 8px;
+    }
+
+    .reset-area-name {
+      font-size: 28px;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+
+    .reset-subtitle {
+      font-size: 14px;
+      color: #666;
+      font-style: italic;
+    }
+
+    /* Area Selector */
+    .area-selector {
+      background: white;
+      border: 4px solid #030506;
+      padding: 24px;
+      margin-bottom: 24px;
+    }
+
+    .area-selector h2 {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 16px;
+    }
+
+    .area-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .area-btn {
+      padding: 12px 16px;
+      border: 2px solid #030506;
+      background: white;
+      font-family: var(--font-mono);
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      text-align: left;
+      transition: all 0.1s ease;
+    }
+
+    .area-btn:hover {
+      background: #EEF1E6;
+    }
+
+    .area-btn.selected {
+      background: #030506;
+      color: white;
+    }
+
+    /* Team Status */
+    .team-status {
+      background: white;
+      border: 4px solid #030506;
+      padding: 16px;
+      margin-bottom: 24px;
+    }
+
+    .team-status h3 {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 12px;
+      color: #666;
+    }
+
+    .team-member {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 0;
+      border-bottom: 1px solid #eee;
+    }
+
+    .team-member:last-child {
+      border-bottom: none;
+    }
+
+    .team-member-name {
+      font-weight: 500;
+    }
+
+    .team-member-status {
+      font-family: var(--font-mono);
+      font-size: 12px;
+    }
+
+    .team-member-status.done {
+      color: #565B21;
+    }
+
+    .team-member-status.pending {
+      color: #999;
+    }
+
+    /* Invocation */
+    .invocation {
+      background: #f6f6f6;
+      border-left: 4px solid #030506;
+      padding: 16px 20px;
+      margin-bottom: 24px;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    .invocation p {
+      margin: 0 0 12px 0;
+    }
+
+    .invocation p:last-child {
+      margin-bottom: 0;
+    }
+
+    .invocation strong {
+      display: block;
+      margin-top: 8px;
+    }
+
+    /* Checklist */
+    .checklist-container {
+      background: white;
+      border: 4px solid #030506;
+      margin-bottom: 24px;
+    }
+
+    .checklist-header {
+      padding: 16px;
+      border-bottom: 2px solid #030506;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .checklist-header h3 {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin: 0;
+    }
+
+    .checklist-progress {
+      font-family: var(--font-mono);
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .checklist-items {
+      padding: 0;
+      margin: 0;
+      list-style: none;
+    }
+
+    .checklist-item {
+      display: flex;
+      align-items: flex-start;
+      padding: 14px 16px;
+      border-bottom: 1px solid #eee;
+      cursor: pointer;
+      transition: background 0.1s ease;
+    }
+
+    .checklist-item:last-child {
+      border-bottom: none;
+    }
+
+    .checklist-item:hover {
+      background: #fafafa;
+    }
+
+    .checklist-item.checked {
+      background: #f0f4e8;
+    }
+
+    .checklist-item.checked .checklist-text {
+      text-decoration: line-through;
+      color: #888;
+    }
+
+    .checklist-box {
+      width: 24px;
+      height: 24px;
+      border: 2px solid #030506;
+      margin-right: 12px;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      background: white;
+    }
+
+    .checklist-item.checked .checklist-box {
+      background: #030506;
+      color: white;
+    }
+
+    .checklist-text {
+      font-size: 14px;
+      line-height: 1.4;
+      padding-top: 2px;
+    }
+
+    /* Photo Upload */
+    .photo-section {
+      background: white;
+      border: 4px solid #030506;
+      padding: 24px;
+      margin-bottom: 24px;
+      text-align: center;
+    }
+
+    .photo-section h3 {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 16px;
+    }
+
+    .photo-upload-area {
+      border: 2px dashed #030506;
+      padding: 32px;
+      cursor: pointer;
+      transition: all 0.1s ease;
+    }
+
+    .photo-upload-area:hover {
+      background: #fafafa;
+    }
+
+    .photo-upload-area.has-photo {
+      border-style: solid;
+      padding: 0;
+    }
+
+    .photo-upload-area img {
+      max-width: 100%;
+      display: block;
+    }
+
+    .photo-upload-text {
+      font-size: 14px;
+      color: #666;
+    }
+
+    .photo-upload-text strong {
+      display: block;
+      color: #030506;
+      margin-bottom: 4px;
+    }
+
+    /* Submit */
+    .submit-section {
+      text-align: center;
+    }
+
+    .submit-btn {
+      background: #030506;
+      color: white;
+      border: none;
+      padding: 16px 48px;
+      font-family: var(--font-mono);
+      font-size: 14px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      cursor: pointer;
+      transition: all 0.1s ease;
+    }
+
+    .submit-btn:hover {
+      background: #565B21;
+    }
+
+    .submit-btn:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+    }
+
+    .points-preview {
+      margin-top: 12px;
+      font-family: var(--font-mono);
+      font-size: 13px;
+      color: #666;
+    }
+
+    /* Success State */
+    .success-message {
+      background: white;
+      border: 4px solid #030506;
+      padding: 48px 24px;
+      text-align: center;
+      display: none;
+    }
+
+    .success-message.visible {
+      display: block;
+    }
+
+    .success-icon {
+      font-size: 48px;
+      margin-bottom: 16px;
+    }
+
+    .success-title {
+      font-size: 24px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .success-quote {
+      font-size: 18px;
+      font-style: italic;
+      color: #565B21;
+      margin-bottom: 24px;
+    }
+
+    .success-points {
+      font-family: var(--font-mono);
+      font-size: 14px;
+      margin-bottom: 24px;
+    }
+
+    /* Already Done State */
+    .already-done {
+      background: #f0f4e8;
+      border: 4px solid #565B21;
+      padding: 32px 24px;
+      text-align: center;
+      margin-bottom: 24px;
+    }
+
+    .already-done h2 {
+      color: #565B21;
+      margin-bottom: 8px;
+    }
+
+    .already-done p {
+      color: #666;
+      margin-bottom: 16px;
+    }
+
+    /* Responsive */
+    @media (max-width: 500px) {
+      .area-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .reset-container {
+        padding: 16px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-shell">
+    <nav class="nav-bar" style="background: #EEF1E6;">
+      <div class="nav-container" style="max-width: none; padding: 0 24px;">
+        <a href="index.html" class="nav-brand">Studio Log</a>
+        <div class="nav-tabs">
+          <a href="index.html" class="nav-tab">Home</a>
+          <a href="tasks.html" class="nav-tab">Tasks</a>
+          <a href="highlights.html" class="nav-tab">Highlights</a>
+          <a href="leaderboard.html" class="nav-tab">Leaderboard</a>
+        </div>
+        <a href="settings.html" class="nav-gear" id="gear-btn" title="Settings"></a>
+      </div>
+    </nav>
+
+    <main class="main-content" style="max-width: none; padding: 0; margin: 0;">
+      <!-- Loading -->
+      <div id="loading" class="loading">
+        <div class="loading-spinner"></div>
+      </div>
+
+      <!-- Auth Required -->
+      <div id="auth-required" class="reset-container" style="display: none;">
+        <div class="area-selector" style="text-align: center;">
+          <h2>Log in to continue</h2>
+          <a href="login.html" class="btn btn-primary">Log In</a>
+        </div>
+      </div>
+
+      <!-- Main Content -->
+      <div id="reset-content" class="reset-container" style="display: none;">
+
+        <!-- Already Done Today -->
+        <div id="already-done" class="already-done" style="display: none;">
+          <h2>Area Reset Complete</h2>
+          <p>You've already logged your shop reset for today.</p>
+          <a href="index.html" class="btn btn-secondary">Back to Home</a>
+        </div>
+
+        <!-- Step 1: Select Area -->
+        <div id="step-select" class="area-selector">
+          <h2>Select Your Shop Area</h2>
+          <div class="area-grid" id="area-buttons">
+            <!-- Populated by JS -->
+          </div>
+        </div>
+
+        <!-- Step 2: Checklist (hidden until area selected) -->
+        <div id="step-checklist" style="display: none;">
+
+          <div class="reset-header">
+            <div class="reset-title">Shop Area Reset</div>
+            <div class="reset-area-name" id="selected-area-name"></div>
+            <div class="reset-subtitle" id="selected-area-subtitle"></div>
+          </div>
+
+          <!-- Team Status -->
+          <div class="team-status" id="team-status" style="display: none;">
+            <h3>Today's Team</h3>
+            <div id="team-members">
+              <!-- Populated by JS -->
+            </div>
+          </div>
+
+          <!-- Invocation -->
+          <div class="invocation">
+            <p>Work is not complete until tools are returned, surfaces are cleared, and the space is reset.</p>
+            <p><strong>Cleanliness is not aesthetic. It is epistemological.</strong></p>
+          </div>
+
+          <!-- Checklist -->
+          <div class="checklist-container">
+            <div class="checklist-header">
+              <h3>Daily Checklist</h3>
+              <span class="checklist-progress" id="checklist-progress">0 / 0</span>
+            </div>
+            <ul class="checklist-items" id="checklist-items">
+              <!-- Populated by JS -->
+            </ul>
+          </div>
+
+          <!-- Photo -->
+          <div class="photo-section">
+            <h3>Photo of Clean Area (Required)</h3>
+            <div class="photo-upload-area" id="photo-upload">
+              <input type="file" id="photo-input" accept="image/*" style="display: none;">
+              <div class="photo-upload-text" id="photo-text">
+                <strong>Tap to upload or take photo</strong>
+                Show us your clean, reset area
+              </div>
+            </div>
+          </div>
+
+          <!-- Submit -->
+          <div class="submit-section">
+            <button class="submit-btn" id="submit-btn" disabled>Submit Reset</button>
+            <div class="points-preview" id="points-preview">+0 pts</div>
+          </div>
+
+        </div>
+
+        <!-- Success Message -->
+        <div id="success-message" class="success-message">
+          <div class="success-icon" style="font-family: var(--font-mono); font-size: 48px; font-weight: 700; border: 4px solid #030506; width: 72px; height: 72px; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px;">OK</div>
+          <div class="success-title">Reset Complete</div>
+          <div class="success-quote" id="success-quote"></div>
+          <div class="success-points" id="success-points"></div>
+          <a href="index.html" class="btn btn-primary">Back to Home</a>
+        </div>
+
+      </div>
+    </main>
+  </div>
+
+  <script type="module">
+    import { initAuth, getCurrentUser, getCurrentUserData } from './js/auth.js';
+    import {
+      db, storage, collection, doc, getDoc, getDocs, setDoc, addDoc,
+      query, where, orderBy, serverTimestamp, ref, uploadBytes, getDownloadURL
+    } from './js/firebase-config.js';
+    import { insertIcon } from './js/icon.js';
+
+    // Insert settings icon
+    insertIcon(document.getElementById('gear-btn'), 'settings', 24);
+
+    // Shop Areas Data
+    const SHOP_AREAS = {
+      'kitchen': {
+        name: 'Kitchen',
+        subtitle: 'chemical cabinet, sink, sharpening station',
+        items: [
+          'All chemicals and consumables returned to the chemical cabinet',
+          'Chemical cabinet doors closed and latched',
+          'Sink cleared completely. No debris.',
+          'Sink basin wiped clean',
+          'Pegboard and shelves cleared and knolled',
+          'Grinder covers on. Sharpening table clear.',
+          'Stones wiped, dried, and stored properly',
+          'Sharpening guides and tools returned to under-table storage',
+          'Rags disposed of or hung to dry. No wet piles.',
+          'Counter surfaces wiped',
+          'Floor swept under sink and sharpening station',
+          'Storage racks knolled. Order is visible.'
+        ]
+      },
+      'press-milling': {
+        name: 'Press, Milling & Back Rack',
+        subtitle: 'printing press, wall lumber rack, jointer, planers, dust collector',
+        items: [
+          'Printing press cleared of scraps, ink, and tools',
+          'Jointer tables Simple Greened, then alcohol wiped',
+          'Planer beds Simple Greened, then alcohol wiped',
+          'Offcuts cleared and organized under the assembly table',
+          'Dust collector bin checked. Overflow is neglect.',
+          'Wall lumber rack organized by type and size',
+          'Floor swept around all machines and rack bases'
+        ]
+      },
+      'table-saw': {
+        name: 'Table Saw / Assembly Table',
+        subtitle: 'two table saws, assembly table with hardwood storage',
+        items: [
+          'Blades lowered fully',
+          'Fences returned to storage position. Push stick on each fence.',
+          'Miter gauges hung or stored properly',
+          'Sleds knolled under tables',
+          'Magfences and extra blades knolled',
+          'Assembly table cleared completely. No projects sleep here.',
+          'Hardwood storage underneath sorted by length',
+          'Table saw surfaces vacuumed and wiped',
+          'Table saw cabinets checked for overfill',
+          'Floor swept under saws and assembly table'
+        ]
+      },
+      'lathe': {
+        name: 'Lathe, Dust Collectors & Shop-Vacs',
+        subtitle: 'lathe, Oneida dust collector, portable shop-vacs',
+        items: [
+          'Tool rest lowered and moved away from the spindle',
+          'Lathe tools returned to the rack',
+          'Whiteboard cleaned. Yesterday is over.',
+          'Chucks and attachments returned to storage',
+          'Dust collector filter cleaning protocol completed',
+          'Dust collection bin checked for overfill',
+          'Shop-vacs emptied if more than half full',
+          'Shop-vac hoses and power cords neatly coiled',
+          'Lathe vacuumed',
+          'Area swept clean'
+        ]
+      },
+      'metal': {
+        name: 'Metal Area & Porch',
+        subtitle: 'welders, metal saws, metal hand tools, metal worktable',
+        items: [
+          'All metal tools returned to designated storage',
+          'Welders wiped clean. Leads neatly coiled.',
+          'All gas valves confirmed closed',
+          'Metal saw wiped clean. Power cord coiled.',
+          'Cutoffs and scrap sorted or discarded',
+          'Metal worktable knolled',
+          'Porch cleared completely. Nothing left behind.',
+          'Floor swept under metal table and rolling machines',
+          'Porch swept'
+        ]
+      },
+      'bandsaws': {
+        name: 'Bandsaws, Vertical & Horizontal Racks',
+        subtitle: 'two bandsaws, vertical plywood storage, horizontal lumber racks',
+        items: [
+          'Tables cleared of tools and offcuts',
+          'Throat inserts in place and level',
+          'Plywood returned to the vertical rack correctly. Cutoffs sorted or removed.',
+          'Hardwood stickered and stacked on racks. Cutoffs sorted or removed.',
+          'No leaning. No unstable stacks.',
+          'Bandsaw cabinets and tables vacuumed',
+          'Floor swept around bandsaws and in front of plywood racks'
+        ]
+      },
+      'handtools': {
+        name: 'Handtools & Loft',
+        subtitle: 'handtool shelving, pegboard, workbench',
+        items: [
+          'All hand tools returned to labeled locations',
+          'Pegboard fully reset. No empty hooks with wandering tools.',
+          'Workbench cleared of materials and scraps',
+          'Loft checked and cleared of unorganized material',
+          'Storage racks knolled',
+          'Floor swept around bench and shelving'
+        ]
+      },
+      'miter': {
+        name: 'Miter Station & Low Racks',
+        subtitle: 'miter saw, drill press, construction lumber storage',
+        items: [
+          'Miter saw blade lowered and locked. Guard checked.',
+          'Dust chute cleared and vacuumed',
+          'Miter saw and fences vacuumed',
+          'Extended fences and tables cleared',
+          'Drill press table cleared and wiped',
+          'Drill press chuck key returned to holder',
+          'Lumber returned to low racks by size and length',
+          'Cutoffs sorted or discarded',
+          'Wall cabinet knolled',
+          'Safety Cabinet clean and knolled',
+          'Racks swept out',
+          'Floor swept in front of miter saw and around drill press'
+        ]
+      }
+    };
+
+    // Points config
+    const POINTS = {
+      base: 50,
+      perItem: 10,
+      fullBonus: 50
+    };
+
+    // Motivational quotes
+    const QUOTES = [
+      "Grab a broom!",
+      "Vacuum until the bell!",
+      "There's always time to clean.",
+      "Order makes problems visible.",
+      "A clean studio is a thinking studio.",
+      "Neglect compounds. You didn't.",
+      "Clarity prevents repetition.",
+      "If it's not orderly, it's not finished.",
+      "Restore the space. Then leave."
+    ];
+
+    // State
+    let currentUser = null;
+    let currentUserData = null;
+    let selectedArea = null;
+    let checkedItems = new Set();
+    let photoFile = null;
+    let photoPreviewUrl = null;
+
+    // DOM
+    const loading = document.getElementById('loading');
+    const authRequired = document.getElementById('auth-required');
+    const resetContent = document.getElementById('reset-content');
+    const alreadyDone = document.getElementById('already-done');
+    const stepSelect = document.getElementById('step-select');
+    const stepChecklist = document.getElementById('step-checklist');
+    const successMessage = document.getElementById('success-message');
+    const areaButtons = document.getElementById('area-buttons');
+    const checklistItems = document.getElementById('checklist-items');
+    const checklistProgress = document.getElementById('checklist-progress');
+    const photoUpload = document.getElementById('photo-upload');
+    const photoInput = document.getElementById('photo-input');
+    const photoText = document.getElementById('photo-text');
+    const submitBtn = document.getElementById('submit-btn');
+    const pointsPreview = document.getElementById('points-preview');
+
+    // Get today's date key (Phoenix timezone)
+    function getDayKey() {
+      return new Date().toLocaleDateString('en-CA', { timeZone: 'America/Phoenix' });
+    }
+
+    // Init
+    initAuth(async (user, userData) => {
+      currentUser = user;
+      currentUserData = userData;
+      loading.style.display = 'none';
+
+      if (!user) {
+        authRequired.style.display = 'block';
+        return;
+      }
+
+      resetContent.style.display = 'block';
+
+      // Check if already submitted today
+      const todayKey = getDayKey();
+      const existingQuery = query(
+        collection(db, 'shopResets'),
+        where('userId', '==', user.uid),
+        where('dayKey', '==', todayKey)
+      );
+      const existingSnap = await getDocs(existingQuery);
+
+      if (!existingSnap.empty) {
+        alreadyDone.style.display = 'block';
+        stepSelect.style.display = 'none';
+        return;
+      }
+
+      // Render area buttons
+      renderAreaButtons();
+    });
+
+    // Render area selection buttons
+    function renderAreaButtons() {
+      areaButtons.innerHTML = Object.entries(SHOP_AREAS).map(([id, area]) => `
+        <button class="area-btn" data-area="${id}">${area.name}</button>
+      `).join('');
+
+      areaButtons.querySelectorAll('.area-btn').forEach(btn => {
+        btn.addEventListener('click', () => selectArea(btn.dataset.area));
+      });
+    }
+
+    // Select an area
+    async function selectArea(areaId) {
+      selectedArea = areaId;
+      const area = SHOP_AREAS[areaId];
+
+      // Update button states
+      areaButtons.querySelectorAll('.area-btn').forEach(btn => {
+        btn.classList.toggle('selected', btn.dataset.area === areaId);
+      });
+
+      // Update header
+      document.getElementById('selected-area-name').textContent = area.name;
+      document.getElementById('selected-area-subtitle').textContent = area.subtitle;
+
+      // Render checklist
+      renderChecklist(area.items);
+
+      // Load team status
+      await loadTeamStatus(areaId);
+
+      // Show checklist step
+      stepSelect.style.display = 'none';
+      stepChecklist.style.display = 'block';
+
+      // Reset state
+      checkedItems.clear();
+      photoFile = null;
+      photoPreviewUrl = null;
+      updateProgress();
+      resetPhotoUI();
+    }
+
+    // Render checklist items
+    function renderChecklist(items) {
+      checklistItems.innerHTML = items.map((item, index) => `
+        <li class="checklist-item" data-index="${index}">
+          <div class="checklist-box"></div>
+          <span class="checklist-text">${item}</span>
+        </li>
+      `).join('');
+
+      checklistItems.querySelectorAll('.checklist-item').forEach(item => {
+        item.addEventListener('click', () => toggleItem(parseInt(item.dataset.index)));
+      });
+
+      checklistProgress.textContent = `0 / ${items.length}`;
+    }
+
+    // Toggle checklist item
+    function toggleItem(index) {
+      const item = checklistItems.querySelector(`[data-index="${index}"]`);
+
+      if (checkedItems.has(index)) {
+        checkedItems.delete(index);
+        item.classList.remove('checked');
+        item.querySelector('.checklist-box').textContent = '';
+      } else {
+        checkedItems.add(index);
+        item.classList.add('checked');
+        item.querySelector('.checklist-box').textContent = 'X';
+      }
+
+      updateProgress();
+    }
+
+    // Update progress display
+    function updateProgress() {
+      const total = SHOP_AREAS[selectedArea].items.length;
+      const checked = checkedItems.size;
+
+      checklistProgress.textContent = `${checked} / ${total}`;
+
+      // Calculate points
+      let points = POINTS.base + (checked * POINTS.perItem);
+      if (checked === total) {
+        points += POINTS.fullBonus;
+      }
+      pointsPreview.textContent = `+${points} pts` + (checked === total ? ' (full completion bonus!)' : '');
+
+      // Enable/disable submit
+      submitBtn.disabled = !photoFile;
+    }
+
+    // Load team status for this area today
+    async function loadTeamStatus(areaId) {
+      const teamStatus = document.getElementById('team-status');
+      const teamMembers = document.getElementById('team-members');
+
+      try {
+        const todayKey = getDayKey();
+        const resetsQuery = query(
+          collection(db, 'shopResets'),
+          where('shopArea', '==', areaId),
+          where('dayKey', '==', todayKey)
+        );
+        const resetsSnap = await getDocs(resetsQuery);
+
+        if (resetsSnap.empty) {
+          teamStatus.style.display = 'none';
+          return;
+        }
+
+        // Get user names
+        const completions = [];
+        for (const doc of resetsSnap.docs) {
+          const data = doc.data();
+          const userDoc = await getDoc(doc(db, 'users', data.userId));
+          const userName = userDoc.exists() ? userDoc.data().fullName : 'Student';
+          const time = data.createdAt?.toDate?.();
+          completions.push({
+            name: userName,
+            time: time ? time.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }) : ''
+          });
+        }
+
+        if (completions.length > 0) {
+          teamStatus.style.display = 'block';
+          teamMembers.innerHTML = completions.map(c => `
+            <div class="team-member">
+              <span class="team-member-name">${c.name}</span>
+              <span class="team-member-status done">Done ${c.time}</span>
+            </div>
+          `).join('');
+        }
+      } catch (error) {
+        console.error('Error loading team status:', error);
+        teamStatus.style.display = 'none';
+      }
+    }
+
+    // Photo upload
+    photoUpload.addEventListener('click', () => photoInput.click());
+
+    photoInput.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      photoFile = file;
+
+      // Preview
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        photoPreviewUrl = e.target.result;
+        photoUpload.classList.add('has-photo');
+        photoUpload.innerHTML = `<img src="${photoPreviewUrl}" alt="Preview">`;
+      };
+      reader.readAsDataURL(file);
+
+      updateProgress();
+    });
+
+    function resetPhotoUI() {
+      photoUpload.classList.remove('has-photo');
+      photoUpload.innerHTML = `
+        <div class="photo-upload-text" id="photo-text">
+          <strong>Tap to upload or take photo</strong>
+          Show us your clean, reset area
+        </div>
+      `;
+      photoInput.value = '';
+    }
+
+    // Submit
+    submitBtn.addEventListener('click', async () => {
+      if (!photoFile || !selectedArea) return;
+
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Submitting...';
+
+      try {
+        // Upload photo
+        const filename = `${Date.now()}_reset.jpg`;
+        const storageRef = ref(storage, `shop-resets/${currentUser.uid}/${filename}`);
+        const uploadMetadata = {
+          contentType: photoFile.type || 'image/jpeg'
+        };
+        await uploadBytes(storageRef, photoFile, uploadMetadata);
+        const photoUrl = await getDownloadURL(storageRef);
+
+        // Calculate points
+        const total = SHOP_AREAS[selectedArea].items.length;
+        const checked = checkedItems.size;
+        let points = POINTS.base + (checked * POINTS.perItem);
+        if (checked === total) {
+          points += POINTS.fullBonus;
+        }
+
+        // Save to Firestore
+        const resetData = {
+          userId: currentUser.uid,
+          shopArea: selectedArea,
+          shopAreaName: SHOP_AREAS[selectedArea].name,
+          dayKey: getDayKey(),
+          checkedItems: Array.from(checkedItems),
+          checkedCount: checked,
+          totalItems: total,
+          percentComplete: Math.round((checked / total) * 100),
+          photoUrl: photoUrl,
+          points: points,
+          createdAt: serverTimestamp()
+        };
+
+        await addDoc(collection(db, 'shopResets'), resetData);
+
+        // Update user points (we'll add this to a Cloud Function later)
+        // For now, just show success
+
+        // Show success
+        stepChecklist.style.display = 'none';
+        successMessage.classList.add('visible');
+
+        const quote = QUOTES[Math.floor(Math.random() * QUOTES.length)];
+        document.getElementById('success-quote').textContent = `"${quote}"`;
+        document.getElementById('success-points').textContent = `+${points} points earned`;
+
+      } catch (error) {
+        console.error('Error submitting:', error);
+        alert('Error submitting: ' + error.message);
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Submit Reset';
+      }
+    });
+
+    // Back button (change area)
+    // Could add this if needed
+  </script>
+</body>
+</html>

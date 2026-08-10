@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Tasks — Portfolio Admin</title>
+  <title>Tasks — Studio Log Admin</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -47,13 +47,13 @@
   <div class="app-shell">
     <nav class="nav-bar">
       <div class="nav-container">
-        <a href="../index.html" class="nav-brand">Portfolio Admin</a>
+        <a href="../index.html" class="nav-brand">Studio Log Admin</a>
         <div class="nav-tabs">
           <a href="tasks.html" class="nav-tab active">Tasks</a>
           <a href="categories.html" class="nav-tab">Categories</a>
           <a href="moderate.html" class="nav-tab">Moderate</a>
         </div>
-        <a href="../index.html" class="btn btn-small btn-secondary">← Back to App</a>
+        <a href="../settings.html" class="nav-gear" id="gear-btn" title="Settings" style="text-decoration: none;"></a>
       </div>
     </nav>
 
@@ -174,6 +174,11 @@
       db, collection, doc, getDoc, getDocs, setDoc, updateDoc, addDoc,
       query, where, orderBy, serverTimestamp
     } from '../js/firebase-config.js';
+    import { insertIcon } from '../js/icon.js';
+    import { StatusBadge, PointsBadge } from '../js/label.js';
+
+    // Insert settings icon
+    insertIcon(document.getElementById('gear-btn'), 'settings', 24);
 
     // State
     let currentUser = null;
@@ -262,13 +267,13 @@
               ${task.subtitle ? `<span style="color: var(--color-text-muted);"> — ${task.subtitle}</span>` : ''}
               <br>
               <span style="font-size: var(--text-xs); color: var(--color-text-muted);">
-                ${cat?.name || 'Unknown'} · +${cat?.pointsPerLog || 0} pts
-                ${task.isPinned ? ' · 📌 Pinned' : ''}
-                ${task.certificationBadgeId ? ' · 🏅 Certification' : ''}
+                ${cat?.name || 'Unknown'} · ${PointsBadge(cat?.pointsPerLog || 0)}
+                ${task.isPinned ? ' · [PIN]' : ''}
+                ${task.certificationBadgeId ? ' · [CERT]' : ''}
               </span>
             </div>
             <div class="task-admin-actions">
-              <span class="status-badge ${task.status}">${task.status}</span>
+              ${StatusBadge(task.status)}
               <button class="btn btn-small btn-secondary edit-btn" data-id="${task.id}">Edit</button>
             </div>
           </div>

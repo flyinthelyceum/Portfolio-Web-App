@@ -488,7 +488,7 @@
           <a href="highlights.html" class="nav-tab">Highlights</a>
           <a href="leaderboard.html" class="nav-tab">Leaderboard</a>
         </div>
-        <button class="nav-gear" id="gear-btn" title="Settings">⚙</button>
+        <button class="nav-gear" id="gear-btn" title="Settings" onclick="navigateToSettings()"></button>
       </div>
     </nav>
 
@@ -610,12 +610,28 @@
   <!-- Toast Container -->
   <div id="toast-container" class="toast-container"></div>
 
+  <!-- Global handler for gear button -->
+  <script>
+    window.navigateToSettings = function() {
+      window.location.href = 'settings.html';
+    };
+  </script>
+
   <script type="module">
     import { initAuth, getCurrentUser, getCurrentUserData, isAdmin } from './js/auth.js';
     import {
       db, storage, collection, doc, getDoc, getDocs, query, where, orderBy,
       ref, uploadBytes, getDownloadURL, publishLog
     } from './js/firebase-config.js';
+    import { Icon, insertIcon } from './js/icon.js';
+    import { PointsBadge } from './js/label.js';
+
+    // Insert settings icon
+    const gearBtn = document.getElementById('gear-btn');
+    if (gearBtn) {
+      insertIcon(gearBtn, 'settings', 24);
+      gearBtn.style.cursor = 'pointer';
+    }
 
     // State
     let currentUser = null;

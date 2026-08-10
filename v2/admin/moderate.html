@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Moderate — Portfolio Admin</title>
+  <title>Moderate — Studio Log Admin</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -36,13 +36,13 @@
   <div class="app-shell">
     <nav class="nav-bar">
       <div class="nav-container">
-        <a href="../index.html" class="nav-brand">Portfolio Admin</a>
+        <a href="../index.html" class="nav-brand">Studio Log Admin</a>
         <div class="nav-tabs">
           <a href="tasks.html" class="nav-tab">Tasks</a>
           <a href="categories.html" class="nav-tab">Categories</a>
           <a href="moderate.html" class="nav-tab active">Moderate</a>
         </div>
-        <a href="../index.html" class="btn btn-small btn-secondary">← Back to App</a>
+        <a href="../settings.html" class="nav-gear" id="gear-btn" title="Settings" style="text-decoration: none;"></a>
       </div>
     </nav>
 
@@ -98,6 +98,10 @@
     import {
       db, collection, doc, getDoc, getDocs, updateDoc, query, orderBy, limit, serverTimestamp
     } from '../js/firebase-config.js';
+    import { insertIcon } from '../js/icon.js';
+
+    // Insert settings icon
+    insertIcon(document.getElementById('gear-btn'), 'settings', 24);
 
     let currentUser = null;
 
@@ -133,7 +137,15 @@
     async function loadComments() {
       const commentsList = document.getElementById('comments-list');
       try {
-        const snap = await getDocs(query(collection(db, 'comments'), orderBy('createdAt', 'desc'), limit(50)));
+        let snap;
+        try {
+          // Try with ordering first (requires index)
+          snap = await getDocs(query(collection(db, 'comments'), orderBy('createdAt', 'desc'), limit(50)));
+        } catch (indexError) {
+          // If index doesn't exist, try without ordering
+          console.log('Index not available, loading without order:', indexError.message);
+          snap = await getDocs(query(collection(db, 'comments'), limit(50)));
+        }
 
         if (snap.empty) {
           commentsList.innerHTML = '<p style="color: var(--color-text-muted);">No comments yet.</p>';
@@ -192,7 +204,15 @@
     async function loadUsers() {
       const usersList = document.getElementById('users-list');
       try {
-        const snap = await getDocs(query(collection(db, 'users'), orderBy('pointsTotal', 'desc')));
+        let snap;
+        try {
+          // Try with ordering first (requires index)
+          snap = await getDocs(query(collection(db, 'users'), orderBy('pointsTotal', 'desc')));
+        } catch (indexError) {
+          // If index doesn't exist, load without ordering
+          console.log('Index not available for users, loading without order:', indexError.message);
+          snap = await getDocs(collection(db, 'users'));
+        }
 
         usersList.innerHTML = snap.docs.map(docSnap => {
           const u = docSnap.data();

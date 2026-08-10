@@ -59,21 +59,6 @@
       border-color: #030506;
     }
 
-    body.home-page .nav-gear {
-      border: none;
-      background: transparent;
-      font-size: 36px;
-      width: 48px;
-      height: 48px;
-      transition: all 0.12s ease;
-    }
-
-    body.home-page .nav-gear:hover {
-      background: transparent;
-      color: #565B21;
-      transform: rotate(45deg);
-    }
-
     /* ============================================
        PRIMITIVE: FrameA - Crisp Standard
        ============================================ */
@@ -843,12 +828,6 @@
         font-size: 14px;
       }
 
-      body.home-page .nav-gear {
-        width: 42px;
-        height: 42px;
-        font-size: 30px;
-      }
-
       .gallery-wall {
         padding: 12px 12px 24px 12px;
       }
@@ -1006,7 +985,7 @@
           <a href="highlights.html" class="nav-tab">Highlights</a>
           <a href="leaderboard.html" class="nav-tab">Leaderboard</a>
         </div>
-        <button class="nav-gear" id="gear-btn" title="Settings">⚙</button>
+        <button class="nav-gear" id="gear-btn" title="Settings"></button>
       </div>
     </nav>
 
@@ -1104,6 +1083,17 @@
             </div>
           </div>
 
+          <!-- Shop Reset Action -->
+          <a href="shop-reset.html" class="frame-b rail-module" style="display: block; text-decoration: none; color: inherit; cursor: pointer; transition: all 0.1s ease;">
+            <div style="padding: 16px; display: flex; align-items: center; gap: 12px;">
+              <div style="font-size: 18px; font-weight: 700; font-family: var(--font-mono); border: 2px solid currentColor; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;">R</div>
+              <div>
+                <div style="font-family: var(--font-mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; color: #666; margin-bottom: 2px;">End of Class</div>
+                <div style="font-weight: 600;">Reset Your Shop Area</div>
+              </div>
+            </div>
+          </a>
+
         </div>
 
         <!-- RIGHT FIELD -->
@@ -1152,8 +1142,8 @@
         <a href="portfolio.html" style="display: block; padding: 10px 14px; border-bottom: 1px solid var(--color-border);">Preview Portfolio</a>
         <a href="settings.html" style="display: block; padding: 10px 14px; border-bottom: 1px solid var(--color-border);">Settings</a>
         <div id="admin-links" style="display: none;">
-          <a href="admin/setup.html" style="display: block; padding: 10px 14px; border-bottom: 1px solid var(--color-border);">Admin: Setup</a>
           <a href="admin/tasks.html" style="display: block; padding: 10px 14px; border-bottom: 1px solid var(--color-border);">Admin: Tasks</a>
+          <a href="admin/categories.html" style="display: block; padding: 10px 14px; border-bottom: 1px solid var(--color-border);">Admin: Categories</a>
           <a href="admin/moderate.html" style="display: block; padding: 10px 14px; border-bottom: 1px solid var(--color-border);">Admin: Moderate</a>
         </div>
         <button id="logout-btn" style="display: block; width: 100%; padding: 10px 14px; text-align: left; border: none; background: none; cursor: pointer; color: var(--color-error);">Log Out</button>
@@ -1161,33 +1151,10 @@
     </div>
   </div>
 
-  <!-- Category Glyph SVGs (inline, hidden) -->
-  <svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
-    <!-- NEWS: Megaphone/broadcast -->
-    <symbol id="glyph-news" viewBox="0 0 16 16">
-      <path d="M13 3v9l-5-2V5l5-2zm-6 3v4H5l-1 3H3l1-3V6h3zm7-1v7h-1V5h1z"/>
-    </symbol>
-    <!-- OFFICE HOURS: Clock -->
-    <symbol id="glyph-office-hours" viewBox="0 0 16 16">
-      <path d="M8 2a6 6 0 100 12A6 6 0 008 2zm0 1a5 5 0 110 10A5 5 0 018 3zm-.5 2v3.5l2.5 1.5.5-.87-2-1.2V5h-1z"/>
-    </symbol>
-    <!-- PROJECT: Cube/box -->
-    <symbol id="glyph-project" viewBox="0 0 16 16">
-      <path d="M8 1L2 4v8l6 3 6-3V4L8 1zm0 1.24L12.5 4.5 8 6.76 3.5 4.5 8 2.24zM3 5.35l4.5 2.25v5.05L3 10.4V5.35zm5.5 7.3V7.6L13 5.35v5.05l-4.5 2.25z"/>
-    </symbol>
-    <!-- CHORE: Broom/wrench -->
-    <symbol id="glyph-chore" viewBox="0 0 16 16">
-      <path d="M12.5 2L11 3.5l1.5 1.5 1.5-1.5L12.5 2zM10 4.5L4 10.5V13h2.5l6-6L10 4.5zM5 11v1h1l5-5-1-1-5 5z"/>
-    </symbol>
-    <!-- RITUAL: Flame/candle -->
-    <symbol id="glyph-ritual" viewBox="0 0 16 16">
-      <path d="M8 2c0 2-2 3-2 5a3 3 0 006 0c0-2-2-3-2-5-1 1-2 1-2 0zm0 4c.5.5 1 1 1 2a1 1 0 01-2 0c0-1 .5-1.5 1-2zM6 12h4v2H6v-2z"/>
-    </symbol>
-  </svg>
-
   <script type="module">
     import { initAuth, logout, getCurrentUser, getCurrentUserData, isAdmin } from './js/auth.js';
     import { db, collection, query, where, orderBy, limit, getDocs } from './js/firebase-config.js';
+    import { Icon, CategoryGlyph, insertIcon } from './js/icon.js';
 
     const loading = document.getElementById('loading');
     const authRequired = document.getElementById('auth-required');
@@ -1198,20 +1165,12 @@
     const logoutBtn = document.getElementById('logout-btn');
     const adminLinks = document.getElementById('admin-links');
 
-    // Category glyph mapping
-    const categoryGlyphs = {
-      'news': 'glyph-news',
-      'office hours': 'glyph-office-hours',
-      'office_hours': 'glyph-office-hours',
-      'project': 'glyph-project',
-      'chore': 'glyph-chore',
-      'ritual': 'glyph-ritual'
-    };
+    // Insert settings icon into gear button
+    insertIcon(gearBtn, 'settings', 24);
 
+    // Use CategoryGlyph from icon.js for task cards
     function getCategoryGlyph(categoryName) {
-      const key = categoryName.toLowerCase().replace(/\s+/g, '_');
-      const glyphId = categoryGlyphs[key] || categoryGlyphs[categoryName.toLowerCase()] || 'glyph-project';
-      return `<span class="cat-glyph"><svg><use href="#${glyphId}"/></svg></span>`;
+      return CategoryGlyph(categoryName);
     }
 
     function generateSerial(uid) {
