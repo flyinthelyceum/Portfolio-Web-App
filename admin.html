@@ -7,14 +7,13 @@
   <link rel="stylesheet" href="styles.css">
   <link rel="icon" href="data:,">
 </head>
-<body>
+<body class="admin">
   <header class="nav">
     <div class="nav__left">
       <h1 class="nav__title">Instructor Dashboard</h1>
       <span class="nav__user" id="admin-user">Loading…</span>
     </div>
     <div class="nav__right">
-      <button class="btn" id="moderation-btn">Moderation</button>
       <button class="btn" id="view-site-btn">View Site</button>
       <button class="btn" id="editor-btn">Editor</button>
       <button class="btn" id="logout-btn">Log Out</button>
@@ -46,16 +45,6 @@
     </section>
 
     <section class="section">
-      <div class="section__title">Quick Actions</div>
-      <div class="actions">
-        <button class="btn" id="export-csv-students-btn">Download Students CSV</button>
-        <button class="btn" id="export-csv-posts-btn">Download Posts CSV</button>
-        <button class="btn" id="export-json-btn">Download JSON Export</button>
-        <button class="btn" id="refresh-btn">Refresh Data</button>
-      </div>
-    </section>
-
-    <section class="section">
       <div class="section__title">Students</div>
       <div id="students-container">
         <div class="empty">Loading students…</div>
@@ -68,8 +57,35 @@
         <div class="empty">Loading activity…</div>
       </div>
     </section>
+
+    <section class="section">
+      <div class="section__title">Quick Actions</div>
+      <div class="actions">
+        <button class="btn" id="export-csv-students-btn">Download Students CSV</button>
+        <button class="btn" id="export-csv-posts-btn">Download Posts CSV</button>
+        <button class="btn" id="export-json-btn">Download JSON Export</button>
+        <button class="btn" id="refresh-btn">Refresh Data</button>
+      </div>
+    </section>
   </main>
 
-  <script type="module" src="admin.js"></script>
+  <!-- Confirm Delete Modal -->
+  <div class="modal" id="confirm-modal">
+    <div class="modal__box" style="max-width: 400px;">
+      <div class="modal__header">
+        <h2 class="modal__title">Confirm Delete</h2>
+        <button class="modal__close" id="confirm-cancel">&times;</button>
+      </div>
+      <div class="modal__body">
+        <p id="confirm-message" style="font-size: 13px; line-height: 1.6;"></p>
+      </div>
+      <div class="modal__footer">
+        <button class="btn" id="confirm-cancel-btn" onclick="document.getElementById('confirm-cancel').click()">Cancel</button>
+        <button class="btn btn--danger" id="confirm-delete" style="border-color: #c00; color: #c00;">Delete</button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="admin.js?v=20260218"></script>
 </body>
 </html>

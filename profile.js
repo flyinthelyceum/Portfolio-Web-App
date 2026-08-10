@@ -2,6 +2,7 @@ import { auth, db, storage } from './firebase-config.js';
 import { onAuthStateChanged, updateProfile } from 'https://www.gstatic.com/firebasejs/12.8.0/firebase-auth.js';
 import { doc, getDoc, setDoc, collection, query, where, getDocs } from 'https://www.gstatic.com/firebasejs/12.8.0/firebase-firestore.js';
 import { ref, uploadBytes, getDownloadURL } from 'https://www.gstatic.com/firebasejs/12.8.0/firebase-storage.js';
+import { initErrorReporting, reportError } from './error-reporting.js';
 
 // DOM Elements
 const profileForm = document.getElementById('profile-form');
@@ -21,6 +22,8 @@ const successMessage = document.getElementById('success-message');
 let currentUser = null;
 let currentAvatarUrl = null;
 let originalUsername = null;
+
+initErrorReporting('profile');
 
 // Check authentication
 onAuthStateChanged(auth, async (user) => {
@@ -63,6 +66,7 @@ async function loadProfile() {
     }
   } catch (error) {
     console.error('Error loading profile:', error);
+    reportError(error, { action: 'profile_load', page: 'profile' });
     showError('Failed to load profile data');
   }
 }
@@ -176,6 +180,7 @@ profileForm.addEventListener('submit', async (e) => {
     
   } catch (error) {
     console.error('Error saving profile:', error);
+    reportError(error, { action: 'profile_save', page: 'profile' });
     showError(error.message);
     saveBtn.disabled = false;
     saveBtn.textContent = 'Save Profile';

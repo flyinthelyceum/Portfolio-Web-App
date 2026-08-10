@@ -65,6 +65,9 @@ img     { display: block; max-width: 100%; }
   color: #000;
 }
 
+/* Admin dashboard — no nav border */
+body.admin .nav { border-bottom: none; }
+
 /* --- Buttons (outside nav) ---------------------------------------- */
 .btn {
   padding: 8px 16px;
@@ -88,26 +91,24 @@ img     { display: block; max-width: 100%; }
 .btn--primary:disabled:hover { background: #000; color: #fff; }
 
 /* --- Page Container ----------------------------------------------- */
-.page { max-width: 1200px; margin: 0 auto; padding: 40px 30px; }
+.page { max-width: 1200px; margin: 0 auto; padding: 20px 30px; }
 
 /* --- Sections ----------------------------------------------------- */
-.section       { margin-bottom: 50px; }
+.section       { margin-bottom: 15px; }
 .section__title {
   font-size: 11px;
   font-weight: 500;
   color: #666;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  margin-bottom: 20px;
+  margin-bottom: 6px;
 }
 
 /* --- Stats (no borders — just numbers) ---------------------------- */
 .stats {
   display: flex;
-  gap: 50px;
-  margin-bottom: 50px;
-  padding-bottom: 25px;
-  border-bottom: 1px solid #eee;
+  gap: 30px;
+  margin-bottom: 15px;
 }
 .stat__label { font-size: 11px; color: #666; margin-bottom: 2px; }
 .stat__value { font-size: 28px; font-weight: 500; letter-spacing: -0.02em; }
@@ -121,8 +122,7 @@ img     { display: block; max-width: 100%; }
 .table th,
 .table td {
   text-align: left;
-  padding: 10px 15px;
-  border-bottom: 1px solid #eee;
+  padding: 2px 8px 2px 0;
 }
 .table th {
   font-size: 11px;
@@ -130,10 +130,23 @@ img     { display: block; max-width: 100%; }
   color: #666;
   text-transform: uppercase;
   letter-spacing: 0.03em;
-  border-bottom: 1px solid #000;
 }
-.table tr:hover td { background: #fafafa; }
-.table a           { text-decoration: underline; }
+.table a { text-decoration: underline; }
+
+/* --- Delete × Button ---------------------------------------------- */
+.delete-x {
+  background: none;
+  border: none;
+  color: #c00;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  padding: 0 4px;
+  line-height: 1;
+  opacity: 0.4;
+  transition: opacity 0.15s;
+}
+.delete-x:hover { opacity: 1; }
 
 /* --- Status Labels (text only — no colored backgrounds) ----------- */
 .pill              { font-size: 11px; color: #666; }
@@ -147,8 +160,7 @@ img     { display: block; max-width: 100%; }
 
 /* --- Empty State -------------------------------------------------- */
 .empty {
-  padding: 40px;
-  text-align: center;
+  padding: 20px 0;
   color: #999;
   font-size: 13px;
 }

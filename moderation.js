@@ -10,6 +10,7 @@ import {
   query,
   orderBy
 } from 'https://www.gstatic.com/firebasejs/12.8.0/firebase-firestore.js';
+import { initErrorReporting, reportError } from './error-reporting.js';
 
 const backBtn = document.getElementById('back-btn');
 const postsContainer = document.getElementById('posts-container');
@@ -25,23 +26,32 @@ let users = [];
 let posts = [];
 let pendingAction = null;
 
+initErrorReporting('moderation');
+
 onAuthStateChanged(auth, async (user) => {
   if (!user) {
     window.location.href = 'login.html';
     return;
   }
 
-  currentUser = user;
-  const adminDoc = await getDoc(doc(db, 'admins', user.uid));
-  if (!adminDoc.exists()) {
-    window.location.href = 'admin.html';
-    return;
-  }
+  try {
+    currentUser = user;
+    const adminDoc = await getDoc(doc(db, 'admins', user.uid));
+    if (!adminDoc.exists()) {
+      window.location.href = 'admin.html';
+      return;
+    }
 
-  await loadData();
-  renderPosts();
-  renderBanned();
-  setupEventListeners();
+    await loadData();
+    renderPosts();
+    renderBanned();
+    setupEventListeners();
+  } catch (error) {
+    console.error('Error initializing moderation page:', error);
+    reportError(error, { action: 'moderation_init', page: 'moderation' });
+    postsContainer.innerHTML = '<div class="empty">Failed to load posts.</div>';
+    bannedContainer.innerHTML = '<div class="empty">Failed to load students.</div>';
+  }
 });
 
 async function loadData() {
@@ -159,12 +169,18 @@ function setupEventListeners() {
   confirmCancel.addEventListener('click', closeConfirmModal);
   confirmOk.addEventListener('click', async () => {
     if (pendingAction) {
-      await pendingAction();
-      pendingAction = null;
-      closeConfirmModal();
-      await loadData();
-      renderPosts();
-      renderBanned();
+      try {
+        await pendingAction();
+        pendingAction = null;
+        closeConfirmModal();
+        await loadData();
+        renderPosts();
+        renderBanned();
+      } catch (error) {
+        console.error('Moderation action failed:', error);
+        reportError(error, { action: 'moderation_action', page: 'moderation' });
+        alert('Action failed. Please try again.');
+      }
     }
   });
 }

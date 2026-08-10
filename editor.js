@@ -19,6 +19,7 @@ import {
   uploadBytes,
   getDownloadURL
 } from 'https://www.gstatic.com/firebasejs/12.8.0/firebase-storage.js';
+import { initErrorReporting, reportError } from './error-reporting.js';
 
 // Global state
 let currentUser = null;
@@ -28,6 +29,8 @@ let posts = [];
 let selectedLogImages = [];
 let selectedProjectImage = null;
 let isAdmin = false;
+
+initErrorReporting('editor');
 
 // Initialize
 onAuthStateChanged(auth, async (user) => {
@@ -44,8 +47,14 @@ onAuthStateChanged(auth, async (user) => {
 });
 
 async function checkAdmin() {
-  const adminDoc = await getDoc(doc(db, 'admins', currentUser.uid));
-  isAdmin = adminDoc.exists();
+  try {
+    const adminDoc = await getDoc(doc(db, 'admins', currentUser.uid));
+    isAdmin = adminDoc.exists();
+  } catch (error) {
+    console.warn('Admin role check failed, defaulting to non-admin:', error?.code || error);
+    reportError(error, { action: 'check_admin', page: 'editor' });
+    isAdmin = false;
+  }
 
   const adminBtn = document.getElementById('admin-btn');
   if (adminBtn) {
@@ -317,6 +326,7 @@ async function handleLogSubmit(e) {
     
   } catch (error) {
     console.error('Error saving log:', error);
+    reportError(error, { action: 'save_log', page: 'editor' });
     alert('Failed to save log. Please try again.');
   } finally {
     submitBtn.disabled = false;
@@ -362,6 +372,7 @@ async function handleProjectSubmit(e) {
     
   } catch (error) {
     console.error('Error saving project:', error);
+    reportError(error, { action: 'save_project', page: 'editor' });
     alert('Failed to save project. Please try again.');
   } finally {
     submitBtn.disabled = false;
@@ -396,6 +407,7 @@ window.deletePost = async function(postId) {
     await loadPosts();
   } catch (error) {
     console.error('Error deleting post:', error);
+    reportError(error, { action: 'delete_post', page: 'editor', context: { postId } });
     alert('Failed to delete post. Please try again.');
   }
 };
