@@ -331,3 +331,49 @@ Upstream of the gradebook entirely. It puts the work on a screen so crit has
 something to look at, and it can record *that* a crit happened without touching
 *what was said*. Attendance to the conversation is verifiable. The content of the
 conversation stays out of Canvas.
+
+---
+
+# Refinement: the constraint is on the number, not the commentary, 2026-08-10
+
+Jared, correcting the section above: *"you as an ai can still evaluate and
+communicate analysis in commentary. Don't hamstring yourself. It just should never
+be tied to '-2 points.' The quantitative should always be checks without judgment:
+does it exist, did it arrive on time, does it have the parts."*
+
+The previous section over-read the rule into "post a receipt and nothing else."
+Wrong. **Two channels, fully decoupled:**
+
+| | driven by |
+|---|---|
+| **The score** | mechanical checks only: exists, on time, has the parts |
+| **The commentary** | anything true and useful, including real evaluation |
+
+The limit on automated commentary is **capability, not permission**. A trigger
+firing on a database write has seen nothing, so it should not pretend; that is the
+"Nice work" failure. But a model that actually reads the entry and looks at the
+image can say something worth reading, and should.
+
+## What this unlocks for the app
+
+The write-back function can do two things on every post, and they must not touch:
+
+1. **Post the score.** `entriesInWindow >= 1` → the completion score. Judgment-free,
+   mechanical, unchanged by anything below.
+2. **Post commentary.** Pass the entry text and image to a vision model and write a
+   real read: what the piece is doing, where it is weak, what it resembles, one
+   thing to try next. Post it as a submission comment, or surface it in the app.
+
+This is the part that makes the app worth opening. A student gets a substantive
+response to every post, within minutes, and **none of it moves their grade.**
+
+**Design rule so the two never bleed:** the commentary must never contain a number,
+a rank, a letter, a score-shaped phrase ("solid B work," "8 out of 10"), or any
+language implying the grade responded to quality. Write a paragraph. Never a
+verdict.
+
+**One risk worth naming rather than burying.** Immediate automated feedback on every
+post could crowd out the crit, or students could read it as the verdict crit is
+supposed to be. Two cheap mitigations: label it plainly as a first read rather than
+the last word, and make sure it asks at least one open question instead of only
+delivering conclusions. The crit stays the place where the real conversation happens.
