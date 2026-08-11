@@ -1,0 +1,101 @@
+# Deploy the v1 Portfolio site from main.
+#
+# This exists because production once ran for months on code that was never
+# committed. The last commit was 10 Feb, the deploy was 17 Feb, and the working
+# tree it came from no longer existed. Recovering it meant pulling files back
+# off the CDN. When deploying is something CI does from a commit, that cannot
+# happen again.
+#
+# Deliberately split into two jobs:
+#
+#   Hosting deploys automatically on push. It is safe, and it only touches the
+#   portfolio-web-app-26 site.
+#
+#   Rules and indexes deploy only when a human asks, because both classes share
+#   one Firestore project. A bad rules deploy locks the other class out of their
+#   tool mid-period, so it should never be a side effect of editing a stylesheet.
+#
+# The Studio Log v2 site is not deployed from here. It builds from the v2/
+# directory on the studio-log-redesign branch and belongs to the labnode lane.
+#
+# ONE-TIME SETUP, not yet done:
+#   1. Create a service account with the Firebase Hosting Admin and Cloud
+#      Datastore Owner roles.
+#   2. Download its JSON key.
+#   3. Add it as the repository secret FIREBASE_SERVICE_ACCOUNT.
+# Until that secret exists both jobs fail at the auth step, which is the correct
+# failure: loud, and before anything is published.
+
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+      - '.github/**'
+  workflow_dispatch:
+    inputs:
+      deploy_rules:
+        description: 'Also deploy Firestore rules, indexes and Storage rules'
+        type: boolean
+        default: false
+
+concurrency:
+  group: deploy-portfolio
+  cancel-in-progress: false
+
+jobs:
+  hosting:
+    name: Hosting
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+
+      - name: Install Firebase CLI
+        run: npm install -g firebase-tools
+
+      - name: Deploy hosting
+        run: |
+          firebase deploy \
+            --only hosting:portfolio-web-app-26 \
+            --project portfolio-web-app-26 \
+            --non-interactive \
+            --message "${GITHUB_SHA::7} ${GITHUB_REF_NAME}"
+
+  rules:
+    name: Rules and indexes
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch' && inputs.deploy_rules
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+
+      - name: Install Firebase CLI
+        run: npm install -g firebase-tools
+
+      # Compile first. A rules file that does not build should never reach a
+      # project that two classes depend on.
+      - name: Check rules compile
+        run: |
+          firebase deploy \
+            --only firestore:rules \
+            --project portfolio-web-app-26 \
+            --non-interactive \
+            --dry-run
+
+      - name: Deploy rules, indexes and storage
+        run: |
+          firebase deploy \
+            --only firestore:rules,firestore:indexes,storage \
+            --project portfolio-web-app-26 \
+            --non-interactive \
+            --message "${GITHUB_SHA::7} rules"

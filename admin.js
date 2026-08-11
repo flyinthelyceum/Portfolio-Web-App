@@ -129,9 +129,9 @@ function renderStudents(postsByUser) {
     .map((user) => {
       const userPosts = postsByUser.get(user.id) || [];
       const lastPost = userPosts[0];
-      const lastPostDate = lastPost ? formatDate(parseDate(lastPost.createdAt || lastPost.date)) : '—';
-      const username = user.username || '—';
-      const email = user.email || '—';
+      const lastPostDate = lastPost ? formatDate(parseDate(lastPost.createdAt || lastPost.date)) : 'never';
+      const username = user.username || 'not set';
+      const email = user.email || 'not set';
       const profileLink = `index.html?user=${user.username || user.id}`;
 
       // Calculate engagement metrics
@@ -387,7 +387,7 @@ function parseDate(value) {
 }
 
 function formatDate(date) {
-  if (!date) return '—';
+  if (!date) return 'never';
   const mm = String(date.getMonth() + 1).padStart(2, '0');
   const dd = String(date.getDate()).padStart(2, '0');
   const yy = String(date.getFullYear()).slice(-2);
@@ -425,7 +425,7 @@ function generateStudentsCSV() {
       const dateB = parseDate(b.createdAt) || new Date(0);
       return dateB - dateA;
     });
-    const lastActivity = userPosts[0] ? formatDate(parseDate(userPosts[0].createdAt)) : '—';
+    const lastActivity = userPosts[0] ? formatDate(parseDate(userPosts[0].createdAt)) : 'never';
     
     const row = [
       escapeCSV(user.displayName || user.email || ''),

@@ -20,6 +20,7 @@ import {
   getDownloadURL
 } from 'https://www.gstatic.com/firebasejs/12.8.0/firebase-storage.js';
 import { initErrorReporting, reportError } from './error-reporting.js';
+import { resizeImages, isUndisplayable } from './image-resize.js';
 
 // Global state
 let currentUser = null;
@@ -331,7 +332,7 @@ async function handleLogSubmit(e) {
   } catch (error) {
     console.error('Error saving log:', error);
     reportError(error, { action: 'save_log', page: 'editor' });
-    alert('Failed to save log. Please try again.');
+    alert(error.userFacing ? error.message : 'Failed to save log. Please try again.');
   } finally {
     submitBtn.disabled = false;
     submitBtn.textContent = 'Save Log';
@@ -378,7 +379,7 @@ async function handleProjectSubmit(e) {
   } catch (error) {
     console.error('Error saving project:', error);
     reportError(error, { action: 'save_project', page: 'editor' });
-    alert('Failed to save project. Please try again.');
+    alert(error.userFacing ? error.message : 'Failed to save project. Please try again.');
   } finally {
     submitBtn.disabled = false;
     submitBtn.textContent = 'Save Project';
@@ -387,17 +388,37 @@ async function handleProjectSubmit(e) {
 
 // Upload images to Firebase Storage
 async function uploadImages(files, folder) {
+  // Resize before upload. Straight from a phone these average 2.9 MB, which is
+  // slow on school wifi and pointless for something viewed on a screen.
+  const resized = await resizeImages(files);
+
+  // Safari converts HEIC during the resize above. Anything still HEIC here came
+  // from a browser that cannot decode it, and uploading it would put an image
+  // on the portfolio that most visitors see as broken.
+  const broken = resized.filter(isUndisplayable);
+  if (broken.length) {
+    const names = broken.map((file) => file.name).join(', ');
+    const error = new Error(
+      `${names} could not be used. iPhone photos in HEIC format do not show up ` +
+      `for most people. On your phone open Settings, Camera, Formats, and pick ` +
+      `Most Compatible, then take the photo again.`
+    );
+    // Tells the save handlers to show this text instead of the generic message.
+    error.userFacing = true;
+    throw error;
+  }
+
   const urls = [];
-  
-  for (const file of files) {
+
+  for (const file of resized) {
     const filename = `${Date.now()}_${file.name}`;
     const storageRef = ref(storage, `users/${currentUser.uid}/${folder}/${filename}`);
-    
+
     await uploadBytes(storageRef, file);
     const url = await getDownloadURL(storageRef);
     urls.push(url);
   }
-  
+
   return urls;
 }
 

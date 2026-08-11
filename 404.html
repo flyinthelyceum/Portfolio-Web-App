@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Not found</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="icon" href="data:,">
+  <style>
+    .notfound {
+      max-width: 34rem;
+      margin: 0 auto;
+      padding: 18vh 1.5rem 4rem;
+    }
+    .notfound__code {
+      font-family: var(--font-mono, monospace);
+      font-size: 0.75rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      opacity: 0.6;
+      margin: 0 0 1.25rem;
+    }
+    .notfound__title {
+      font-size: clamp(1.5rem, 4vw, 2rem);
+      line-height: 1.15;
+      margin: 0 0 1rem;
+    }
+    .notfound__body {
+      line-height: 1.6;
+      margin: 0 0 1.75rem;
+      opacity: 0.85;
+    }
+    .notfound__links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1.25rem;
+      font-size: 0.95rem;
+    }
+  </style>
+</head>
+<body class="portfolio">
+  <main class="notfound">
+    <p class="notfound__code">Error 404</p>
+    <h1 class="notfound__title">There is nothing at this address.</h1>
+    <p class="notfound__body">
+      The link may be mistyped, or it may point at something that has moved. If you
+      were looking for a student portfolio, check the spelling of the name at the
+      end of the address.
+    </p>
+    <nav class="notfound__links">
+      <a href="/">Home</a>
+      <a href="/login.html">Log in</a>
+    </nav>
+  </main>
+</body>
+</html>

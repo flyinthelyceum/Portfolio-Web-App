@@ -127,8 +127,8 @@ function renderBanned() {
   }
 
   const rows = bannedUsers.map((user) => {
-    const email = user.email || '—';
-    const bannedAt = user.bannedAt ? formatDate(parseDate(user.bannedAt)) : '—';
+    const email = user.email || 'not set';
+    const bannedAt = user.bannedAt ? formatDate(parseDate(user.bannedAt)) : 'never';
 
     return `
       <tr>
@@ -249,7 +249,7 @@ function parseDate(value) {
 }
 
 function formatDate(date) {
-  if (!date) return '—';
+  if (!date) return 'never';
   return date.toLocaleDateString('en-US', {
     month: 'short',
     day: 'numeric',

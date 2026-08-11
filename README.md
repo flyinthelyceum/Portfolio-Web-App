@@ -1,347 +1,116 @@
-# Art & Technology Student Portfolio System
+# Portfolio Web App
 
-A multi-tenant portfolio platform for art and technology students. Built with Firebase, featuring an editorial "art book" aesthetic. Students create accounts, build portfolios, and share shareable URLs with zero code knowledge required.
+Student portfolio tools for high school art and technology classes at Brophy.
+Two apps, one Firebase project, no build step.
 
-## Quick Links
+| Tool | URL | Serves | Source |
+|---|---|---|---|
+| v1 Portfolio | https://test.aaand.space | Working Artist Portfolio | this branch, repo root |
+| Studio Log v2 | https://portfolio-v2-log.web.app | the other class | `studio-log-redesign`, `v2/` |
 
-- **Live App**: https://flyinthelyceum.github.io/Portfolio-Web-App/
-- **Student Guide**: See [STUDENT_GUIDE.md](STUDENT_GUIDE.md)
-- **Instructor Guide**: See [INSTRUCTOR_GUIDE.md](INSTRUCTOR_GUIDE.md)
-- **Project Charter**: See [PROJECT_CHARTER.md](PROJECT_CHARTER.md)
+Students post work to the app. A Cloud Function grades the entry in Canvas and
+comments with a link back to it, so logging work is the assignment rather than
+something recommended alongside it.
 
----
+## Stack
 
-## Architecture Overview
+Static HTML, CSS and ES modules. No framework, no bundler, no build. The Firebase
+SDK loads from the CDN at version 12.8.0.
 
-### Multi-Tenant Design
+- **Hosting** Firebase Hosting, two sites in one project, Cloudflare DNS in front
+- **Auth** Firebase Auth, Google SSO against `@brophybroncos.org`
+- **Data** Firestore
+- **Media** Firebase Storage, resized client side before upload
+- **Grading** Cloud Functions in `functions/`, writing to the Canvas REST API
 
-- **Single web application** hosts all student portfolios
-- **Firebase backend** for authentication, data storage, and image hosting
-- **Students log in** with Google account or email/password
-- **Public URLs**: `yourapp.com/?user=username` or `yourapp.com/?user=userId`
-- **Instructor tools**: CSV bulk import, credential email generation (optional)
+It is not on GitHub Pages and it is not on Vercel. GitHub Pages served a third
+stale copy of v1 until 11 Aug 2026 and is now switched off.
 
-### Authentication Methods
+## Read these before changing anything
 
-Students can sign up/log in using any of three methods:
+| File | What it is |
+|---|---|
+| `CLAUDE.md` | who works where, and how the two machines avoid colliding |
+| `CANVAS_WRITEBACK.md` | the Canvas design record, written against live API tests |
+| `INTERLOCKS.md` | the seam between the app and the grading integration |
+| `SESSION_LOG.md` | what happened last session and what is next |
 
-1. **Google SSO** (recommended for school Google accounts)
-   - One-click sign-in
-   - Profile picture auto-imported
-   - Perfect for @school.edu accounts
-
-2. **Email/Password**
-   - Self-service registration
-   - Email-based password reset
-   - Secure password validation
-
-3. **Bulk Import** (instructor)
-   - Import CSV of students
-   - Auto-generate credentials
-   - Send credentials via email template
-
----
-
-## Features
-
-### For Students
-
-✅ **One-Click Sign-In/Sign-Up**
-- Google account (for school users)
-- Email/password (optional)
-- No installation, no configuration
-
-✅ **Content Creation**
-- **+ Log button**: Quick updates with images (3 images · 2 sentences · 1 next step)
-- **+ Project button**: Deeper work with hero images and artist statements
-- **Image uploads**: Up to 5 images per post, up to 5MB each
-- **Drag-and-drop**: Reorder images in preview grid
-
-✅ **Profile Management**
-- Edit displayName, username, bio
-- Upload avatar image
-- Username used in portfolio URLs (e.g., `?user=alexrivera`)
-
-✅ **Portfolio Display**
-- Clean card grid with responsive layout
-- Filter by All / Logs / Projects
-- Full-post modal viewer
-- Share button (copies URL to clipboard)
-
-✅ **Public Portfolio**
-- Shareable link with clean URL (`?user=username`)
-- Displays all posts in reverse chronological order
-- Mobile-friendly design
-- No login required to view
-
-### For Instructors (Optional)
-
-⚡ **Bulk Student Import**
-- Upload CSV file with student names and emails
-- Auto-generate temporary passwords
-- Creates Firebase Auth accounts
-- Email credentials to students in one command
-
-⚡ **Bulk Credential Email**
-- Generates HTML email with all credentials
-- Copy/paste to Gmail or paste into email blast
-- Secure delivery template
-
----
-
-## Tech Stack
-
-### Frontend
-- **HTML/CSS/JavaScript** (no frameworks, no build step)
-- **Firebase SDK v12.8.0** (via CDN)
-- **marked.js** for Markdown parsing
-- **Google Fonts** (Fraunces, Inter, IBM Plex Mono)
-
-### Backend
-- **Firebase Authentication** (Google OAuth, Email/Password)
-- **Firestore Database** (NoSQL, real-time queries)
-- **Firebase Storage** (image hosting with security rules)
-
-### Hosting
-- **GitHub Pages** (static site hosting)
-- Can be deployed to Firebase Hosting or custom domain
-
-### Optional: Student Management
-- **Node.js** script for bulk CSV import
-- **Firebase Admin SDK** for server-side operations
-
----
-
-## Project Structure
+## Layout
 
 ```
-portfolio-web-app/
-├── index.html              # Public portfolio viewer (landing page)
-├── login.html              # Email/password + Google Sign-In
-├── signup.html             # Email/password + Google Sign-Up registration
-├── editor.html             # Student dashboard (content creation)
-├── editor.js               # Dashboard logic (+ Log, + Project buttons)
-├── profile.html            # Profile editor (username, bio, avatar)
-├── profile.js              # Profile save/upload logic
-├── app.js                  # Portfolio viewer logic (Firestore queries)
-├── styles.css              # Brutalist design system (CSS variables)
-├── firebase-config.js      # Firebase SDK initialization
-│
-├── scripts/                # Optional instructor tools
-│   ├── import-students.js  # Bulk import from CSV
-│   ├── package.json        # Node.js dependencies
-│   ├── .gitignore         # Protects serviceAccountKey.json
-│   └── README.md          # Setup instructions
-│
-├── firestore.rules         # Firestore security rules (deployed)
-├── storage.rules           # Storage security rules (deployed)
-│
-├── PROJECT_CHARTER.md      # Project vision & constraints
-├── STUDENT_GUIDE.md        # Student onboarding guide
-├── INSTRUCTOR_GUIDE.md     # Instructor setup & management
-├── README.md               # This file
-└── TODO-FIREBASE.md        # Development roadmap
+index.html  app.js         public portfolio, no login required
+login.html  signup.html    auth, creates the profile on first sign-in
+editor.html editor.js      student dashboard, where work gets posted
+profile.html profile.js    profile editing
+admin.html  moderation.html  instructor views
+identity.js                username and profile records
+image-resize.js            resize before upload
+error-reporting.js         client errors into Firestore
+
+firestore.rules            covers BOTH tools, see the warning below
+storage.rules              covers all four media prefixes
+firestore.indexes.json     includes the index the grading query needs
+
+functions/                 Canvas write-back (labnode lane)
+scripts/                   one-off operational scripts
+v2/                        Studio Log v2, on the studio-log-redesign branch
 ```
 
----
+## Deploying
 
-## Getting Started
+Pushing to `main` deploys the v1 site through
+[.github/workflows/deploy.yml](.github/workflows/deploy.yml). That workflow needs
+a `FIREBASE_SERVICE_ACCOUNT` repository secret, which is not set yet.
 
-### For Instructors: Initial Setup
-
-1. **Access the Firebase Console**
-   - Project: `portfolio-web-app-26`
-   - Already configured with Auth, Firestore, Storage
-   - Security rules already deployed
-
-2. **Share the App URL with Students**
-   - Live: https://flyinthelyceum.github.io/Portfolio-Web-App/
-   - Students visit signup.html to create accounts
-   - OR use bulk import script to pre-create accounts (see below)
-
-3. **(Optional) Bulk Import Students**
-   - See [scripts/README.md](scripts/README.md)
-   - Requires Firebase Admin credentials (one-time setup)
-   - Creates 20+ accounts from CSV in seconds
-
-4. **Support Students**
-   - See [STUDENT_GUIDE.md](STUDENT_GUIDE.md) for common questions
-   - See [INSTRUCTOR_GUIDE.md](INSTRUCTOR_GUIDE.md) for troubleshooting
-
-### For Students: Getting Started
-
-1. **Visit the App**
-   - Go to: https://flyinthelyceum.github.io/Portfolio-Web-App/
-   - Click "Create Account"
-
-2. **Sign Up** (Choose One)
-   - **Google**: Click "Sign up with Google" (fastest for @school.edu)
-   - **Email**: Enter email and password, follow validation requirements
-
-3. **Complete Your Profile**
-   - Set your displayName (real name)
-   - Choose a username (used in your portfolio URL)
-   - Write a short bio (optional)
-   - Upload an avatar image (optional)
-
-4. **Start Creating**
-   - Click **+ Log** for quick updates (images + 2 sentences)
-   - Click **+ Project** for deeper work (hero image + description)
-   - Upload images (up to 5MB, JPEG/PNG)
-
-5. **Share Your Portfolio**
-   - Click **Share Portfolio** button (copies URL)
-   - Send link to friends, teachers, colleges
-   - Portfolio URL: `https://.../?user=yourusername`
-
----
-
-## Design System (Customization)
-
-All styling uses CSS variables in `styles.css`:
-
-```css
-:root {
-  /* Colors */
-  --color-bg: #fafaf8;              /* Background */
-  --color-text: #1a1a18;            /* Text */
-  --color-border: #d0d0c8;          /* Borders */
-  --color-accent: #007bff;          /* Links, accents */
-  
-  /* Typography */
-  --font-display: 'Fraunces', serif;
-  --font-body: 'Inter', sans-serif;
-  --font-mono: 'IBM Plex Mono', monospace;
-  
-  /* Spacing Scale */
-  --spacing-xs: 0.25rem;
-  --spacing-sm: 0.5rem;
-  --spacing-md: 1rem;
-  --spacing-lg: 1.5rem;
-  /* ... more spacing */
-  
-  /* Borders */
-  --border-thin: 1px;
-  --border-medium: 2px;
-  --border-thick: 3px;
-}
-```
-
-**To customize:**
-1. Open `styles.css`
-2. Modify `:root` CSS variables
-3. Changes apply site-wide instantly
-
-No need to edit component styles — everything is variable-driven.
-
----
-
-## Security
-
-### Firestore Rules
-
-Deployed rules ensure:
-- ✅ Public read access (everyone can view portfolios)
-- ✅ Owner-only write access (students can only edit their own posts)
-- ✅ Admin access for instructors (via `/admins/{uid}`)
-
-### Storage Rules
-
-Deployed rules ensure:
-- ✅ Public read access (images are visible to all)
-- ✅ Owner-only upload (each student uploads to their folder)
-- ✅ File size limit: 5MB per image
-- ✅ File type limit: JPEG, PNG only
-
-### API Security
-
-Google Cloud Console:
-- ✅ API key restricted to HTTP referrers
-- ✅ API key restricted to Firebase APIs only
-- ⚠️ API keys in frontend are expected and safe (public, Google-managed)
-
----
-
-## Troubleshooting
-
-### Google Sign-In Not Working
-- Check browser allows popups from this domain
-- Try clearing browser cookies
-- Fallback: Use email/password method
-
-### Images Not Uploading
-- Check image size (must be < 5MB)
-- Check image format (JPEG or PNG only)
-- Check Firebase Storage quota
-
-### Forgot Password
-- Click "Forgot password?" on login page
-- Enter email
-- Check inbox (may be in spam)
-- Follow reset link
-
-### Can't Find Your Portfolio URL
-- Click "Share Portfolio" button in editor
-- URL will be copied to clipboard
-- Format: `https://yourapp.com/?user=yourusername`
-
----
-
-## Development
-
-### Local Testing
-
-This is a static site, so you can open `index.html` directly in a browser. For full functionality:
+**Rules and indexes do not deploy automatically, on purpose.** Both classes share
+one Firestore project, so a bad rules deploy locks the other class out of their
+tool while they are using it. Deploy them deliberately, from the
+`workflow_dispatch` trigger or by hand:
 
 ```bash
-# Serve locally (requires Python)
-python3 -m http.server 8000
+# always dry run first
+firebase deploy --only firestore:rules --dry-run --project portfolio-web-app-26
 
-# Then visit: http://localhost:8000/
+firebase deploy --only firestore:rules,firestore:indexes,storage --project portfolio-web-app-26
 ```
 
-### Deploying
+Hosting by hand, if you need it, is per site:
 
-Currently deployed to GitHub Pages. To deploy to a custom domain:
+```bash
+firebase deploy --only hosting:portfolio-web-app-26   # v1
+firebase deploy --only hosting:portfolio-v2-log       # v2, from the v2 branch
+```
 
-1. **Firebase Hosting** (recommended)
-   - Deploy with: `firebase deploy --only hosting`
-   - Get custom domain via Firebase Console
+A bare `firebase deploy` touches both sites. Use `--only`.
 
-2. **Custom Domain**
-   - Point DNS to your host
-   - Update URLs in firebase-config.js if needed
+## Local
 
----
+```bash
+python3 -m http.server 8000
+```
 
-## Roadmap
+Then open http://localhost:8000. Auth and Firestore talk to the live project, so
+anything you create locally is real. There is no emulator setup yet; running the
+rules tests would need one, plus a Java runtime.
 
-- ✅ Phase 1-5: Core platform (auth, editor, portfolio, profiles)
-- ✅ Phase 6: Bulk student import
-- ✅ Phase 7: Documentation (README, Student Guide, Instructor Guide)
-- 🚀 Phase 8 (Optional): Instructor dashboard, analytics, exports
+## Operational scripts
 
----
+```bash
+# Archive a semester before clearing it. Read only, deletes nothing.
+node scripts/archive-semester.mjs
+node scripts/archive-semester.mjs --skip-storage      # metadata only, fast
 
-## Support
+# Bulk student import from CSV, needs Admin credentials
+node scripts/import-students.js
+```
 
-**For Students:**
-- See [STUDENT_GUIDE.md](STUDENT_GUIDE.md)
-- Ask your instructor
+The archive writes Firestore, the auth roster, the whole Storage bucket and a
+readable per-student index. Read its `INDEX.md` first. It contains email
+addresses and password hashes for minors, so keep it off shared drives and out
+of this repo.
 
-**For Instructors:**
-- See [INSTRUCTOR_GUIDE.md](INSTRUCTOR_GUIDE.md)
-- Check [scripts/README.md](scripts/README.md) for bulk import
-- See [PROJECT_CHARTER.md](PROJECT_CHARTER.md) for design philosophy
+## Conventions
 
----
-
-## License
-
-MIT License — feel free to fork, modify, and deploy.
-
----
-
-**Last Updated:** February 4, 2026  
-**Tech Stack:** Firebase + Static HTML/CSS/JS  
-**Hosting:** GitHub Pages (deployable to Firebase Hosting)
+Commit messages are `type: description` with a prose body. They are read by
+other agents working in this repo, not only by people, so say what changed and
+why. No em dashes anywhere, including code comments.

@@ -8,6 +8,56 @@ Keep entries short. State what changed, what is next, and what is blocked.
 
 ---
 
+## 2026-08-11, MacBook VS Code session
+
+Phase 1 done, most of Phase 4 done. The wipe is now unblocked.
+
+### Done
+
+**The semester is archived.** `scripts/archive-semester.mjs` is new and read only.
+Output at `~/Portfolio-Archive-2026-08-11`, 829 MB.
+
+- 569 Firestore documents across all 10 collections
+- 102 auth accounts
+- 396 Storage objects, which matches the bucket object count exactly
+- `INDEX.md`, a readable per-student table of what each person made and where
+  their files are, plus the 17 who signed up and never posted and the 8 posts
+  whose author no longer exists
+
+Verified by resolving every image URL recorded in `posts` back to a file on
+disk. All 178 referenced images are present and readable. **Copy it off this
+machine before the wipe.** It holds emails and password hashes for minors.
+
+**Six images were never displaying for most students.** The verification turned
+up six HEIC files. They are intact in the archive, but HEIC does not render in
+Chrome or Firefox, so those portfolio images have been broken for most viewers
+since they were posted and nothing ever said so. Now handled at upload: Safari
+converts them during the resize, and anywhere that cannot, the student gets told
+what to change on their phone instead of the upload silently succeeding.
+
+**Client-side image resizing.** New `image-resize.js`, wired into post and avatar
+uploads. Longest edge 2000px at quality 0.82, 512px for avatars. Re-encoding also
+strips EXIF, which drops the GPS coordinates phones write into photos, and EXIF
+orientation is baked in first so portrait shots are not sideways.
+
+**Deploy CI.** `.github/workflows/deploy.yml`. Hosting deploys on push to main.
+Rules and indexes only deploy from a manual trigger, because both classes share
+one Firestore project. Needs a `FIREBASE_SERVICE_ACCOUNT` secret, not yet set,
+and fails loudly at auth until it exists.
+
+**Also.** GitHub Pages switched off, so the stale third copy is gone and
+github.io now returns 404. Attendance page deleted, it never wrote anything.
+`404.html` added. README rewritten to match reality. Em dashes cleared from the
+live app per house style, and the table placeholders now say "not set" and
+"never" rather than a dash.
+
+### Still true from yesterday
+
+Nothing is deployed. The rules changes from `a876272` and `a7fe2f0` are still
+sitting in the repo unapplied, and so is everything from today.
+
+---
+
 ## 2026-08-10, MacBook VS Code session
 
 Full audit of both tools, source recovery, and Phase 3 of the reset plan.
@@ -60,9 +110,7 @@ once, so it stays gated behind the archive and the wipe.
 
 ### Next, in order
 
-1. **Phase 1, archive.** Export all 10 Firestore collections and all 735 MB of
-   Storage to a dated archive, plus a readable per-student index. Verify by
-   opening three students' work from the archive before anything is deleted.
+1. ~~Phase 1, archive.~~ Done 11 Aug. Copy it off this machine first.
 2. **Phase 2, wipe.** Content collections, the 102 auth accounts, all four
    Storage prefixes. Keep `tasks`, `taskCategories` and `badgeDefs`, which are
    course structure rather than student output.

@@ -4,6 +4,7 @@ import { doc, getDoc, setDoc, collection, query, where, getDocs } from 'https://
 import { ref, uploadBytes, getDownloadURL } from 'https://www.gstatic.com/firebasejs/12.8.0/firebase-storage.js';
 import { initErrorReporting, reportError } from './error-reporting.js';
 import { buildPublicProfile, publicProfileRef } from './identity.js';
+import { resizeImage } from './image-resize.js';
 
 // DOM Elements
 const profileForm = document.getElementById('profile-form');
@@ -86,12 +87,9 @@ function showAvatarPreview(url) {
 avatarInput.addEventListener('change', (e) => {
   const file = e.target.files[0];
   if (file) {
-    if (file.size > 2 * 1024 * 1024) {
-      showError('Avatar image must be under 2MB');
-      avatarInput.value = '';
-      return;
-    }
-    
+    // No size limit here any more. The file is resized to 512px before upload,
+    // so rejecting a large original just made students go and find a smaller
+    // photo for no reason.
     const reader = new FileReader();
     reader.onload = (e) => {
       showAvatarPreview(e.target.result);
@@ -119,8 +117,9 @@ async function isUsernameAvailable(username) {
 
 // Upload avatar to Storage
 async function uploadAvatar(file) {
+  const resized = await resizeImage(file, { maxEdge: 512 });
   const storageRef = ref(storage, `users/${currentUser.uid}/avatar.jpg`);
-  await uploadBytes(storageRef, file);
+  await uploadBytes(storageRef, resized);
   return await getDownloadURL(storageRef);
 }
 
